@@ -1,0 +1,49 @@
+#Configuration file for Nek5000 framework developed at KTH
+# Place for short description; doxygen style
+/**
+@defgroup toolbox  Toolbox
+@ingroup framework
+
+@brief Toolbox for Nek5000
+
+@details 
+This directory contains number of tools used by toolboxes developed at KTH. 
+Files are grouped by taks and placed in a tree structure, where the parent directories (modules) 
+perform some operations and can define tasks and interfaces that have to be provided by their 
+subdirectories (submodules). This structure can be repeated recursively with submodules becoming
+parent modules for nex level structures. The top level directories are related to the main services 
+that have to be provided for toolboxes. Examplary framework structure is presented in a figure.
+
+@image html framework.png Examplary framework structure.
+
+Dependences between modules are described in FRAMEWORK.txt (present in every directory) including:
+- documentation section witten in a form of doxygen C comment
+- list of existing submodules (subdirectories)
+- list of conflicting submodules
+- default submodule
+- list of required modules (from other tree branches)
+- list of required conflicting submodules (from local subdirectories)
+
+Modules can provide tools, [runtime parameters] (@ref parameter_list_page), memory structures (common blocks), 
+define interfaces and perform some tasks.
+The main goal is to simplify development of toolboxes by defining simple tasks that could be used by number of toolboxes. 
+At the same time clear difinition of the inteface alows to keep number of different implementation of the same task.
+
+*/
+#List of existing submodules
+SUBMODULES driver \
+           io \
+           physics \
+           toolbox
+
+#List of conflicting submodules
+CONFLICTS
+
+#Default submodules
+DEFAULT
+
+#List of required modules
+REQUIRED
+
+#List of required conflicting modules
+EXCLUSIVE
