@@ -26,7 +26,7 @@ Dependences between modules are described in FRAMEWORK.txt (present in every dir
 
 Modules can provide tools, [runtime parameters] (@ref parameter_list_page), memory structures (common blocks), 
 define interfaces and perform some tasks.
-The main goal is to simplify development of toolboxes by defining simple tasks that could be used by number of toolboxes. 
+The main goal is to simplify development of toolboxes by defining simple tasks that could be used by number of tools. 
 At the same time clear difinition of the inteface alows to keep number of different implementation of the same task.
 
 */
@@ -34,7 +34,7 @@ At the same time clear difinition of the inteface alows to keep number of differ
 SUBMODULES driver \
            io \
            physics \
-           toolbox
+           tools
 
 #List of conflicting submodules
 CONFLICTS

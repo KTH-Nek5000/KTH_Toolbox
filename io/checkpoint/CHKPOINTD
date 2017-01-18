@@ -1,0 +1,18 @@
+!> @file CHKPOINTD
+!! @ingroup chkpoint
+!! @brief Include file for checkpoint module
+!! @author Adam Peplinski
+!! @date Mar 7, 2016
+!=======================================================================
+!     module parameters
+!     Do we restart form the checkpoint
+      logical ifchkptrst
+
+!     checkpoint frequency
+      integer chkptstep
+!     module parameters end
+
+!     common blocks
+      common /CHKPNTI/ chkptstep
+
+      common /CHKPNTL/ ifchkptrst

@@ -1,0 +1,44 @@
+#Configuration file for Nek5000 framework developed at KTH
+# Place for short description; doxygen style
+/**
+@defgroup uparam User parameters
+@ingroup runparam
+
+@brief User defined runtime parameters.
+
+@details 
+Read/write parameters defined in include file USERPAR usinfg Fortran90 namelist.
+
+@mod_interface
+This module provides folowing interface:
+-# user_param_in(iunit)
+-# user_param_out(iunit)
+
+@mod_param
+@param_list Parameters provided by uparam module (include file - \a USERPAR):
++ UPRM_PRB - (integer) frequency for probe reading
+
+@mod_param_example
+@code{.f90}
+&USERPAR
+ UPRM_PRB=         100,
+ /
+@endcode
+
+@attention This is just an example that has to be modified by user.
+
+*/
+#List of existing submodules
+SUBMODULES
+
+#List of conflicting submodules
+CONFLICTS
+
+#Default submodules
+DEFAULT
+
+#List of required modules
+REQUIRED
+
+#List of required conflicting modules
+EXCLUSIVE

@@ -1,0 +1,33 @@
+!> @file POWERITD
+!! @ingroup powerit
+!! @brief Include file for power iteration modue
+!! @author Adam Peplinski
+!! @date Mar 7, 2016
+!=======================================================================
+!     module parameters
+!     initial L2 norm of the vector
+      real PWIL2NORM
+!     module parameters end
+
+!     growthrate
+      real PWIGRWTH
+
+!     timing power iteration
+!     PWITIMET - total time spent within 
+!     PWITIME1 - temporary storage
+      real PWITIMET,PWITIME1
+
+!     file units
+!     convergence
+      integer PWIFIDCNV
+
+!     reference vector
+      real PWIVX(LPX1*LPY1*LPZ1*LPELV),PWIVY(LPX1*LPY1*LPZ1*LPELV),
+     $     PWIVZ(LPX1*LPY1*LPZ1*LPELV),PWIT(LPX1*LPY1*LPZ1*LPELT)
+
+!     common blocks
+      common /PWITI/ PWIFIDCNV
+
+      common /PWITR/ PWIL2NORM,PWIGRWTH,PWITIMET,PWITIME1
+
+      common /PWITRV/ PWIVX, PWIVY, PWIVZ, PWIT

@@ -1,0 +1,33 @@
+!> @file CHKPTDNSD
+!! @ingroup chkpoint_dns_lin
+!! @brief Include file for checkpoint dns module
+!! @author Adam Peplinski
+!! @date Mar 7, 2016
+!=======================================================================
+!     number of restart sets to keep
+!     for now nek5000 accepts two sets only!!!
+      integer chkptnset
+      parameter (chkptnset=2)
+
+!     number of snapshots in a single set
+      integer chkptnrsf
+      parameter  (chkptnrsf=4)
+
+!     number of files in a snapshot
+      integer chkptnfile, chkptnfmax
+      parameter (chkptnfmax=5)
+
+!     filenames
+      character*80 chkptfname(chkptnrsf,chkptnfmax), chkptrstf
+
+!     write and read reastart file set number. 
+!     Keep it in common block, so other subroutines can access it.
+!     Important!!! Do not modify it elswere!!!
+      integer chkptset_o, chkptset_i
+
+!     common blocks
+      common /CHKPTDNSI/ chkptnfile
+
+      common /CHKPTDNSC/ chkptfname, chkptrstf
+
+      common /RST_SET/ chkptset_o, chkptset_i

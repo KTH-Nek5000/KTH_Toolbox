@@ -1,0 +1,62 @@
+!> @file comm_mpi_wrp.f
+!! @ingroup comm_mpi
+!! @brief Set of MPI wrappers for toolbox communication.
+!!
+!! @author Adam Peplinski
+!! @date May 31, 2016
+!=======================================================================
+!> @brief Global MPI scan for integer array.
+!! @ingroup comm_mpi
+!! @param[inout]  out    output array
+!! @param[in]      in     input array
+!! @param[in]      nl     buffer length
+!! @note This routine is simillar to igl_running_sum, i8gl_running_sum
+!! from comm_mpi.f
+!! @todo Error mark should be exported
+      subroutine ivgl_running_sum(out,in,nl)
+      implicit none
+
+      include 'mpif.h'
+
+      integer nid, np, nekcomm,nekgroup,nekreal
+      common /nekmpi/ nid,np,nekcomm,nekgroup,nekreal
+
+!     argument list
+      integer nl
+      integer out(nl),in(nl)
+
+!     local varaibles
+      integer ierr
+!-----------------------------------------------------------------------
+      call mpi_scan(in,out,nl,mpi_integer,mpi_sum,nekcomm,ierr)
+
+      return
+      end
+!=======================================================================
+!> @brief Broadcast integer array from specified process
+!! @ingroup comm_mpi
+!! @param[inout]   buf    array to be broadcased
+!! @param[in]      nl     buffer length
+!! @param[in]      sid    broadcasting process id
+!! @note This routine is simillar to lbicast and bicast from comm_mpi.f
+!! @todo Error mark should be exported
+      subroutine ibcastn(buf,nl,sid)
+      implicit none
+
+      include 'mpif.h'
+
+      integer nid, np, nekcomm,nekgroup,nekreal
+      common /nekmpi/ nid,np,nekcomm,nekgroup,nekreal
+
+!     argument list
+      integer nl,sid
+      integer buf(nl)
+
+!     local varaibles
+      integer ierr
+!-----------------------------------------------------------------------
+      call mpi_bcast (buf,nl,mpi_integer,sid,nekcomm,ierr)
+
+      return
+      end
+!=======================================================================

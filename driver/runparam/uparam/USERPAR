@@ -1,0 +1,13 @@
+!> @file USERPAR
+!! @ingroup uparam
+!! @brief Include file to store user parameters
+!! @author Adam Peplinski
+!! @date Mar 7, 2016
+!=======================================================================
+!     module parameters
+!     Frequency for probe reading (calling hpts)
+      integer UPRM_PRB
+!     module parameters end
+
+!     common blocks
+      common /UPARAMI/ UPRM_PRB

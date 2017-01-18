@@ -1,0 +1,28 @@
+#Configuration file for Nek5000 framework developed at KTH
+# Place for short description; doxygen style
+/**
+@defgroup tools  Tools for KTH nek5000 platform
+@ingroup toolbox
+
+@brief Set of tools for KHT framework
+
+@details 
+This directory contains number of tools developed at KTH. 
+
+*/
+#List of existing submodules
+SUBMODULES tstepper \
+           statistics2D
+
+#List of conflicting submodules
+CONFLICTS tstepper \
+          statistics2D
+
+#Default submodules
+DEFAULT
+
+#List of required modules
+REQUIRED
+
+#List of required conflicting modules
+EXCLUSIVE

@@ -1,0 +1,2 @@
+$(OBJDIR)/arnoldi_arpack.o       :arnoldi_arpack.f;                   $(F77) -c $(FL2) -I./ $< -o $@
+$(OBJDIR)/arnoldi_arpack_io.o    :arnoldi_arpack_io.f;                $(F77) -c $(FL2) -I./ $< -o $@

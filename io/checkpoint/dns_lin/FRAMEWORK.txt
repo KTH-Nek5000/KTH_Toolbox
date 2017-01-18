@@ -1,0 +1,49 @@
+#Configuration file for Nek5000 modules developped at KTH
+# Place for short description; doxygen style
+/**
+@defgroup chkpoint_dns_lin Checkpointing for DNS and linear simulations
+@ingroup chkpoint
+
+@brief Multi-file checkopinting for DNS and linear simulations
+
+@details
+In the case of multistep time-integration method one needs data
+from NBDINP timestep. I use standard full_restart and
+\a full_restart_save subroutines. There are four 'rs8...' reatart
+files saved in double precission. Only .f format is supported.
+In any case two sets of restart files (1-4;5-8) are created.
+
+@attention To make this varsion to work correctly
+\a mod(total_number_of_steps,CHKPTSTEP).ge.NBDINP
+Otherwise last checkpoint will not be complete.
+
+@mod_interface
+This module provides following interfaces to checkpoint:
+-# chkpt_init
+-# chkpt_read
+-# chkpt_write
+
+@mod_param
+@param_reqr Parameters required by dns_lin module:
+-# [CHKPOINTD] (@ref chkpoint):
+   + IFCHKPTRST - if restart
+   + CHKPTSTEP - checkpiont dump frequency (number of time steps)
+-# Nek5000 \a PARAM array
+   + PARAM(66) - write format
+   + PARAM(67) - read format
+
+*/
+#List of existing submodules
+SUBMODULES 
+
+#List of conflicting submodules
+CONFLICTS
+
+#Default submodules
+DEFAULT
+
+#List of required modules
+REQUIRED
+
+#List of required conflicting modules
+EXCLUSIVE

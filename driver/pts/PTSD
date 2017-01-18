@@ -1,0 +1,25 @@
+!> @file PTSD
+!! @ingroup pts
+!! @brief Include file for pts module
+!! @author Adam Peplinski
+!! @date May 31, 2016
+!=======================================================================
+      integer pts_npts              ! local number of points
+      integer pts_npoints           ! global number of points
+
+      integer pts_ihpts             ! findpts_setup handle
+
+      integer pts_ipts(LHIS)        ! global point number
+      integer pts_rcode(LHIS)       ! error code
+      integer pts_elid(LHIS)        ! ownership element
+      integer pts_proc(LHIS)        ! ownership processor
+
+      real pts_crd(LDIM,LHIS)       ! point position
+      real pts_dist(LHIS)           ! distance from the nearest grid point
+      real pts_rst(LHIS*LDIM)       ! r,s,t coordinates in element
+
+!     common blocks
+      common /pts_hptsi/ pts_npts, pts_npoints,pts_inth_hpts
+      common /pts_hptsiv/ pts_ipts,pts_rcode,pts_elid,pts_proc 
+      common /pts_hptsrv/ pts_crd, pts_dist, pts_rst
+

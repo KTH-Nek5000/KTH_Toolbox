@@ -1,0 +1,28 @@
+#Configuration file for Nek5000 framework developed at KTH
+# Place for short description; doxygen style
+/**
+@defgroup io  Input/output module for KTH nek5000 platform
+@ingroup toolbox
+
+@brief I/O routines for KHT toolboxes
+
+@details 
+This directory contains number of I/O tools used by toolboxes developed at KTH.
+
+
+*/
+#List of existing submodules
+SUBMODULES io_tools \
+           checkpoint
+
+#List of conflicting submodules
+CONFLICTS
+
+#Default submodules
+DEFAULT
+
+#List of required modules
+REQUIRED
+
+#List of required conflicting modules
+EXCLUSIVE

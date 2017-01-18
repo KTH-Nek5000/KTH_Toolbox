@@ -1,0 +1,73 @@
+#Configuration file for Nek5000 framework developed at KTH
+# Place for short description; doxygen style
+/**
+@defgroup pts   History points driver for toolboxes.
+@ingroup driver
+
+@brief History points/particles driver.
+
+@details
+Set of subroutines to work with hpts interpolation routines from Nek5000. Using defined
+(relatively big) set of points in the domain it allows to redistribute them among 
+processors according to point-to-element mapping and retrive set of variables using 
+spectral interpolation (hpts routines). 
+
+@mod_interface
+This module provides following interface:
+-# pts_timing
+-# pts_rdst
+
+@mod_var
+This module provides following variables:
+-# pts_crd(LDIM,LHIS) - (real) point coordinates
+-# pts_npts - (integer) local number of points
+-# pts_npoints - (integer) global number of points
+-# pts_ihpts - (integer) findpts_setup handle
+
+@mod_interface_example
+@code{.f}
+      subroutine userchk
+      include 'SIZE'
+      real ubuffer(2,LHIS)
+
+!     pts timing and redistribute
+      call pts_timing(nptimb,ubuffer,2,LHIS,.TRUE.)
+
+      return
+      end
+@endcode
+@code{.f}
+      subroutine userchk
+      include 'SIZE'
+      real ubuffer(2,LHIS)
+
+!     main pts interface; point redistribute
+      call pts_rdst(nptimb,ubuffer,2,LHIS,.TRUE.)
+
+      return
+      end
+@endcode
+
+@note This vesion of the code does not work for number of processors bigger than 2*LX1*LY1*LZ1*LELT.
+
+@note Check PTSD include file for definition of memeory structures provided by this module.
+
+@note This module requres findpts_setup to be executed before any of the module routines would be called.
+
+@todo This vesion of the code does not take into account error code rcode. This shuld be added later.
+
+*/
+#List of existing submodules
+SUBMODULES 
+
+#List of conflicting submodules
+CONFLICTS 
+
+#Default submodules
+DEFAULT 
+
+#List of required modules
+REQUIRED driver/comm
+
+#List of required conflicting modules
+EXCLUSIVE 

@@ -1,0 +1,31 @@
+#Configuration file for Nek5000 framework developed at KTH
+# Place for short description; doxygen style
+/**
+@defgroup driver  Driver modules for KTH nek5000 platform
+@ingroup toolbox
+
+@brief Driver routines for KHT toolboxes
+
+@details 
+Driver module provides most fundamental services for code execution related e.g. 
+to runtime parameters or global communication.
+
+[List of runtime parameters provided by all the modules.] (@ref parameter_list_page)
+
+*/
+#List of existing submodules
+SUBMODULES comm \
+           pts \
+           runparam
+
+#List of conflicting submodules
+CONFLICTS
+
+#Default submodules
+DEFAULT
+
+#List of required modules
+REQUIRED
+
+#List of required conflicting modules
+EXCLUSIVE

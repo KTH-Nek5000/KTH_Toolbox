@@ -1,0 +1,31 @@
+#Configuration file for Nek5000 framework developed at KTH
+# Place for short description; doxygen style
+/**
+@defgroup avg_spt   Spatial average routines.
+@ingroup driver
+
+@brief Set of routines for global spatial average of elements.
+
+@details
+Set of routines for global spatial average of elements generating LDIM-1 or LDIM-2 fields. 
+
+@mod_interface
+This module provides following interface:
+-# avgs_init
+-# avgs_end
+
+*/
+#List of existing submodules
+SUBMODULES 
+
+#List of conflicting submodules
+CONFLICTS 
+
+#Default submodules
+DEFAULT 
+
+#List of required modules
+REQUIRED 
+
+#List of required conflicting modules
+EXCLUSIVE 

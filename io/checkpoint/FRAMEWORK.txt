@@ -1,0 +1,63 @@
+#Configuration file for Nek5000 modules developped at KTH
+# Place for short description; doxygen style
+/**
+@defgroup chkpoint  Checkpointing routines
+@ingroup io
+
+@brief Multi-file checkopinting for KTH submodules
+
+@details
+
+@mod_interface
+This module provides following interface:
+-# @ref checkpoint_main
+
+@par
+This module requires following interfaces:
+-# chkpt_init
+-# chkpt_read
+-# chkpt_write
+
+@mod_interface_example
+@code{.f}
+      subroutine userchk
+
+!     save/load files for full-restart
+      call checkpoint_main
+
+      return
+      end
+@endcode
+
+@mod_param
+@param_list Parameters provided by checkpoint module (include file - \a CHKPOINTD):
++ IFCHKPTRST - (logical) if restart
++ CHKPTSTEP - (integer) checkpiont dump frequency (number of time steps)
+
+@mod_param_example
+@code{.f90}
+&CHKPOINT
+ CHKPTSTEP=         10,
+ IFCHKPTRST=F,
+ /
+@endcode
+
+*/
+#List of existing submodules
+SUBMODULES dns_lin \
+           dummy
+
+#List of conflicting submodules
+CONFLICTS  dns_lin \
+           dummy
+
+#Default submodules
+DEFAULT dns_lin
+
+#List of required modules
+REQUIRED io/io_tools \
+         driver/runparam
+
+#List of required conflicting modules
+EXCLUSIVE  dns_lin \
+           dummy
