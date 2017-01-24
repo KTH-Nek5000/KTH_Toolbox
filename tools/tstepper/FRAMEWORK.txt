@@ -2,7 +2,7 @@
 # Place for short description; doxygen style
 /**
 @defgroup tstepper Time stepper routines
-@ingroup toolbox
+@ingroup tools
 
 @brief Time stepper for Nek5000
 

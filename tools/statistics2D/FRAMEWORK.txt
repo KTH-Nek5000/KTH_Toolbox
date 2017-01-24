@@ -2,7 +2,7 @@
 # Place for short description; doxygen style
 /**
 @defgroup statistics2D 2D statistics
-@ingroup toolbox
+@ingroup tools
 
 @brief 2D time averaged flow statistics for Nek5000
 
