@@ -7,7 +7,7 @@
 @brief I/O routines for KHT toolboxes
 
 @details 
-This directory contains number of I/O tools used by toolboxes developed at KTH.
+This directory contains number of I/O tools used by toolboxes.
 
 
 */

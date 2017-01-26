@@ -6,27 +6,16 @@
 !=======================================================================
 !> @brief Read checkpoint parameters
 !! @ingroup chkpoint
-!! @param[in]  fid    file unit
-!! @note This routine should be called in @ref runprm_in
-!! @todo Check iostat value for missing namelist in the file
-!! @see @ref readers_writers_page
-      subroutine chkpt_param_in(fid)
+      subroutine chkpt_param_get()
       implicit none
 
-      include 'SIZE_DEF'
       include 'SIZE'            !
-      include 'PARALLEL_DEF' 
       include 'PARALLEL'        ! ISIZE, WDSIZE, LSIZE,CSIZE
       include 'CHKPOINTD'
 
-!     argument list
-      integer fid
-
 !     local variables
-      integer ierr
-
-!     namelists
-      namelist /CHKPOINT/ CHKPTSTEP, IFCHKPTRST
+      integer i_out,ifnd
+      real d_out
 !-----------------------------------------------------------------------
 !     default values
       CHKPTSTEP = 100
@@ -34,44 +23,21 @@
 !     read the file
       ierr=0
       if (NID.eq.0) then
-        rewind(fid)
-        read(unit=fid,nml=CHKPOINT,iostat=ierr)
+!     do we restart
+        call finiparser_getBool(i_out,'_chkpoint:ifchkptrst',ifnd)
+        if (ifnd.eq.1.and.i_out.eq.1) then
+           IFCHKPTRST = .TRUE.
+        endif
+!     checkpoint frequency
+        call finiparser_getDbl(d_out,'_chkpoint:chkptstep',ifnd)
+        if (ifnd.eq.1) then
+           CHKPTSTEP = int(d_out)
+        endif
       endif
-      call err_chk(ierr,'Error reading CHKPOINT parameters.$')
 
 !     broadcast data
       call bcast(CHKPTSTEP,ISIZE)
       call bcast(IFCHKPTRST,LSIZE)
-
-      return
-      end
-!=======================================================================
-!> @brief Write checkpoint parameters
-!! @ingroup chkpoint
-!! @param[in]  fid    file unit
-!! @note This routine should be called in @ref runprm_out
-!! @see @ref readers_writers_page
-      subroutine chkpt_param_out(fid)
-      implicit none
-
-      include 'SIZE_DEF'
-      include 'SIZE'            !
-      include 'CHKPOINTD'
-
-!     argument list
-      integer fid
-
-!     local variables
-      integer ierr
-
-!     namelists
-      namelist /CHKPOINT/ CHKPTSTEP, IFCHKPTRST
-!-----------------------------------------------------------------------
-      ierr=0
-      if (NID.eq.0) then
-         write(unit=fid,nml=CHKPOINT,iostat=ierr)
-      endif
-      call err_chk(ierr,'Error writing CHKPOINT parameters.$')
 
       return
       end

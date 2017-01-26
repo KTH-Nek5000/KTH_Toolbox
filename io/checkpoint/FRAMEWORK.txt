@@ -4,12 +4,13 @@
 @defgroup chkpoint  Checkpointing routines
 @ingroup io
 
-@brief Multi-file checkopinting for KTH submodules
+@brief Checkopinting routines for toolbox
 
 @details
 
 @mod_interface
 This module provides following interface:
+-# @ref chkpt_param_get
 -# @ref checkpoint_main
 
 @par
@@ -21,9 +22,15 @@ This module requires following interfaces:
 @mod_interface_example
 @code{.f}
       subroutine userchk
-
+      include 'TSTEP'
+      
+      if (ISTEP.eq.0) then
+!     initialise runtime parameters
+         call chkpt_param_get
+      else
 !     save/load files for full-restart
-      call checkpoint_main
+         call checkpoint_main
+      endif
 
       return
       end
@@ -35,29 +42,30 @@ This module requires following interfaces:
 + CHKPTSTEP - (integer) checkpiont dump frequency (number of time steps)
 
 @mod_param_example
-@code{.f90}
-&CHKPOINT
- CHKPTSTEP=         10,
- IFCHKPTRST=F,
- /
+@code{.txt}
+[_CHKPOINT]
+chkptstep = 10
+ifchkptrst = no
 @endcode
 
 */
 #List of existing submodules
-SUBMODULES dns_lin \
+SUBMODULES multi_step \
+           single_step \
            dummy
 
 #List of conflicting submodules
-CONFLICTS  dns_lin \
+CONFLICTS  multi_step \
+           single_step \
            dummy
 
 #Default submodules
 DEFAULT dns_lin
 
 #List of required modules
-REQUIRED io/io_tools \
-         driver/runparam
+REQUIRED io/io_tools
 
 #List of required conflicting modules
-EXCLUSIVE  dns_lin \
+EXCLUSIVE  multi_step \
+           single_step \
            dummy

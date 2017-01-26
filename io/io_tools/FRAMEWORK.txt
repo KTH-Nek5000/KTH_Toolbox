@@ -6,7 +6,15 @@
 
 @brief Input/Output simple tools
 
-@details Detatiled description of I/O speciffic routines
+@details
+Set of I/O speciffic routines for toolbox
+
+@mod_interface
+This module provides following interface:
+-# @ref io_file_freeid
+-# @ref io_file_close
+-# @ref io_mfo_fname
+-# @ref io_mbyte_open_srl
 
 */
 #List of existing submodules

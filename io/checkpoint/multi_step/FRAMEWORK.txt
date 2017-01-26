@@ -1,10 +1,12 @@
 #Configuration file for Nek5000 modules developped at KTH
 # Place for short description; doxygen style
 /**
-@defgroup chkpoint_dns_lin Checkpointing for DNS and linear simulations
+@defgroup chkpoint_mstep Multistep checkpointing
 @ingroup chkpoint
 
-@brief Multi-file checkopinting for DNS and linear simulations
+@brief Multistep checkpointing for DNS and linear simulations
+
+@deprecated This module is deprecated, but it is here for backward consistency.
 
 @details
 In the case of multistep time-integration method one needs data
@@ -24,7 +26,7 @@ This module provides following interfaces to checkpoint:
 -# chkpt_write
 
 @mod_param
-@param_reqr Parameters required by dns_lin module:
+@param_reqr Parameters required by multistep module:
 -# [CHKPOINTD] (@ref chkpoint):
    + IFCHKPTRST - if restart
    + CHKPTSTEP - checkpiont dump frequency (number of time steps)

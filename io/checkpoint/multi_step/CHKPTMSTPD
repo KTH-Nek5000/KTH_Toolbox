@@ -1,4 +1,4 @@
-!> @file CHKPTDNSD
+!> @file CHKPTMSTPD
 !! @ingroup chkpoint_dns_lin
 !! @brief Include file for checkpoint dns module
 !! @author Adam Peplinski

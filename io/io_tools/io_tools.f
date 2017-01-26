@@ -4,7 +4,7 @@
 !! @author Adam Peplinski
 !! @date Mar 7, 2016
 !=======================================================================
-!> @brief Get free unit number
+!> @brief Get free file unit number and store max unit value
 !! @ingroup io_tools
 !! @param[out] iunit     file unit
 !! @param[out] ierr      error mark
@@ -41,7 +41,7 @@
       return
       end
 !=======================================================================
-!> @brief Close opened files
+!> @brief Close all opened files up to sotred max unit numer
 !! @ingroup io_tools
 !! @see io_file_freeid
       subroutine io_file_close()
@@ -69,7 +69,7 @@
 !     mfo_open_files, mfo_outfld from prepost.f;
 !     mfi from ic.f
 !=======================================================================
-!> @brief Generate name according to nek rulles
+!> @brief Generate name according to nek rulles without opening the file
 !! @ingroup io_tools
 !! @param[out]  fname     file name
 !! @param[in]   bname     base name
@@ -78,11 +78,8 @@
       subroutine io_mfo_fname(fname,bname,prefix,ierr)
       implicit none
 
-      include 'SIZE_DEF'
       include 'SIZE'
-      include 'INPUT_DEF'
       include 'INPUT'           ! IFREGUO
-      include 'RESTART_DEF'
       include 'RESTART'         ! NFILEO
 
 !     argument list
@@ -153,9 +150,7 @@
       subroutine io_mbyte_open_srl(hname,fid,ierr)
       implicit none
 
-      include 'SIZE_DEF'
       include 'SIZE'            ! NID
-      include 'TSTEP_DEF'
       include 'TSTEP'           ! ISTEP
 
 !     argumnt list

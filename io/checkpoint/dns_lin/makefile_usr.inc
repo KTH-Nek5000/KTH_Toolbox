@@ -1,1 +1,0 @@
-$(OBJDIR)/chkpt_dns_lin.o        :chkpt_dns_lin.f;                 $(F77) -c $(FL2) -I./ $< -o $@

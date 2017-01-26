@@ -6,6 +6,8 @@
 
 @brief User/module runtime parameters.
 
+@deprecated This module and its submodules are deprecated. It is currently replaced by Nek5000 dictionary.
+
 @details
 Set of subroutines to read user and module parameters using Fortran90 namelists.
 

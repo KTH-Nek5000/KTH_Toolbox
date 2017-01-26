@@ -1,5 +1,5 @@
-!> @file chkpt_dns_lin.f
-!! @ingroup chkpoint_dns_lin
+!> @file chkpt_mstp.f
+!! @ingroup chkpoint_mstep
 !! @brief Set of multi-file checkpoint routines for DNS and  linear
 !! @details VERSION FOR DNS AND LINEAR SIMULATIONS
 !!    This version supports only proper restart for DNS and for
@@ -10,21 +10,17 @@
 !!
 !=======================================================================
 !> @brief Initialise multi-file checkpoint routines
-!! @ingroup chkpoint_dns_lin
+!! @ingroup chkpoint_mstep
 !! @note This interface is defined in @ref checkpoint_main
       subroutine chkpt_init
       implicit none
 
-      include 'SIZE_DEF'
       include 'SIZE'            ! NID, NPERT
-      include 'TSTEP_DEF'
       include 'TSTEP'           ! IOSTEP, ISTEP
-      include 'INPUT_DEF'
       include 'INPUT'           ! SESSION, IFPERT, IFBASE
-      include 'PARALLEL_DEF'
       include 'PARALLEL'        ! ISIZE
       include 'CHKPOINTD'       ! CHKPTSTEP, IFCHKPTRST
-      include 'CHKPTDNSD'       ! CHKPTSET_O, CHKPTSET_I, CHKPTNRSF,
+      include 'CHKPTMSTPD'      ! CHKPTSET_O, CHKPTSET_I, CHKPTNRSF,
                                 ! CHKPTNFILE, CHKPTNSET
 
 !     local variables
@@ -160,7 +156,7 @@
       end
 !=======================================================================
 !> @brief Generate restart file names
-!! @ingroup chkpoint_dns_lin
+!! @ingroup chkpoint_mstep
 !! @param[out] fname  restart file name
 !! @param[in]  bname  base name
 !! @param[in]  prefix prefix
@@ -169,9 +165,8 @@
       subroutine chkpt_fname(fname, bname, prefix, nset, ierr)
       implicit none
 
-      include 'SIZE_DEF'
       include 'SIZE'            ! NIO
-      include 'CHKPTDNSD'       ! CHKPTNRSF, CHKPTNSET
+      include 'CHKPTMSTPD'      ! CHKPTNRSF, CHKPTNSET
 
 !     argument list
       character*80 fname(CHKPTNRSF)
@@ -217,19 +212,16 @@
       end
 !=======================================================================
 !> @brief Read full file restart set.
-!! @ingroup chkpoint_dns_lin
+!! @ingroup chkpoint_mstep
 !! @note This interface is defined in @ref checkpoint_main
       subroutine chkpt_read()
       implicit none
 
-      include 'SIZE_DEF'
       include 'SIZE'            !
-      include 'TSTEP_DEF'
       include 'TSTEP'           ! ISTEP
-      include 'INPUT_DEF'
       include 'INPUT'           ! IFREGUO
       include 'CHKPOINTD'       ! IFCHKPTRST
-      include 'CHKPTDNSD'       ! CHKPTNRSF, CHKPTNFILE, CHKPTFNAME
+      include 'CHKPTMSTPD'      ! CHKPTNRSF, CHKPTNFILE, CHKPTFNAME
 
 !     local variables
       logical lifreguo
@@ -278,21 +270,18 @@
       end
 !=======================================================================
 !> @brief Write full file restart set
-!! @ingroup chkpoint_dns_lin
+!! @ingroup chkpoint_mstep
 !! @note This interface is defined in @ref checkpoint_main.
 !! @note This is version of full_restart_save routine. In additional
 !! file it saves the file set number to allow for automatic restart.
       subroutine chkpt_write()
       implicit none
 
-      include 'SIZE_DEF'
       include 'SIZE'            ! NID
-      include 'TSTEP_DEF'
       include 'TSTEP'           ! ISTEP
-      include 'INPUT_DEF'
       include 'INPUT'           ! IFREGUO
       include 'CHKPOINTD'       ! CHKPTSTEP
-      include 'CHKPTDNSD'       ! CHKPTNRSF, CHKPTSET_O, CHKPTNSET
+      include 'CHKPTMSTPD'      ! CHKPTNRSF, CHKPTSET_O, CHKPTNSET
 
 !     local variables
       integer ierr, iotest, iunit
@@ -352,7 +341,7 @@
 !     of file numbers to be written and e.g. hanges in restart_nfld.
 !=======================================================================
 !> @brief Save checkpoint variables in a single set of files.
-!! @ingroup chkpoint_dns_lin
+!! @ingroup chkpoint_mstep
 !! @param[in] iosave
 !! @param[in] save_size
 !! @param[in] nfldi
@@ -360,15 +349,10 @@
       subroutine restart_save_pert(iosave,save_size,nfldi)
       implicit none
 
-      include 'SIZE_DEF'
       include 'SIZE'
-      include 'RESTART_DEF'
       include 'RESTART'
-      include 'TSTEP_DEF'
       include 'TSTEP'
-      include 'INPUT_DEF'
       include 'INPUT'
-      include 'SOLN_DEF'
       include 'SOLN'
 
 !     argument list
@@ -463,7 +447,7 @@
       end
 !=======================================================================
 !> @brief Load checpoint variables from single set of files.
-!! @ingroup chkpoint_dns_lin
+!! @ingroup chkpoint_mstep
 !! @param[in] nfiles     last file number
 !! @param[in] nfilstart  first file number
 !! @note This is version of restart routine. It excludes .fld format
@@ -471,13 +455,9 @@
       subroutine restart_pert(nfiles,nfilstart)
       implicit none
 
-      include 'SIZE_DEF'
       include 'SIZE'            ! NID
-      include 'TSTEP_DEF'
       include 'TSTEP'           ! TIME
-      include 'INPUT_DEF'
       include 'INPUT'           ! PARAM
-      include 'RESTART_DEF'
       include 'RESTART'
 
 !     argument list
@@ -514,7 +494,7 @@
       end
 !=======================================================================
 !> @brief Load checkpoint variables from single file.
-!! @ingroup chkpoint_dns_lin
+!! @ingroup chkpoint_mstep
 !! @param[in] fname  file name
 !! @param[in] ifile  field pointer (nonlinear, mhd, perturbation; at the same time file number)
 !! @note This is version of mfi including perturbation field.
@@ -522,19 +502,12 @@
       subroutine mfi_pert(fname,ifile)
       implicit none
 
-      include 'SIZE_DEF'
       include 'SIZE'
-      include 'INPUT_DEF'
       include 'INPUT'
-      include 'TSTEP_DEF'
       include 'TSTEP'
-      include 'RESTART_DEF'
       include 'RESTART'
-      include 'PARALLEL_DEF'
       include 'PARALLEL'
-      include 'SOLN_DEF'
       include 'SOLN'
-      include 'GEOM_DEF'
       include 'GEOM'
 
 !     aragument list
@@ -693,7 +666,7 @@
       end
 !=======================================================================
 !> @brief Map loaded variables from velocity to axisymmetric mesh
-!! @ingroup chkpoint_dns_lin
+!! @ingroup chkpoint_mstep
 !! @param[in] pm1    pressure loaded form the file
 !! @note This is version of axis_interp_ic taking into account fact
 !! pressure does not have to be written on velocity mesh.
@@ -701,17 +674,11 @@
       subroutine axis_interp_ic_full_pres(pm1)
       implicit none
 
-      include 'SIZE_DEF'
       include 'SIZE'
-      include 'INPUT_DEF'
       include 'INPUT'
-      include 'TSTEP_DEF'
       include 'TSTEP'
-      include 'RESTART_DEF'
       include 'RESTART'
-      include 'SOLN_DEF'
       include 'SOLN'
-      include 'GEOM_DEF'
       include 'GEOM'
       include 'IXYZ'
 
@@ -767,7 +734,7 @@
       end
 !=======================================================================
 !> @brief Map loaded pressure to the pressure mesh
-!! @ingroup chkpoint_dns_lin
+!! @ingroup chkpoint_mstep
 !! @param[in] pm1    pressure loaded form the file
 !! @param[in] ifile  field pointer (nonlinear, mhd, perturbation;
 !!   at the same time file number)
@@ -775,15 +742,10 @@
       subroutine map_pm1_to_pr_pert(pm1,ifile)
       implicit none
 
-      include 'SIZE_DEF'
       include 'SIZE'
-      include 'INPUT_DEF'
       include 'INPUT'
-      include 'TSTEP_DEF'
       include 'TSTEP'
-      include 'RESTART_DEF'
       include 'RESTART'
-      include 'SOLN_DEF'
       include 'SOLN'
 
 !     argument list
