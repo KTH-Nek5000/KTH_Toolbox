@@ -10,7 +10,7 @@
 Set of subroutines to wrap MPI communication missing in Nek5000.
 
 @mod_interface
-This module provides following interface:
+@interface_list Interface provided:
 -# @ref ivgl_running_sum
 -# @ref ibcastn
 
@@ -29,3 +29,9 @@ REQUIRED
 
 #List of required conflicting modules
 EXCLUSIVE 
+
+#List of object files
+OBJECT
+
+#List of include files
+INCLUDE 

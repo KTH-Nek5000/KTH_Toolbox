@@ -1,7 +1,7 @@
 #Configuration file for Nek5000 framework developed at KTH
 # Place for short description; doxygen style
 /**
-@defgroup tools  Tools for KTH nek5000 platform
+@defgroup tools  Tools module
 @ingroup toolbox
 
 @brief Set of tools for KHT framework
@@ -26,3 +26,9 @@ REQUIRED
 
 #List of required conflicting modules
 EXCLUSIVE
+
+#List of object files
+OBJECT
+
+#List of include files
+INCLUDE

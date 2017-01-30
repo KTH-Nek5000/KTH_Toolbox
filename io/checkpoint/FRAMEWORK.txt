@@ -9,12 +9,12 @@
 @details
 
 @mod_interface
-This module provides following interface:
+@interface_list Interface provided:
 -# @ref chkpt_param_get
 -# @ref checkpoint_main
 
 @par
-This module requires following interfaces:
+@interface_reqr Interface required:
 -# chkpt_init
 -# chkpt_read
 -# chkpt_write
@@ -27,10 +27,10 @@ This module requires following interfaces:
       if (ISTEP.eq.0) then
 !     initialise runtime parameters
          call chkpt_param_get
-      else
-!     save/load files for full-restart
-         call checkpoint_main
       endif
+
+!     save/load files for full-restart
+      call checkpoint_main
 
       return
       end
@@ -50,22 +50,22 @@ ifchkptrst = no
 
 */
 #List of existing submodules
-SUBMODULES multi_step \
-           single_step \
+SUBMODULES mstep \
+           sstep \
            dummy
 
 #List of conflicting submodules
-CONFLICTS  multi_step \
-           single_step \
+CONFLICTS  mstep \
+           sstep \
            dummy
 
 #Default submodules
-DEFAULT dns_lin
+DEFAULT mstep
 
 #List of required modules
 REQUIRED io/io_tools
 
 #List of required conflicting modules
-EXCLUSIVE  multi_step \
-           single_step \
+EXCLUSIVE  mstep \
+           sstep \
            dummy

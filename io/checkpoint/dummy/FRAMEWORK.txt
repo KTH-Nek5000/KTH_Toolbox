@@ -26,7 +26,7 @@ CONFLICTS
 DEFAULT
 
 #List of required modules
-REQUIRED
+REQUIRED io/checkpoint
 
 #List of required conflicting modules
 EXCLUSIVE

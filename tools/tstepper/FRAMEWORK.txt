@@ -89,3 +89,9 @@ REQUIRED driver/runparam
 #List of required conflicting modules
 EXCLUSIVE arnoldi_arpack \
           powerit
+          
+#List of object files
+OBJECT time_stepper.o
+
+#List of include files
+INCLUDE TIME_STEPPERD

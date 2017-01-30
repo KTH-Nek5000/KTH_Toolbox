@@ -10,8 +10,8 @@
 !! @param[inout]  out    output array
 !! @param[in]      in     input array
 !! @param[in]      nl     buffer length
-!! @note This routine is simillar to igl_running_sum, i8gl_running_sum
-!! from comm_mpi.f
+!! @note This routine is simillar to @ref igl_running_sum and
+!!  @ref i8gl_running_sum from comm_mpi.f
 !! @todo Error mark should be exported
       subroutine ivgl_running_sum(out,in,nl)
       implicit none
@@ -38,7 +38,8 @@
 !! @param[inout]   buf    array to be broadcased
 !! @param[in]      nl     buffer length
 !! @param[in]      sid    broadcasting process id
-!! @note This routine is simillar to lbicast and bicast from comm_mpi.f
+!! @note This routine is simillar to @ref lbcast and @ref bcast
+!!  from comm_mpi.f
 !! @todo Error mark should be exported
       subroutine ibcastn(buf,nl,sid)
       implicit none
