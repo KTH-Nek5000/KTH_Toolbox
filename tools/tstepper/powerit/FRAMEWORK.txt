@@ -6,10 +6,12 @@
 
 @brief Power iteration submodule
 
+@warning This module is not upgraded to stable Nek5000 relese yet
+
 @details 
 
 @mod_interface
-This module provides following interfaces to tstepper:
+@interface_list Interface provided to tstepper:
 + stepper_param_in
 + stepper_param_out
 + stepper_vinit
@@ -53,3 +55,9 @@ REQUIRED io/io_tools \
 
 #List of required conflicting modules
 EXCLUSIVE
+
+#List of object files
+OBJECT powerit.o
+
+#List of include files
+INCLUDE POWERITD

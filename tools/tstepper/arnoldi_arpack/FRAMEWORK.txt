@@ -6,11 +6,13 @@
 
 @brief Arnoldi algorithm with PARPACK
 
+@warning This module is not upgraded to stable Nek5000 relese yet
+
 @details 
 Description of the method can be found in @cite Peplinski2014 @cite Peplinski2015
 
 @mod_interface
-This module provides following interface to tstepper:
+@interface_list Interface provided to tstepper:
    + stepper_param_in
    + stepper_param_out
    + stepper_vinit
@@ -88,3 +90,11 @@ REQUIRED io/io_tools \
 
 #List of required conflicting modules
 EXCLUSIVE
+
+#List of object files
+OBJECT arnoldi_arpack.o \
+       arnoldi_arpack_io.o
+
+#List of include files
+INCLUDE ARNOLDI_ARPACKD
+
