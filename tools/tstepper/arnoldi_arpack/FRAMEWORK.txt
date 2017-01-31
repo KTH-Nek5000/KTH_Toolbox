@@ -78,18 +78,17 @@ by sub.module.
 SUBMODULES
 
 #List of conflicting submodules
-CONFLICTS
+EXCLUSIVE
 
 #Default submodules
 DEFAULT
 
+#List of conflicting modules
+CONFLICTS tools/tstepper/powerit
+
 #List of required modules
 REQUIRED io/io_tools \
-         io/checkpoint/dummy \
-         driver/runparam
-
-#List of required conflicting modules
-EXCLUSIVE
+         io/checkpoint/dummy
 
 #List of object files
 OBJECT arnoldi_arpack.o \
@@ -97,4 +96,3 @@ OBJECT arnoldi_arpack.o \
 
 #List of include files
 INCLUDE ARNOLDI_ARPACKD
-

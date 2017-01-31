@@ -43,18 +43,17 @@
 SUBMODULES
 
 #List of conflicting submodules
-CONFLICTS
+EXCLUSIVE
 
 #Default submodules
 DEFAULT
 
+#List of conflicting modules
+CONFLICTS tools/tstepper/arnoldi_arpack
+
 #List of required modules
 REQUIRED io/io_tools \
-         io/checkpoint/dns_lin \
-         driver/runparam
-
-#List of required conflicting modules
-EXCLUSIVE
+         io/checkpoint/mstep
 
 #List of object files
 OBJECT powerit.o

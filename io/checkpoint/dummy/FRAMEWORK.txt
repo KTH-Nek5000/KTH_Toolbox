@@ -20,13 +20,19 @@ This module provides folowing interface to checkpoint:
 SUBMODULES
 
 #List of conflicting submodules
-CONFLICTS
+EXCLUSIVE
 
 #Default submodules
 DEFAULT
 
+#List of conflicting modules
+CONFLICTS io/checkpoint/mstep
+
 #List of required modules
 REQUIRED io/checkpoint
 
-#List of required conflicting modules
-EXCLUSIVE
+#List of object files
+OBJECT chkptd.o
+
+#List of include files
+INCLUDE 

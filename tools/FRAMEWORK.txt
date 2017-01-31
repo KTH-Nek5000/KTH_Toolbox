@@ -14,16 +14,16 @@ This directory contains number of tools developed at KTH.
 SUBMODULES tstepper
 
 #List of conflicting submodules
-CONFLICTS tstepper
+EXCLUSIVE
 
 #Default submodules
 DEFAULT
 
+#List of conflicting modules
+CONFLICTS
+
 #List of required modules
 REQUIRED
-
-#List of required conflicting modules
-EXCLUSIVE
 
 #List of object files
 OBJECT

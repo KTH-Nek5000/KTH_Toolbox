@@ -39,13 +39,19 @@ This module provides following interfaces to checkpoint:
 SUBMODULES 
 
 #List of conflicting submodules
-CONFLICTS
+EXCLUSIVE
 
 #Default submodules
 DEFAULT
 
-#List of required modules
-REQUIRED
+#List of conflicting modules
+CONFLICTS io/checkpoint/dummy
 
-#List of required conflicting modules
-EXCLUSIVE
+#List of required modules
+REQUIRED io/checkpoint
+
+#List of object files
+OBJECT chkpt_mstp.o
+
+#List of include files
+INCLUDE CHKPTMSTPD

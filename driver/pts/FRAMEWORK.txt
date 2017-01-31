@@ -63,16 +63,16 @@ This module provides following variables:
 SUBMODULES 
 
 #List of conflicting submodules
-CONFLICTS 
+EXCLUSIVE 
 
 #Default submodules
 DEFAULT 
 
+#List of conflicting modules
+CONFLICTS 
+
 #List of required modules
 REQUIRED driver/comm
-
-#List of required conflicting modules
-EXCLUSIVE 
 
 #List of object files
 OBJECT pts_redistribute.o

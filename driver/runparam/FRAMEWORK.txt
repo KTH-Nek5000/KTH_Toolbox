@@ -38,18 +38,17 @@ SUBMODULES uparam \
            dummy
 
 #List of conflicting submodules
-CONFLICTS uparam \
+EXCLUSIVE uparam \
           dummy
 
 #Default submodules
 DEFAULT dummy
 
+#List of conflicting modules
+CONFLICTS
+
 #List of required modules
 REQUIRED io/io_tools
-
-#List of required conflicting modules
-EXCLUSIVE uparam \
-          dummy
 
 #List of object files
 OBJECT runparam.o

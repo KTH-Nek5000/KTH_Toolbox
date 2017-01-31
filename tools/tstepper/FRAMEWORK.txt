@@ -86,19 +86,18 @@ SUBMODULES arnildi_arpack \
            powerit
 
 #List of conflicting submodules
-CONFLICTS arnoldi_arpack \
+EXCLUSIVE arnoldi_arpack \
           powerit
 
 #Default submodules
 DEFAULT arnoldi_arpack
 
+#List of conflicting modules
+CONFLICTS
+
 #List of required modules
-REQUIRED driver/runparam
-         
-#List of required conflicting modules
-EXCLUSIVE arnoldi_arpack \
-          powerit
-          
+REQUIRED
+                   
 #List of object files
 OBJECT time_stepper.o
 

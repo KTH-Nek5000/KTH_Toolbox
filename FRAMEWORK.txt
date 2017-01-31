@@ -38,10 +38,10 @@ Dependences between modules are described in FRAMEWORK.txt (present in almost ev
   + list of requred runtime parameters (module dependency)
   + example of section in \a setup.par file
 - SUBMODULES - list of existing submodules (subdirectories)
-- CONFLICTS - list of conflicting submodules
+- CONFLICTS - list of modules in conflict with current module
 - DEFAULT - default submodule
 - REQUIRED - list of required modules (from other tree branches)
-- EXCLUSIVE - list of required conflicting submodules (from local subdirectories)
+- EXCLUSIVE - list of local task implementations (submodules) that cannot be used simultaneously
 - OBJECT - list of object files for USR variable in makenek
 - INCLUDE - list of include files
 
@@ -49,20 +49,20 @@ Dependences between modules are described in FRAMEWORK.txt (present in almost ev
 #List of existing submodules
 SUBMODULES driver \
            io \
-           physics \
+           utilities \
            tools
 
 #List of conflicting submodules
-CONFLICTS
+EXCLUSIVE
 
 #Default submodules
 DEFAULT
 
+#List of conflicting modules
+CONFLICTS
+
 #List of required modules
 REQUIRED
-
-#List of required conflicting modules
-EXCLUSIVE
 
 #List of object files
 OBJECT

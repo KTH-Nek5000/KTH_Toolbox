@@ -55,17 +55,21 @@ SUBMODULES mstep \
            dummy
 
 #List of conflicting submodules
-CONFLICTS  mstep \
+EXCLUSIVE  mstep \
            sstep \
            dummy
 
 #Default submodules
 DEFAULT mstep
 
+#List of conflicting modules
+CONFLICTS
+
 #List of required modules
 REQUIRED io/io_tools
 
-#List of required conflicting modules
-EXCLUSIVE  mstep \
-           sstep \
-           dummy
+#List of object files
+OBJECT chkpoint.o
+
+#List of include files
+INCLUDE CHKPOINTD

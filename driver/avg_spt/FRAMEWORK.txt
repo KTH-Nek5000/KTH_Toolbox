@@ -21,16 +21,16 @@ Set of routines for global spatial average of elements generating LDIM-1 or LDIM
 SUBMODULES 
 
 #List of conflicting submodules
-CONFLICTS 
+EXCLUSIVE
 
 #Default submodules
 DEFAULT 
 
+#List of conflicting modules
+CONFLICTS 
+
 #List of required modules
 REQUIRED 
-
-#List of required conflicting modules
-EXCLUSIVE
 
 #List of object files
 OBJECT avg_spt.o \
@@ -39,4 +39,3 @@ OBJECT avg_spt.o \
 
 #List of include files
 INCLUDE AVG_SPTD
-

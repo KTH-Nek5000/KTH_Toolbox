@@ -19,13 +19,19 @@ This module provides folowing interface:
 SUBMODULES
 
 #List of conflicting submodules
-CONFLICTS
+EXCLUSIVE
 
 #Default submodules
 DEFAULT
 
+#List of conflicting modules
+CONFLICTS
+
 #List of required modules
 REQUIRED
 
-#List of required conflicting modules
-EXCLUSIVE
+#List of object files
+OBJECT uparamd.o
+
+#List of include files
+INCLUDE
