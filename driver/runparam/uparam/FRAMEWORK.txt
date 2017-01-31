@@ -6,6 +6,8 @@
 
 @brief User defined runtime parameters.
 
+@deprecated This module and its submodules are deprecated. It is currently replaced by Nek5000 dictionary.
+
 @details 
 Read/write parameters defined in include file USERPAR usinfg Fortran90 namelist.
 
@@ -42,3 +44,9 @@ REQUIRED
 
 #List of required conflicting modules
 EXCLUSIVE
+
+#List of object files
+OBJECT uparam.o
+
+#List of include files
+INCLUDE USERPAR

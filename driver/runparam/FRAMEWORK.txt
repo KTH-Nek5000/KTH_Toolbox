@@ -50,3 +50,9 @@ REQUIRED io/io_tools
 #List of required conflicting modules
 EXCLUSIVE uparam \
           dummy
+
+#List of object files
+OBJECT runparam.o
+
+#List of include files
+INCLUDE

@@ -6,13 +6,15 @@
 
 @brief Set of routines for global spatial average of elements.
 
+@warning This module is not upgraded to stable Nek5000 relese yet
+
 @details
 Set of routines for global spatial average of elements generating LDIM-1 or LDIM-2 fields. 
 
 @mod_interface
-This module provides following interface:
--# avgs_init
--# avgs_end
+@interface_list Interface provided:
+-# @ref avgs_init
+-# @ref avgs_end
 
 */
 #List of existing submodules
@@ -28,4 +30,13 @@ DEFAULT
 REQUIRED 
 
 #List of required conflicting modules
-EXCLUSIVE 
+EXCLUSIVE
+
+#List of object files
+OBJECT avg_spt.o \
+       avg_spt_usr.o \
+       avg_spt_debug.o
+
+#List of include files
+INCLUDE AVG_SPTD
+

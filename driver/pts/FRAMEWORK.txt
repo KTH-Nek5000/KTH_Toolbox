@@ -6,6 +6,8 @@
 
 @brief History points/particles driver.
 
+@warning This module is not upgraded to stable Nek5000 relese yet
+
 @details
 Set of subroutines to work with hpts interpolation routines from Nek5000. Using defined
 (relatively big) set of points in the domain it allows to redistribute them among 
@@ -13,9 +15,9 @@ processors according to point-to-element mapping and retrive set of variables us
 spectral interpolation (hpts routines). 
 
 @mod_interface
-This module provides following interface:
--# pts_timing
--# pts_rdst
+@interface_list Interface provided:
+-# @ref pts_timing
+-# @ref pts_rdst
 
 @mod_var
 This module provides following variables:
@@ -71,3 +73,9 @@ REQUIRED driver/comm
 
 #List of required conflicting modules
 EXCLUSIVE 
+
+#List of object files
+OBJECT pts_redistribute.o
+
+#List of include files
+INCLUDE PTSD
