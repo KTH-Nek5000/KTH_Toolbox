@@ -6,12 +6,12 @@
 !! @date May 31, 2016
 !=======================================================================
 !> @brief Global MPI scan for integer array.
+!! @details This routine is simillar to @ref igl_running_sum and
+!!  @ref i8gl_running_sum from comm_mpi.f
 !! @ingroup comm_mpi
 !! @param[inout]  out    output array
 !! @param[in]      in     input array
 !! @param[in]      nl     buffer length
-!! @note This routine is simillar to @ref igl_running_sum and
-!!  @ref i8gl_running_sum from comm_mpi.f
 !! @todo Error mark should be exported
       subroutine ivgl_running_sum(out,in,nl)
       implicit none
@@ -34,12 +34,12 @@
       end
 !=======================================================================
 !> @brief Broadcast integer array from specified process
+!! @details This routine is simillar to @ref lbcast and @ref bcast
+!!  from comm_mpi.f
 !! @ingroup comm_mpi
 !! @param[inout]   buf    array to be broadcased
 !! @param[in]      nl     buffer length
 !! @param[in]      sid    broadcasting process id
-!! @note This routine is simillar to @ref lbcast and @ref bcast
-!!  from comm_mpi.f
 !! @todo Error mark should be exported
       subroutine ibcastn(buf,nl,sid)
       implicit none
