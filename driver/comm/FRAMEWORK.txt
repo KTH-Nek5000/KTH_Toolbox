@@ -31,7 +31,7 @@ REQUIRED
 EXCLUSIVE 
 
 #List of object files
-OBJECT
+OBJECT comm_mpi_wrp.o
 
 #List of include files
 INCLUDE 

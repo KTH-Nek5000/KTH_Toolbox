@@ -4,7 +4,7 @@
 @defgroup driver  Driver module
 @ingroup toolbox
 
-@brief Driver routines for KHT toolboxes
+@brief Driver routines for toolboxes
 
 @details 
 Driver module provides most fundamental services that can be shared by a number of tools related e.g. 
