@@ -10,7 +10,7 @@
 Set of I/O speciffic routines for toolbox
 
 @mod_interface
-This module provides following interface:
+@interface_list Interface provided:
 -# @ref io_file_freeid
 -# @ref io_file_close
 -# @ref io_mfo_fname
@@ -31,3 +31,10 @@ REQUIRED
 
 #List of required conflicting modules
 EXCLUSIVE
+
+#List of object files
+OBJECT io_tools_block.o \
+       io_tools.o
+
+#List of include files
+INCLUDE

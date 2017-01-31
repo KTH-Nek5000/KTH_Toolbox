@@ -4,7 +4,7 @@
 @defgroup io  Input/output module
 @ingroup toolbox
 
-@brief I/O routines for KHT toolboxes
+@brief I/O routines for toolboxes
 
 @details 
 This directory contains number of I/O tools used by toolboxes.

@@ -64,12 +64,10 @@
       return
       end
 !=======================================================================
-!     following subroutines are modiffications of
-!
-!     mfo_open_files, mfo_outfld from prepost.f;
-!     mfi from ic.f
-!=======================================================================
-!> @brief Generate name according to nek rulles without opening the file
+!> @brief Generate file name according to nek rulles without opening the file
+!! @details It is a modified version of @ref mfo_open_files from prepost.f but
+!! without equivalence and file opening part. I split file name generation
+!! and file opening as different tools can require this.
 !! @ingroup io_tools
 !! @param[out]  fname     file name
 !! @param[in]   bname     base name
@@ -140,8 +138,8 @@
       end
 !=======================================================================
 !> @brief Open file at a given process only
-!! @details It is a modified version of mbyte_open from ic.f but without
-!! equivalence and MPIIO part; I need it for some tools
+!! @details It is a modified version of @ref mbyte_open from ic.f but
+!! without equivalence and MPIIO part; I need it for some tools
 !! because processor independent part is saved only by master.
 !! @ingroup io_tools
 !! @param[in]   hname      file name
