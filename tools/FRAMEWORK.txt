@@ -4,19 +4,17 @@
 @defgroup tools  Tools module
 @ingroup toolbox
 
-@brief Set of tools for KHT framework
+@brief Set of tools for Nek5000 framework
 
 @details 
 This directory contains number of tools developed at KTH. 
 
 */
 #List of existing submodules
-SUBMODULES tstepper \
-           statistics2D
+SUBMODULES tstepper
 
 #List of conflicting submodules
-CONFLICTS tstepper \
-          statistics2D
+CONFLICTS tstepper
 
 #Default submodules
 DEFAULT
