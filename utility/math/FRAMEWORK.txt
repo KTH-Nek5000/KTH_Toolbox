@@ -1,20 +1,21 @@
 #Configuration file for Nek5000 framework developed at KTH
 # Place for short description; doxygen style
 /**
-@defgroup utility  Utility module
-@ingroup toolbox
+@defgroup math  Math module
+@ingroup utility
 
-@brief Diverse utilities for toolboxes
+@brief Diverse mathematical tools
 
-@details 
-This directory contains number of different utilities used by toolboxes. It corers number of different simulation 
-aspects like mathematical functions, fluid forcing or initial conditions.
+@details
+Set of math related routines for toolbox
 
+@mod_interface
+@interface_list Interface provided:
+-# @ref mth_stepf
 
 */
 #List of existing submodules
-SUBMODULES math \
-           forcing
+SUBMODULES 
 
 #List of conflicting submodules
 EXCLUSIVE
