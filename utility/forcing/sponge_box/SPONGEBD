@@ -1,0 +1,22 @@
+!> @file SPONGEBD
+!! @ingroup sponge_box
+!! @brief Include file for sponge_box module
+!! @author Adam Peplinski
+!! @date Feb 1, 2017
+!=======================================================================
+!     module parameters
+!     sponge strength
+!     sponge width (evey direction separately)
+!     left and right part of the width
+      real spng_str, spng_w(LDIM), spng_wl(LDIM), spng_wr(LDIM)
+
+!     sponge function
+      real spng_fun(LX1*LY1*LZ1*LELV)
+
+!     reference velocity field
+      real spng_vr(LX1*LY1*LZ1*LELV,LDIM)
+
+!     common block section
+      common /SPONGER/ spng_str, spng_w, spng_wl, spng_wr
+
+      common /SPONGEV/ spng_fun, spng_vr

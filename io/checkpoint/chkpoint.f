@@ -4,7 +4,7 @@
 !! @details This is a main interface reading/writing runtime parameters
 !! and calling proper submodule.
 !=======================================================================
-!> @brief Read checkpoint parameters
+!> @brief Set checkpoint parameters
 !! @ingroup chkpoint
       subroutine chkpt_param_get()
       implicit none
@@ -20,8 +20,8 @@
 !     default values
       CHKPTSTEP = 100
       IFCHKPTRST = .FALSE.
-!     read the file
-      ierr=0
+
+!     check dictionary
       if (NID.eq.0) then
 !     do we restart
         call finiparser_getBool(i_out,'_chkpoint:ifchkptrst',ifnd)

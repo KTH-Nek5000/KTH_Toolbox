@@ -38,8 +38,10 @@
 
 @mod_param
 @param_list Parameters provided by checkpoint module (include file - \a CHKPOINTD):
-+ IFCHKPTRST - (logical) if restart
-+ CHKPTSTEP - (integer) checkpiont dump frequency (number of time steps)
+|Varaible | Type | Runtime parameter | Description |
+|---------|------|-------------------|-------------|
+| ifchkptrst | logical | _chkpoint:ifchkptrst | if restart |
+| chkptstep | integer | _chkpoint:chkptstep | checkpiont dump frequency (number of time steps) |
 
 @mod_param_example
 @code{.txt}

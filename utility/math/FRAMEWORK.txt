@@ -30,7 +30,7 @@ CONFLICTS
 REQUIRED
 
 #List of object files
-OBJECT
+OBJECT math_tools.o
 
 #List of include files
 INCLUDE

@@ -1,0 +1,103 @@
+#Configuration file for Nek5000 framework developed at KTH
+# Place for short description; doxygen style
+/**
+@defgroup sponge_box  Sponge_box module
+@ingroup forcing
+
+@brief Sponge/fringe for simple box mesh
+
+@details
+Set of routines to apply sponge (fringe in periodic domains) for simple box mesh.
+
+@mod_interface
+@interface_list Interface provided:
+-# @ref spng_box_param_get
+-# @ref spng_box_init
+-# @ref spng_box_forcing
+
+@mod_interface_example
+@code{.f}
+      subroutine userf  (ix,iy,iz,ieg)
+      include 'SIZE'
+      include 'NEKUSE'          ! FF[XYZ]
+      include 'SOLN'            ! V[XYZ]
+
+      FFX = 0.0
+      FFY = 0.0
+      FFZ = 0.0
+
+!     add sponge
+      call spng_box_forcing(FFX,FFY,FFZ,ix,iy,iz,ieg)
+
+      return
+      end
+!-----------------------------------------------------------------------
+      subroutine userchk
+      include 'TSTEP'           ! ISTEP
+      include 'SOLN'            ! V[XYZ]
+      
+      if (ISTEP.eq.0) then
+!     initialise runtime parameters
+         call spng_box_param_get
+!     initialise module
+!     provide initial velocity condition as reference field for sponge
+         call spng_box_init(vx,vy,vz)
+      endif
+
+      return
+      end
+@endcode
+
+@mod_param
+@param_list Parameters provided by sponge_box module (include file - \a SPONGRBD):
+|Varaible | Type |Runtime parameter | Description|
+|---------|------|------------------|------------|
+|spng_str | real | _spongeb:strenght | sponge strength |
+|spng_w(1) | real | _spongeb:widthx | sponge total width; dimension X |
+|spng_w(2) | real | _spongeb:widthy | sponge total width; dimension Y |
+|spng_w(3) | real | _spongeb:widthz | sponge total width; dimension Z |
+|spng_wl(1) | real | _spongeb:widthlx | sponge left section width (drop); dimension X |
+|spng_wl(2) | real | _spongeb:widthly | sponge left section width (drop); dimension Y |
+|spng_wl(3) | real | _spongeb:widthlz | sponge left section width (drop); dimension Z |
+|spng_wr(1) | real | _spongeb:widthrx | sponge right section width (rise); dimension X |
+|spng_wr(2) | real | _spongeb:widthry | sponge right section width (rise); dimension Y |
+|spng_wr(3) | real | _spongeb:widthrz | sponge right section width (rise); dimension Z |
+
+@mod_param_example
+@code{.txt}
+[_SPONGEB]
+strength = 1.0
+widthx = 5.0
+widthy = 0.0
+widthz = 0.0
+widthlx = 2.0
+widthly = 0.0
+widthlz = 0.0
+widthrx = 2.0
+widthry = 0.0
+widthrz = 0.0
+@endcode
+
+
+*/
+#List of existing submodules
+SUBMODULES 
+
+#List of conflicting submodules
+EXCLUSIVE
+
+#Default submodules
+DEFAULT
+
+#List of conflicting modules
+CONFLICTS
+
+#List of required modules
+REQUIRED utility/math
+
+#List of object files
+OBJECT spongeb.o
+
+#List of include files
+INCLUDE SPONGEBD
+ 

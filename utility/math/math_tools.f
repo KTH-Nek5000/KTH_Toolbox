@@ -25,7 +25,7 @@
 
 !     local variables
       real xdmin, xdmax
-      parameter (xdmin = 0.02, xdmax = 0.98)
+      parameter (xdmin = 0.001, xdmax = 0.999)
 !-----------------------------------------------------------------------
 !     get function vale
       if (x.le.xdmin) then
