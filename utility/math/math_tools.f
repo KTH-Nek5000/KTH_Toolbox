@@ -38,3 +38,39 @@
 
       end function mth_stepf
 !=======================================================================
+!> @brief Give random distribution depending on position
+!! @ingroup math
+!! @details The original Nek5000 rundom number generator is implementted
+!!  in @ref ran1. This totally ad-hoc random number generator below
+!!  could be preferable to the origina one for the simple reason that it
+!!  gives the same initial cindition independent of the number of
+!!  processors, which is important for code verification.
+!! @param[in] ix,iy,iz     GLL point index
+!! @param[in] ieg          global element number
+!! @param[in] xl           physical point coordinates
+!! @param[in] fcoeff       function coefficients
+!! @return  random distribution
+      real function mth_rand(ix,iy,iz,ieg,xl,fcoeff)
+      implicit none
+
+      include 'SIZE'
+      include 'INPUT'       ! IF3D
+
+!     argument list
+      integer ix,iy,iz,ieg
+      real xl(LDIM)
+      real fcoeff(3)
+
+!     local variables
+!-----------------------------------------------------------------------
+      mth_rand = fcoeff(1)*(ieg+xl(1)*sin(xl(2))) + fcoeff(2)*ix*iy +
+     $     fcoeff(3)*ix
+      if (IF3D) mth_rand = fcoeff(1)*(ieg +xl(3)*sin(mth_rand)) +
+     $     fcoeff(2)*iz*ix + fcoeff(3)*iz
+      mth_rand = 1.e3*sin(mth_rand)
+      mth_rand = 1.e3*sin(mth_rand)
+      mth_rand = cos(mth_rand)
+
+      return
+      end function mth_rand
+!=======================================================================

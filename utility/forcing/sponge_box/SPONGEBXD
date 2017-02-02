@@ -1,15 +1,15 @@
-!> @file SPONGEBD
+!> @file SPONGEBXD
 !! @ingroup sponge_box
 !! @brief Include file for sponge_box module
 !! @author Adam Peplinski
 !! @date Feb 1, 2017
 !=======================================================================
-!     module parameters
-!     sponge strength
-!     sponge total width (left and right section; evey dmension separately)
-!     sponge drop/rise width (left and right section; evey dmension separately)
-      real spng_str, spng_wl(LDIM), spng_wr(LDIM), spng_dl(LDIM),
-     $     spng_dr(LDIM)
+!     parameter section
+      real spng_str      !<  @var sponge strength
+      real spng_wl(LDIM) !<  @var sponge width (left section; every dmension separately)
+      real spng_wr(LDIM) !<  @var sponge width (right section)
+      real spng_dl(LDIM) !<  @var sponge drop/rise width (left section)
+      real spng_dr(LDIM) !<  @var sponge drop/rise width (right section)
 
 !     sponge function
       real spng_fun(LX1*LY1*LZ1*LELV)

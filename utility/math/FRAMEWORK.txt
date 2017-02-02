@@ -12,6 +12,7 @@ Set of math related routines for toolbox
 @mod_interface
 @interface_list Interface provided:
 -# @ref mth_stepf
+-# @ref mth_rand
 
 */
 #List of existing submodules

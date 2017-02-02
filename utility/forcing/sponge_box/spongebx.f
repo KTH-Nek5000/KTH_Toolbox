@@ -1,4 +1,4 @@
-!> @file spongeb.f
+!> @file spongebx.f
 !! @ingroup sponge_box
 !! @brief Sponge/fringe for simple box mesh
 !! @author Adam Peplinski
@@ -11,7 +11,7 @@
 
       include 'SIZE'
       include 'PARALLEL'        ! ISIZE, WDSIZE, LSIZE,CSIZE
-      include 'SPONGEBD'
+      include 'SPONGEBXD'
 
 !     local variables
 !     to operate with dictionary
@@ -172,7 +172,7 @@
       include 'SIZE'
       include 'GEOM'            ! [XYZ]M1
       include 'INPUT'           ! IF3D
-      include 'SPONGEBD'        !
+      include 'SPONGEBXD'        !
 
 !     argument list
 !     reference velocity field
@@ -311,7 +311,7 @@
       include 'INPUT'           ! IF3D
       include 'PARALLEL'        ! GLLEL
       include 'SOLN'            ! JP
-      include 'SPONGEBD'
+      include 'SPONGEBXD'
 
 !     argument list
       real ffx, ffy, ffz
