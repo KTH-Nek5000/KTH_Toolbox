@@ -6,9 +6,10 @@
 !=======================================================================
 !     module parameters
 !     sponge strength
-!     sponge width (evey direction separately)
-!     left and right part of the width
-      real spng_str, spng_w(LDIM), spng_wl(LDIM), spng_wr(LDIM)
+!     sponge total width (left and right section; evey dmension separately)
+!     sponge drop/rise width (left and right section; evey dmension separately)
+      real spng_str, spng_wl(LDIM), spng_wr(LDIM), spng_dl(LDIM),
+     $     spng_dr(LDIM)
 
 !     sponge function
       real spng_fun(LX1*LY1*LZ1*LELV)
@@ -17,6 +18,6 @@
       real spng_vr(LX1*LY1*LZ1*LELV,LDIM)
 
 !     common block section
-      common /SPONGER/ spng_str, spng_w, spng_wl, spng_wr
+      common /SPONGER/ spng_str, spng_wl, spng_wr, spng_dl, spng_dr
 
       common /SPONGEV/ spng_fun, spng_vr

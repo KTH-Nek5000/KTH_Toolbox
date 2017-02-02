@@ -19,18 +19,16 @@
       real d_out
 !     for broadcasting
       integer llen, il, ip, lsent
-      parameter (lsent = (1+3*LDIM))
+      parameter (lsent = (1+4*LDIM))
       real rtmp(lsent)
 !-----------------------------------------------------------------------
 !     default values
-      SPNG_STR = 1.0
-      SPNG_W(1) = 5.0
-      SPNG_WL(1) = 2.0
-      SPNG_WR(1) = 2.0
-      do il=2,NDIM
-         SPNG_W(il) = 0.0
+      SPNG_STR = 0.0
+      do il=1,NDIM
          SPNG_WL(il) = 0.0
          SPNG_WR(il) = 0.0
+         SPNG_DL(il) = 0.0
+         SPNG_DR(il) = 0.0
       enddo
 
 !     check dictionary
@@ -38,44 +36,25 @@
 !     sponge strength
         call finiparser_getDbl(d_out,'_spongeb:strength',ifnd)
         if (ifnd.eq.1) then
-           SPNG_STR = d_out
-        endif
-
-!     sponge total width
-!     X
-        call finiparser_getDbl(d_out,'_spongeb:widthx',ifnd)
-        if (ifnd.eq.1) then
-           SPNG_W(1) = d_out
-        endif
-!     Y
-        call finiparser_getDbl(d_out,'_spongeb:widthy',ifnd)
-        if (ifnd.eq.1) then
-           SPNG_W(2) = d_out
-        endif
-!     Z
-        if (NDIM.eq.3) then
-           call finiparser_getDbl(d_out,'_spongeb:widthz',ifnd)
-           if (ifnd.eq.1) then
-              SPNG_W(NDIM) = d_out
-           endif
+           SPNG_STR = abs(d_out)
         endif
 
 !     sponge left section width
 !     X
         call finiparser_getDbl(d_out,'_spongeb:widthlx',ifnd)
         if (ifnd.eq.1) then
-           SPNG_WL(1) = d_out
+           SPNG_WL(1) = abs(d_out)
         endif
 !     Y
         call finiparser_getDbl(d_out,'_spongeb:widthly',ifnd)
         if (ifnd.eq.1) then
-           SPNG_WL(2) = d_out
+           SPNG_WL(2) = abs(d_out)
         endif
 !     Z
         if (NDIM.eq.3) then
            call finiparser_getDbl(d_out,'_spongeb:widthlz',ifnd)
            if (ifnd.eq.1) then
-              SPNG_WL(NDIM) = d_out
+              SPNG_WL(NDIM) = abs(d_out)
            endif
         endif
 
@@ -83,18 +62,56 @@
 !     X
         call finiparser_getDbl(d_out,'_spongeb:widthrx',ifnd)
         if (ifnd.eq.1) then
-           SPNG_WR(1) = d_out
+           SPNG_WR(1) = abs(d_out)
         endif
 !     Y
         call finiparser_getDbl(d_out,'_spongeb:widthry',ifnd)
         if (ifnd.eq.1) then
-           SPNG_WR(2) = d_out
+           SPNG_WR(2) = abs(d_out)
         endif
 !     Z
         if (NDIM.eq.3) then
            call finiparser_getDbl(d_out,'_spongeb:widthrz',ifnd)
            if (ifnd.eq.1) then
-              SPNG_WR(NDIM) = d_out
+              SPNG_WR(NDIM) = abs(d_out)
+           endif
+        endif
+
+!     sponge left drop/rise section width
+!     X
+        call finiparser_getDbl(d_out,'_spongeb:droplx',ifnd)
+        if (ifnd.eq.1) then
+           SPNG_DL(1) = abs(d_out)
+        endif
+!     Y
+        call finiparser_getDbl(d_out,'_spongeb:droply',ifnd)
+        if (ifnd.eq.1) then
+           SPNG_DL(2) = abs(d_out)
+        endif
+!     Z
+        if (NDIM.eq.3) then
+           call finiparser_getDbl(d_out,'_spongeb:droplz',ifnd)
+           if (ifnd.eq.1) then
+              SPNG_DL(NDIM) = abs(d_out)
+           endif
+        endif
+
+!     sponge right drop/rise section width
+!     X
+        call finiparser_getDbl(d_out,'_spongeb:droprx',ifnd)
+        if (ifnd.eq.1) then
+           SPNG_DR(1) = abs(d_out)
+        endif
+!     Y
+        call finiparser_getDbl(d_out,'_spongeb:dropry',ifnd)
+        if (ifnd.eq.1) then
+           SPNG_DR(2) = abs(d_out)
+        endif
+!     Z
+        if (NDIM.eq.3) then
+           call finiparser_getDbl(d_out,'_spongeb:droprz',ifnd)
+           if (ifnd.eq.1) then
+              SPNG_DR(NDIM) = abs(d_out)
            endif
         endif
       endif
@@ -105,15 +122,19 @@
          rtmp(ip) = SPNG_STR
          do il=1,NDIM
             ip = ip +1
-            rtmp(ip) = SPNG_W(il)
-         enddo
-         do il=1,NDIM
-            ip = ip +1
             rtmp(ip) = SPNG_WL(il)
          enddo
          do il=1,NDIM
             ip = ip +1
             rtmp(ip) = SPNG_WR(il)
+         enddo
+         do il=1,NDIM
+            ip = ip +1
+            rtmp(ip) = SPNG_DL(il)
+         enddo
+         do il=1,NDIM
+            ip = ip +1
+            rtmp(ip) = SPNG_DR(il)
          enddo
       endif
       llen = lsent*WDSIZE
@@ -123,15 +144,19 @@
          SPNG_STR = rtmp(ip)
          do il=1,NDIM
             ip = ip +1
-            SPNG_W(il) = rtmp(ip)
-         enddo
-         do il=1,NDIM
-            ip = ip +1
             SPNG_WL(il) = rtmp(ip)
          enddo
          do il=1,NDIM
             ip = ip +1
             SPNG_WR(il) = rtmp(ip)
+         enddo
+         do il=1,NDIM
+            ip = ip +1
+            SPNG_DL(il) = rtmp(ip)
+         enddo
+         do il=1,NDIM
+            ip = ip +1
+            SPNG_DR(il) = rtmp(ip)
          enddo
       endif
 
@@ -140,7 +165,7 @@
 !=======================================================================
 !> @brief Init sponge variables in the box domain
 !! @ingroup sponge_box
-!! @param[in] lvx, lvy, lvz   initial
+!! @param[in] lvx, lvy, lvz   velocity field to be stored as reference field
       subroutine spng_box_init(lvx,lvy,lvz)
       implicit none
 
@@ -184,11 +209,16 @@
 
 !     stamp the file
          if (NIO.eq.0) then
-            write(6,*) 'SPONGE TURNED ON'
-            write(6,*) 'sponge strenght = ' , SPNG_STR
-            write(6,*) 'sponge width = ', SPNG_W
-            write(6,*) 'sponge drop width = ', SPNG_WL
-            write(6,*) 'sponge rise width = ', SPNG_WR
+            write(*,*)
+            write(*,*) 'SPONGE TURNED ON'
+            write(*,*) 'sponge strenght = ' , SPNG_STR
+            write(*,*) 'Left section'
+            write(*,*) 'sponge width = ', SPNG_WL
+            write(*,*) 'sponge drop/rise width = ', SPNG_DL
+            write(*,*) 'Right section'
+            write(*,*) 'sponge width = ', SPNG_WR
+            write(*,*) 'sponge drop/rise width = ', SPNG_DR
+            write(*,*)
          endif
 
 !     save reference field
@@ -199,24 +229,23 @@
 !     for every dimension
          do il=1,NDIM
 
-            if (SPNG_W(il).gt.0.0) then
-               if (SPNG_W(il).lt.(SPNG_WL(il)+SPNG_WR(il)).or.
-     $              SPNG_WL(il)+SPNG_WR(il).eq.0.0) then
+            if (SPNG_WL(il).gt.0.0.or.SPNG_WR(il).gt.0.0) then
+               if (SPNG_WL(il).lt.SPNG_DL(il).or.
+     $              SPNG_WR(il).lt.SPNG_DR(il)) then
                   if (NIO.eq.0) then
-                     write(6,*) 'ERROR; wrong sponge parameters'
+                     write(*,*) 'ERROR; wrong sponge parameters'
                   endif
                   call exitt
                endif
-     
-               rtmp = SPNG_W(il)/(SPNG_WL(il)+SPNG_WR(il))
+
 !     sponge beginning (rise at xmax; right)
-               xxmax = bmax(il) - SPNG_WR(il)*rtmp
+               xxmax = bmax(il) - SPNG_WR(il)
 !     end (drop at xmin; left)
-               xxmin = bmin(il) + SPNG_WL(il)*rtmp
+               xxmin = bmin(il) + SPNG_WL(il)
 !     beginnign of constant part (right)
-               xxmax_c = xxmax + SPNG_WR(il)
+               xxmax_c = xxmax + SPNG_DR(il)
 !     beginnign of constant part (left)
-               xxmin_c = xxmin - SPNG_WL(il)
+               xxmin_c = xxmin - SPNG_DL(il)
 
 !     get SPNG_FUN
                if (xxmax.le.xxmin) then

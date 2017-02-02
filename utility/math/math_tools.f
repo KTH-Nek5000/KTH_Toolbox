@@ -30,12 +30,10 @@
 !     get function vale
       if (x.le.xdmin) then
          mth_stepf = 0.0
+      else if (x.le.xdmax) then
+         mth_stepf = 1./( 1. + exp(1./(x - 1.) + 1./x) )
       else
-         if (x.le.xdmax) then
-            mth_stepf = 1./( 1. + exp(1./(x - 1.) + 1./x) )
-         else
-            mth_stepf = 1.
-         end if
+         mth_stepf = 1.
       end if
 
       end function mth_stepf
