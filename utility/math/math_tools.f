@@ -65,7 +65,7 @@
 !-----------------------------------------------------------------------
       mth_rand = fcoeff(1)*(ieg+xl(1)*sin(xl(2))) + fcoeff(2)*ix*iy +
      $     fcoeff(3)*ix
-      if (IF3D) mth_rand = fcoeff(1)*(ieg +xl(3)*sin(mth_rand)) +
+      if (IF3D) mth_rand = fcoeff(1)*(ieg +xl(NDIM)*sin(mth_rand)) +
      $     fcoeff(2)*iz*ix + fcoeff(3)*iz
       mth_rand = 1.e3*sin(mth_rand)
       mth_rand = 1.e3*sin(mth_rand)
