@@ -10,15 +10,20 @@
       implicit none
 
       include 'SIZE'
+      include 'INPUT'
       include 'PARALLEL'        ! ISIZE, WDSIZE, LSIZE,CSIZE
       include 'SPONGEBXD'
 
 !     local variables
-!     to operate with dictionary
-      integer i_out,ifnd
+      integer il, ip  ! loop index
+!     dictionary operations
+      integer nkey, ifnd, i_out
       real d_out
+      character*132 key, lkey
+      character*1024 val
+      logical ifsec, ifvar
 !     for broadcasting
-      integer llen, il, ip, lsent
+      integer llen, lsent
       parameter (lsent = (1+4*LDIM))
       real rtmp(lsent)
 !-----------------------------------------------------------------------
@@ -31,90 +36,124 @@
          SPNG_DR(il) = 0.0
       enddo
 
-!     check dictionary
+!     dictionary
       if (NID.eq.0) then
-!     sponge strength
-        call finiparser_getDbl(d_out,'_spongeb:strength',ifnd)
-        if (ifnd.eq.1) then
-           SPNG_STR = abs(d_out)
-        endif
+!     check consistency
+!     key number in dictionary
+         call finiparser_getdictentries(nkey)
 
-!     sponge left section width
-!     X
-        call finiparser_getDbl(d_out,'_spongeb:widthlx',ifnd)
-        if (ifnd.eq.1) then
-           SPNG_WL(1) = abs(d_out)
-        endif
-!     Y
-        call finiparser_getDbl(d_out,'_spongeb:widthly',ifnd)
-        if (ifnd.eq.1) then
-           SPNG_WL(2) = abs(d_out)
-        endif
-!     Z
-        if (NDIM.eq.3) then
-           call finiparser_getDbl(d_out,'_spongeb:widthlz',ifnd)
-           if (ifnd.eq.1) then
-              SPNG_WL(NDIM) = abs(d_out)
-           endif
-        endif
+!     check if the section name shows up and runtime parameters are
+!     spelled correctly
+!     set marker for finding module's section
+         ifsec = .FALSE.
+         do il=1,nkey
+!     get a key
+            call finiparser_getpair(key,val,il,ifnd)
+            call capit(key,132)
 
-!     sponge right section width
-!     X
-        call finiparser_getDbl(d_out,'_spongeb:widthrx',ifnd)
-        if (ifnd.eq.1) then
-           SPNG_WR(1) = abs(d_out)
-        endif
-!     Y
-        call finiparser_getDbl(d_out,'_spongeb:widthry',ifnd)
-        if (ifnd.eq.1) then
-           SPNG_WR(2) = abs(d_out)
-        endif
-!     Z
-        if (NDIM.eq.3) then
-           call finiparser_getDbl(d_out,'_spongeb:widthrz',ifnd)
-           if (ifnd.eq.1) then
-              SPNG_WR(NDIM) = abs(d_out)
-           endif
-        endif
+!     does it belong to current module's section
+            ifnd = index(key,trim(spng_dictkey(1)))
+            if (ifnd.eq.1) then
+!     section was found, check variable
+               ifsec = .TRUE.
+               ifvar = .FALSE.
+               do ip = spng_nkeys,1,-1
+                  lkey = trim(adjustl(spng_dictkey(1)))
+                  if (ip.gt.1) lkey =trim(adjustl(lkey))//
+     $                ':'//trim(adjustl(spng_dictkey(ip)))
+                  if(index(key,trim(lkey)).eq.1) then
+                     ifvar = .TRUE.
+                     exit
+                  endif
+               enddo
+               if (ifvar) then
+!     check 2D versus 3D
+                  if ((.not.IF3D).and.(ip.eq.5.or.ip.eq.8.or.
+     $                          ip.eq.11.or.ip.eq.14)) then
+                     write(*,*) 'Module ',trim(spng_dictkey(1))
+                     write(*,*) '3D parameter specified for 2D run'
+                     write(*,*) trim(key)
+                  endif
+               else
+!     variable not found
+                  write(*,*) 'Module ',trim(spng_dictkey(1))
+                  write(*,*) 'Unknown runtime parameter:'
+                  write(*,*) trim(key)
+               endif
+            endif
+         enddo
+         if (ifsec) then
+!     section present; read parameters
+!     strenght
+            lkey = trim(adjustl(spng_dictkey(1)))//':'//
+     $             trim(adjustl(spng_dictkey(2)))
+            call finiparser_getDbl(d_out,trim(lkey),ifnd)
+            if (ifnd.eq.1) then
+               spng_str = abs(d_out)
+            endif
 
-!     sponge left drop/rise section width
-!     X
-        call finiparser_getDbl(d_out,'_spongeb:droplx',ifnd)
-        if (ifnd.eq.1) then
-           SPNG_DL(1) = abs(d_out)
-        endif
-!     Y
-        call finiparser_getDbl(d_out,'_spongeb:droply',ifnd)
-        if (ifnd.eq.1) then
-           SPNG_DL(2) = abs(d_out)
-        endif
-!     Z
-        if (NDIM.eq.3) then
-           call finiparser_getDbl(d_out,'_spongeb:droplz',ifnd)
-           if (ifnd.eq.1) then
-              SPNG_DL(NDIM) = abs(d_out)
-           endif
-        endif
+!     sponge width
+            do il=1,NDIM
+               lkey = trim(adjustl(spng_dictkey(1)))//':'//
+     $                trim(adjustl(spng_dictkey(2+il)))
+               call finiparser_getDbl(d_out,trim(lkey),ifnd)
+               if (ifnd.eq.1) then
+                  spng_wl(il) = d_out
+               endif
+            enddo
 
-!     sponge right drop/rise section width
-!     X
-        call finiparser_getDbl(d_out,'_spongeb:droprx',ifnd)
-        if (ifnd.eq.1) then
-           SPNG_DR(1) = abs(d_out)
-        endif
-!     Y
-        call finiparser_getDbl(d_out,'_spongeb:dropry',ifnd)
-        if (ifnd.eq.1) then
-           SPNG_DR(2) = abs(d_out)
-        endif
-!     Z
-        if (NDIM.eq.3) then
-           call finiparser_getDbl(d_out,'_spongeb:droprz',ifnd)
-           if (ifnd.eq.1) then
-              SPNG_DR(NDIM) = abs(d_out)
-           endif
-        endif
-      endif
+!     sponge width
+            do il=1,NDIM
+               lkey = trim(adjustl(spng_dictkey(1)))//':'//
+     $                trim(adjustl(spng_dictkey(5+il)))
+               call finiparser_getDbl(d_out,trim(lkey),ifnd)
+               if (ifnd.eq.1) then
+                  spng_wr(il) = d_out
+               endif
+            enddo
+
+!     drop/rise width
+            do il=1,NDIM
+               lkey = trim(adjustl(spng_dictkey(1)))//':'//
+     $                trim(adjustl(spng_dictkey(8+il)))
+               call finiparser_getDbl(d_out,trim(lkey),ifnd)
+               if (ifnd.eq.1) then
+                  spng_dl(il) = d_out
+               endif
+            enddo
+
+!     drop/rise width
+            do il=1,NDIM
+               lkey = trim(adjustl(spng_dictkey(1)))//':'//
+     $                trim(adjustl(spng_dictkey(11+il)))
+               call finiparser_getDbl(d_out,trim(lkey),ifnd)
+               if (ifnd.eq.1) then
+                  spng_dr(il) = d_out
+               endif
+            enddo
+
+         else
+!     nor parameter section; give warning
+            write(*,*) 'Module ',trim(spng_dictkey(1))
+            write(*,*) 'runtime parameter section not found.'
+         endif
+
+!     print prarameters values
+         write(*,*) '[',trim(spng_dictkey(1)),']'
+         write(*,*) trim(spng_dictkey(2)),' = ',spng_str
+         do il=1,NDIM
+            write(*,*) trim(spng_dictkey(2+il)),' = ',spng_wl(il)
+         enddo
+         do il=1,NDIM
+            write(*,*) trim(spng_dictkey(5+il)),' = ',spng_wr(il)
+         enddo
+         do il=1,NDIM
+            write(*,*) trim(spng_dictkey(8+il)),' = ',spng_dl(il)
+         enddo
+         do il=1,NDIM
+            write(*,*) trim(spng_dictkey(11+il)),' = ',spng_dr(il)
+         enddo
+      endif ! NID
 
 !     broadcast data
       if (NID.eq.0) then
