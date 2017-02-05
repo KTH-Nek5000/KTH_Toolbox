@@ -1,1 +1,0 @@
-$(OBJDIR)/pts_redistribute.o              :pts_redistribute.f;                          $(F77) -c $(FL2) -I./ $< -o $@
