@@ -17,16 +17,16 @@
 
       include 'SIZE'            ! NID, NPERT
       include 'TSTEP'           ! IOSTEP, ISTEP
-      include 'INPUT'           ! SESSION, IFPERT, IFBASE
+      include 'INPUT'           ! SESSION, IFPERT, IFBASE, PARAM
       include 'PARALLEL'        ! ISIZE
-      include 'CHKPOINTD'       ! chpt_step, chpt_ifrst
-      include 'CHKPTMSTPD'      ! CHKPTSET_O, CHKPTSET_I, CHKPTNRSF,
-                                ! CHKPTNFILE, CHKPTNSET
+      include 'CHKPOINTD'       ! chpt_step, chpt_ifrst, chpt_fnum
+      include 'CHKPTMSTPD'      ! chpm_set_o, chpm_set_i, chpm_snmax,
+                                ! CHKPTNFILE, chpm_nset, chpm_nsnap
 
 !     local variables
       integer il, ierr, itmp
 
-      character*132 fname, bname
+      character*132 bname
 
       character*3 prefix
 
@@ -34,71 +34,52 @@
 !-----------------------------------------------------------------------
 !     this should be done only once
 
+!     get number of snapshots on a set
+      if (PARAM(27).lt.0) then
+         chpm_nsnap = NBDINP
+      else
+         chpm_nsnap = chpm_snmax
+      endif
+
 !     check checkpoint frequency
       if (chpt_step.le.0) then
-         chpt_step = NSTEPS-CHKPTNRSF+1
+         chpt_step = NSTEPS-chpm_nsnap+1
          if (NIO.eq.0) write (*,*) 'Warning; checkpoint_init: ',
      $           ' chpt_step = 0; resetting to ', chpt_step
-      elseif(mod(NSTEPS,chpt_step).ne.(CHKPTNRSF-1)) then
+      elseif(mod(NSTEPS,chpt_step).ne.(chpm_nsnap-1)) then
          if (NIO.eq.0) write (*,*) 'Warning; checkpoint_init: ',
      $           ' chpt_step and NSTEPS not optimal'
       endif
 
-!     set negetive value of chkptset_i to mark that restart was not 
-!     initialised yet
-      CHKPTSET_I = -1
-
 !     check perturbation parameters
       if (IFPERT) then
          if (IFBASE.or.NPERT.gt.1.or.IFMHD) then
-            if (NIO.eq.0) write(*,*) 'CHECKPOINT: not supported mode'
+            if (NIO.eq.0) write(*,*) 'CHECKPOINT: mode not supported'
             call exitt
          endif
       else                   ! IFPERT
          if (IFMHD) then
             if(NIO.eq.0)
-     $           write(*,*) 'CHECKPOINT: not supported mode'
+     $           write(*,*) 'CHECKPOINT: mode not supported'
             call exitt
          endif
       endif                  ! IFPERT
 
-!     create chkptrstf name (SESSION.restart)
-      bname = trim(adjustl(SESSION))
-      fname = trim(bname)
-      fname = trim(fname)//'.restart'
-      if (len_trim(fname).gt.80) then
-         if(NIO.eq.0) write(*,*)
-     $      'ERROR; checkpoint: too long restart file name'
-         call exitt
-      endif
-      chkptrstf = trim(fname)
-
-!     create names acording to mfo_open_files
+!     create restart files names acording to mfo_open_files
       if (chpt_ifrst) then
+!     get base name (SESSION)
+         bname = trim(adjustl(SESSION))
 
-!     create names of restart files
-!     get set number from the file SESSION.restart
-         ierr=0
-         if (NID.eq.0) then
-!     find free unit
-            call io_file_freeid(iunit, ierr)
-!     get file name and open file
-            if (ierr.eq.0) then
-               open (unit=iunit,file=chkptrstf,status='old',
-     $               action='read',iostat=ierr)
-               if(ierr.eq.0) read(unit=iunit,fmt=*,iostat=ierr) itmp
-               close(unit=iunit,iostat=ierr)
-            endif
-            if (ierr.eq.0.and.(itmp.lt.0.or.itmp.ge.CHKPTNSET)) ierr=1
-
+!     get input set number
+         chpm_set_i = chpt_fnum
+         if (chpm_set_i.ge.chpm_nset) then
+            if (NIO.eq.0)
+     $         write(*,*) 'CHECKPOINT: chpt_fnum must be smaller than',
+     $                    chpm_nset
+            call exitt
          endif
-         call err_chk(ierr,'Error reading .restart file.$')
 
-         call bcast(itmp ,ISIZE)
-         CHKPTSET_I = itmp
-
-!     create restart file names
-!     fill chkptfname array with 'rb8' and 'rs' file names
+!     fill chkptfname array with 'rbx' and 'rsx' file names
          if (IFPERT) then
 !     assumes only single perturbation
             CHKPTNFILE = 2
@@ -106,7 +87,7 @@
 !     prefix and name for base flow
             prefix(1:2)='rb'
             call chkpt_fname(CHKPTFNAME(1,1), bname, prefix,
-     $           CHKPTSET_I, ierr)
+     $           chpm_set_i, ierr)
 
             if (ierr.ne.0) then
                if (NIO.eq.0) write(*,*)
@@ -115,14 +96,14 @@
             endif
 
 !     for now IFBASE=F only
-            do il=2,CHKPTNRSF
+            do il=2,chpm_nsnap
                CHKPTFNAME(il,1) = CHKPTFNAME(1,1)
             enddo
 
 !     create prefix and name for perturbation
             prefix(1:2)='rs'
             call chkpt_fname(CHKPTFNAME(1,2), bname, prefix,
-     $           CHKPTSET_I, ierr)
+     $           chpm_set_i, ierr)
 
             if (ierr.ne.0) then
                if (NIO.eq.0) write(*,*)
@@ -136,7 +117,7 @@
 !     create prefix and name for DNS
             prefix(1:2)='rs'
             call chkpt_fname(CHKPTFNAME(1,1), bname, prefix,
-     $           CHKPTSET_I, ierr)
+     $           chpm_set_i, ierr)
 
             if (ierr.ne.0) then
                if (NIO.eq.0) write(*,*)
@@ -148,9 +129,9 @@
 
       endif                  ! chpt_ifrst
 
-!     set initial file set number; it is different from chkptset_i 
+!     set initial file set number; it is different from chpm_set_i
 !     because nek5000 always starts from 1
-      CHKPTSET_O = 1
+      chpm_set_o = chpm_nset -1
 
       return
       end
@@ -166,10 +147,10 @@
       implicit none
 
       include 'SIZE'            ! NIO
-      include 'CHKPTMSTPD'      ! CHKPTNRSF, CHKPTNSET
+      include 'CHKPTMSTPD'      ! chpm_nsnap, chpm_nset
 
 !     argument list
-      character*80 fname(CHKPTNRSF)
+      character*80 fname(chpm_snmax)
       character*132 bname
       character*3 prefix
       integer nset, ierr
@@ -188,7 +169,7 @@
 !     create prefix and name for DNS
       ierr = 0
       prefixl(1:2) = prefix(1:2)
-      itmp=min(17,CHKPTNSET*CHKPTNRSF) + 1
+      itmp=min(17,chpm_nset*chpm_nsnap) + 1
       prefixl(3:3)=kst(itmp:itmp)
       call io_mfo_fname(fnamel,bname,prefixl,ierr)
       if (ierr.ne.0) then
@@ -200,11 +181,12 @@
       if (len_trim(fnamel).gt.(80-5)) then
          if (NIO.eq.0)
      $      write(6,*) 'ERROR: checkpoint: too long file name'
+         ierr = 1
          return
       endif
 
-      do itmp=1,CHKPTNRSF
-         write(str,'(i5.5)') CHKPTNRSF*nset+itmp
+      do itmp=1,chpm_nsnap
+         write(str,'(i5.5)') chpm_nsnap*nset+itmp
          fname(itmp) = trim(fnamel)//trim(str)//char(0)
       enddo
 
@@ -221,25 +203,25 @@
       include 'TSTEP'           ! ISTEP
       include 'INPUT'           ! IFREGUO
       include 'CHKPOINTD'       ! chpt_ifrst
-      include 'CHKPTMSTPD'      ! CHKPTNRSF, CHKPTNFILE, CHKPTFNAME
+      include 'CHKPTMSTPD'      ! chpm_nsnap, CHKPTNFILE, CHKPTFNAME
 
 !     local variables
       logical lifreguo
-      integer ifile, i
+      integer ifile, il
       real p67
 !-----------------------------------------------------------------------
 !     no regular mesh
       lifreguo= IFREGUO
       IFREGUO = .false.
 
-      if (chpt_ifrst.and.(ISTEP.lt.CHKPTNRSF)) then
+      if (chpt_ifrst.and.(ISTEP.lt.chpm_nsnap)) then
 
          ifile = ISTEP+1  ! istep=0,1,...
 
          p67 = param(67)
          param(67) = 6.00
-         do i=1,CHKPTNFILE
-            call chcopy (initc(i),CHKPTFNAME(ifile,i),80)
+         do il=1,CHKPTNFILE
+            call chcopy (initc(il),CHKPTFNAME(ifile,il),80)
          enddo
          call bcast  (initc,132*CHKPTNFILE)
 
@@ -247,11 +229,11 @@
 !     for IFBASE=F basefield loaded during istep=0 only
 !     perturbation from 'rs' files in all steps
             if (IFBASE) then
-               call restart_pert(CHKPTNFILE,1)
+               call restart_pert(1,CHKPTNFILE)
             elseif (ifile.eq.1) then
-               call restart_pert(CHKPTNFILE,1)
+               call restart_pert(1,CHKPTNFILE)
             else
-               call restart_pert(CHKPTNFILE,2)
+               call restart_pert(2,CHKPTNFILE)
             endif
          elseif (IFMHD) then    ! MHD
             call restart(2)
@@ -272,8 +254,7 @@
 !> @brief Write full file restart set
 !! @ingroup chkpoint_mstep
 !! @note This interface is defined in @ref checkpoint_main.
-!! @note This is version of full_restart_save routine. In additional
-!! file it saves the file set number to allow for automatic restart.
+!! @note This is version of @ref full_restart_save routine.
       subroutine chkpt_write()
       implicit none
 
@@ -281,7 +262,7 @@
       include 'TSTEP'           ! ISTEP
       include 'INPUT'           ! IFREGUO
       include 'CHKPOINTD'       ! chpt_step
-      include 'CHKPTMSTPD'      ! CHKPTNRSF, CHKPTSET_O, CHKPTNSET
+      include 'CHKPTMSTPD'      ! chpm_nsnap, chpm_set_o, chpm_nset
 
 !     local variables
       integer ierr, iotest, iunit
@@ -297,31 +278,17 @@
 !     there is some problem with nfld_save; sometimes it would be good
 !     to increase its value, but restart_nfld doesn't allow for that
       save_size=8  ! For checkpoint
-      call restart_save_pert(chpt_step,save_size,chkptnrsf)
+      call restart_save_pert(chpt_step,save_size,chpm_nsnap)
 
-!     save file set in SESSION.restart
+!     update output set number
 !     we do it after the last file in the set was sucsesfully written
-      ierr=0
-      if(NID.eq.0) then
-         iotest = 0
-         if (ISTEP.gt.chpt_step/2.and.
-     $     mod(ISTEP+chpt_step-iotest,chpt_step).eq.(CHKPTNRSF-1)) then
+      iotest = 0
+      if (ISTEP.gt.chpt_step/2.and.
+     $    mod(ISTEP+chpt_step-iotest,chpt_step).eq.(chpm_nsnap-1)) then
 
-            CHKPTSET_O = mod(CHKPTSET_O+1,CHKPTNSET)
+         chpm_set_o = mod(chpm_set_o+1,chpm_nset)
+      endif                  ! ISTEP
 
-!     find free unit
-            call io_file_freeid(iunit, ierr)
-!     get file name and open file
-            if(ierr.eq.0) then
-               open (unit=iunit,file=CHKPTRSTF,
-     $              action='write',iostat=ierr)
-               if(ierr.eq.0)
-     $              write(unit=iunit,fmt=*,iostat=ierr) CHKPTSET_O
-               close(unit=iunit,iostat=ierr)
-            endif
-         endif                  ! ISTEP
-      endif                     ! NID
-      call err_chk(ierr,'Error writing to .restart file.$')
 
 !     put parameters back
       IFREGUO = lifreguo
@@ -345,7 +312,7 @@
 !! @param[in] iosave
 !! @param[in] save_size
 !! @param[in] nfldi
-!! @note This is version of restart routine. It
+!! @note This is version of @ref restart_save routine.
       subroutine restart_save_pert(iosave,save_size,nfldi)
       implicit none
 
@@ -448,11 +415,11 @@
 !=======================================================================
 !> @brief Load checpoint variables from single set of files.
 !! @ingroup chkpoint_mstep
-!! @param[in] nfiles     last file number
 !! @param[in] nfilstart  first file number
-!! @note This is version of restart routine. It excludes .fld format
+!! @param[in] nfiles     last file number
+!! @note This is version of @ref restart routine. It excludes .fld format
 !! and adds lower loop bound to allow for ifbase=.false.
-      subroutine restart_pert(nfiles,nfilstart)
+      subroutine restart_pert(nfilstart,nfiles)
       implicit none
 
       include 'SIZE'            ! NID
@@ -497,7 +464,7 @@
 !! @ingroup chkpoint_mstep
 !! @param[in] fname  file name
 !! @param[in] ifile  field pointer (nonlinear, mhd, perturbation; at the same time file number)
-!! @note This is version of mfi including perturbation field.
+!! @note This is version of @ref mfi including perturbation field.
 !! @remark This routine uses global scratch space SCRNS, SCRCG.
       subroutine mfi_pert(fname,ifile)
       implicit none
@@ -668,7 +635,7 @@
 !> @brief Map loaded variables from velocity to axisymmetric mesh
 !! @ingroup chkpoint_mstep
 !! @param[in] pm1    pressure loaded form the file
-!! @note This is version of axis_interp_ic taking into account fact
+!! @note This is version of @ref axis_interp_ic taking into account fact
 !! pressure does not have to be written on velocity mesh.
 !! @remark This routine uses global scratch space CTMP0.
       subroutine axis_interp_ic_full_pres(pm1)
@@ -690,7 +657,7 @@
       common /ctmp0/ axism1
 
 !     local variables
-      integer e
+      integer e, ips, is1
 !-----------------------------------------------------------------------
       if (.not.ifaxis) return
 
@@ -738,7 +705,7 @@
 !! @param[in] pm1    pressure loaded form the file
 !! @param[in] ifile  field pointer (nonlinear, mhd, perturbation;
 !!   at the same time file number)
-!! @note This is version of map_pm1_to_pr including perturbation
+!! @note This is version of @ref map_pm1_to_pr including perturbation
       subroutine map_pm1_to_pr_pert(pm1,ifile)
       implicit none
 

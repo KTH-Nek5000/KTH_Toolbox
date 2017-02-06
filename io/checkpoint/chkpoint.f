@@ -22,6 +22,7 @@
 !     default values
       chpt_step = 100
       chpt_ifrst = .FALSE.
+      chpt_fnum = 1
 
 !     dictionary
       if (NID.eq.0) then
@@ -31,19 +32,26 @@
 
 !     if section present read parameters
          if (ifsec) then
-!     do we restart
+!     checkpoint frequency
             lkey = trim(adjustl(chpt_dictkey(1)))//':'//
      $             trim(adjustl(chpt_dictkey(2)))
+            call finiparser_getDbl(d_out,trim(lkey),ifnd)
+            if (ifnd.eq.1) then
+               chpt_step = int(d_out)
+            endif
+!     do we restart
+            lkey = trim(adjustl(chpt_dictkey(1)))//':'//
+     $             trim(adjustl(chpt_dictkey(3)))
             call finiparser_getBool(i_out,trim(lkey),ifnd)
             if (ifnd.eq.1.and.i_out.eq.1) then
                chpt_ifrst = .TRUE.
             endif
-!     checkpoint frequency
+!     restart file number
             lkey = trim(adjustl(chpt_dictkey(1)))//':'//
-     $             trim(adjustl(chpt_dictkey(3)))
+     $             trim(adjustl(chpt_dictkey(4)))
             call finiparser_getDbl(d_out,trim(lkey),ifnd)
             if (ifnd.eq.1) then
-               chpt_step = int(d_out)
+               chpt_fnum = int(d_out)
             endif
          endif
 
@@ -56,6 +64,7 @@
          endif
          write(*,*) trim(chpt_dictkey(2)),' = ', trim(lkey)
          write(*,*) trim(chpt_dictkey(3)),' = ', chpt_step
+         write(*,*) trim(chpt_dictkey(4)),' = ', chpt_fnum
       endif
 
 !     broadcast data

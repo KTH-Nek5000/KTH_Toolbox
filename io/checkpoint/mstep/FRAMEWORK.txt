@@ -6,7 +6,7 @@
 
 @brief Multistep checkpointing for DNS and linear simulations
 
-@deprecated This module is deprecated, but it is here for backward consistency.
+@deprecated This module is deprecated, but it is here for backward compatibility.
 
 @details
 In the case of multistep time-integration method one needs data
@@ -20,7 +20,7 @@ In any case two sets of restart files (1-4;5-8) are created.
 Otherwise last checkpoint will not be complete.
 
 @mod_interface
-This module provides following interfaces to checkpoint:
+@interface_list Interface provided to [checkpoint] (@ref chkpoint):
 -# chkpt_init
 -# chkpt_read
 -# chkpt_write
@@ -28,8 +28,9 @@ This module provides following interfaces to checkpoint:
 @mod_param
 @param_reqr Parameters required by multistep module:
 -# [CHKPOINTD] (@ref chkpoint):
+   + chpt_step - checkpiont dump frequency (number of time steps)
    + chpt_ifrst - if restart
-   + chkp_step - checkpiont dump frequency (number of time steps)
+   + chpt_fnum - restart set number
 -# Nek5000 \a PARAM array
    + PARAM(66) - write format
    + PARAM(67) - read format
@@ -48,7 +49,8 @@ DEFAULT
 CONFLICTS io/checkpoint/dummy
 
 #List of required modules
-REQUIRED io/checkpoint
+REQUIRED io/checkpoint \
+         io/io_tools
 
 #List of object files
 OBJECT chkpt_mstp.o
