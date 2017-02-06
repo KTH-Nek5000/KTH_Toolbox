@@ -12,9 +12,7 @@ to runtime parameters or global communication.
 
 */
 #List of existing submodules
-SUBMODULES avg_spt \
-           comm \
-           pts \
+SUBMODULES comm \
            runparam
 
 #List of conflicting submodules

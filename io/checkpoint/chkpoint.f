@@ -14,30 +14,53 @@
       include 'CHKPOINTD'
 
 !     local variables
+      character*132 lkey
       integer i_out,ifnd
       real d_out
+      logical ifsec
 !-----------------------------------------------------------------------
 !     default values
-      CHKPTSTEP = 100
-      IFCHKPTRST = .FALSE.
+      chpt_step = 100
+      chpt_ifrst = .FALSE.
 
-!     check dictionary
+!     dictionary
       if (NID.eq.0) then
+!     check consistency
+         call rprm_check(chpt_nkeys, chpt_dictkey, chpt_n3dkeys,
+     $           chpt_l3dkey, ifsec)
+
+!     if section present read parameters
+         if (ifsec) then
 !     do we restart
-        call finiparser_getBool(i_out,'_chkpoint:ifchkptrst',ifnd)
-        if (ifnd.eq.1.and.i_out.eq.1) then
-           IFCHKPTRST = .TRUE.
-        endif
+            lkey = trim(adjustl(chpt_dictkey(1)))//':'//
+     $             trim(adjustl(chpt_dictkey(2)))
+            call finiparser_getBool(i_out,trim(lkey),ifnd)
+            if (ifnd.eq.1.and.i_out.eq.1) then
+               chpt_ifrst = .TRUE.
+            endif
 !     checkpoint frequency
-        call finiparser_getDbl(d_out,'_chkpoint:chkptstep',ifnd)
-        if (ifnd.eq.1) then
-           CHKPTSTEP = int(d_out)
-        endif
+            lkey = trim(adjustl(chpt_dictkey(1)))//':'//
+     $             trim(adjustl(chpt_dictkey(3)))
+            call finiparser_getDbl(d_out,trim(lkey),ifnd)
+            if (ifnd.eq.1) then
+               chpt_step = int(d_out)
+            endif
+         endif
+
+!     print prarameters values
+         write(*,*) '[',trim(chpt_dictkey(1)),']'
+         if (chpt_ifrst) then
+            lkey = 'yes'
+         else
+            lkey = 'no'
+         endif
+         write(*,*) trim(chpt_dictkey(2)),' = ', trim(lkey)
+         write(*,*) trim(chpt_dictkey(3)),' = ', chpt_step
       endif
 
 !     broadcast data
-      call bcast(CHKPTSTEP,ISIZE)
-      call bcast(IFCHKPTRST,LSIZE)
+      call bcast(chpt_step,ISIZE)
+      call bcast(chpt_ifrst,LSIZE)
 
       return
       end
@@ -48,7 +71,7 @@
       subroutine checkpoint_main
       implicit none
 
-      include 'CHKPOINTD'        ! IFCHKPTRST
+      include 'CHKPOINTD'        ! chpt_ifrst
 
 !     local variables
       logical ifcalled
@@ -60,7 +83,7 @@
         call chkpt_init
       endif
 
-      if(ifchkptrst) call chkpt_read
+      if(chpt_ifrst) call chkpt_read
 
       call chkpt_write
 

@@ -17,11 +17,10 @@
 !     local variables
       integer il, ip  ! loop index
 !     dictionary operations
-      integer nkey, ifnd, i_out
+      integer ifnd, i_out
       real d_out
-      character*132 key, lkey
-      character*1024 val
-      logical ifsec, ifvar
+      character*132 lkey
+      logical ifsec
 !     for broadcasting
       integer llen, lsent
       parameter (lsent = (2+2*LDIM))
@@ -38,50 +37,11 @@
 !     dictionary
       if (NID.eq.0) then
 !     check consistency
-!     key number in dictionary
-         call finiparser_getdictentries(nkey)
+         call rprm_check(nseb_nkeys, nseb_dictkey, nseb_n3dkeys,
+     $           nseb_l3dkey, ifsec)
 
-!     check if the section name shows up and runtime parameters are
-!     spelled correctly
-!     set marker for finding module's section
-         ifsec = .FALSE.
-         do il=1,nkey
-!     get a key
-            call finiparser_getpair(key,val,il,ifnd)
-            call capit(key,132)
-
-!     does it belong to current module's section
-            ifnd = index(key,trim(nseb_dictkey(1)))
-            if (ifnd.eq.1) then
-!     section was found, check variable
-               ifsec = .TRUE.
-               ifvar = .FALSE.
-               do ip = nseb_nkeys,1,-1
-                  lkey = trim(adjustl(nseb_dictkey(1)))
-                  if (ip.gt.1) lkey =trim(adjustl(lkey))//
-     $                ':'//trim(adjustl(nseb_dictkey(ip)))
-                  if(index(key,trim(lkey)).eq.1) then
-                     ifvar = .TRUE.
-                     exit
-                  endif
-               enddo
-               if (ifvar) then
-!     check 2D versus 3D
-                  if ((.not.IF3D).and.(ip.eq.6.or.ip.eq.9)) then
-                     write(*,*) 'Module ',trim(nseb_dictkey(1))
-                     write(*,*) '3D parameter specified for 2D run'
-                     write(*,*) trim(key)
-                  endif
-               else
-!     variable not found
-                  write(*,*) 'Module ',trim(nseb_dictkey(1))
-                  write(*,*) 'Unknown runtime parameter:'
-                  write(*,*) trim(key)
-               endif
-            endif
-         enddo
+!     if section present read parameters
          if (ifsec) then
-!     section present; read parameters
 !     time
             lkey = trim(adjustl(nseb_dictkey(1)))//':'//
      $             trim(adjustl(nseb_dictkey(2)))
@@ -117,11 +77,6 @@
                   nseb_bmax(il) = d_out
                endif
             enddo
-
-         else
-!     nor parameter section; give warning
-            write(*,*) 'Module ',trim(nseb_dictkey(1))
-            write(*,*) 'runtime parameter section not found.'
          endif
 
 !     print prarameters values

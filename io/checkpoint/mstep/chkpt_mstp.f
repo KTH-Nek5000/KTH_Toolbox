@@ -19,7 +19,7 @@
       include 'TSTEP'           ! IOSTEP, ISTEP
       include 'INPUT'           ! SESSION, IFPERT, IFBASE
       include 'PARALLEL'        ! ISIZE
-      include 'CHKPOINTD'       ! CHKPTSTEP, IFCHKPTRST
+      include 'CHKPOINTD'       ! chpt_step, chpt_ifrst
       include 'CHKPTMSTPD'      ! CHKPTSET_O, CHKPTSET_I, CHKPTNRSF,
                                 ! CHKPTNFILE, CHKPTNSET
 
@@ -35,13 +35,13 @@
 !     this should be done only once
 
 !     check checkpoint frequency
-      if (CHKPTSTEP.le.0) then
-         CHKPTSTEP = NSTEPS-CHKPTNRSF+1
+      if (chpt_step.le.0) then
+         chpt_step = NSTEPS-CHKPTNRSF+1
          if (NIO.eq.0) write (*,*) 'Warning; checkpoint_init: ',
-     $           ' CHKPTSTEP = 0; resetting to ', CHKPTSTEP
-      elseif(mod(NSTEPS,CHKPTSTEP).ne.(CHKPTNRSF-1)) then
+     $           ' chpt_step = 0; resetting to ', chpt_step
+      elseif(mod(NSTEPS,chpt_step).ne.(CHKPTNRSF-1)) then
          if (NIO.eq.0) write (*,*) 'Warning; checkpoint_init: ',
-     $           ' CHKPTSTEP and NSTEPS not optimal'
+     $           ' chpt_step and NSTEPS not optimal'
       endif
 
 !     set negetive value of chkptset_i to mark that restart was not 
@@ -74,7 +74,7 @@
       chkptrstf = trim(fname)
 
 !     create names acording to mfo_open_files
-      if (IFCHKPTRST) then
+      if (chpt_ifrst) then
 
 !     create names of restart files
 !     get set number from the file SESSION.restart
@@ -146,7 +146,7 @@
 
          endif
 
-      endif                  ! IFCHKPTRST
+      endif                  ! chpt_ifrst
 
 !     set initial file set number; it is different from chkptset_i 
 !     because nek5000 always starts from 1
@@ -220,7 +220,7 @@
       include 'SIZE'            !
       include 'TSTEP'           ! ISTEP
       include 'INPUT'           ! IFREGUO
-      include 'CHKPOINTD'       ! IFCHKPTRST
+      include 'CHKPOINTD'       ! chpt_ifrst
       include 'CHKPTMSTPD'      ! CHKPTNRSF, CHKPTNFILE, CHKPTFNAME
 
 !     local variables
@@ -232,7 +232,7 @@
       lifreguo= IFREGUO
       IFREGUO = .false.
 
-      if (IFCHKPTRST.and.(ISTEP.lt.CHKPTNRSF)) then
+      if (chpt_ifrst.and.(ISTEP.lt.CHKPTNRSF)) then
 
          ifile = ISTEP+1  ! istep=0,1,...
 
@@ -280,7 +280,7 @@
       include 'SIZE'            ! NID
       include 'TSTEP'           ! ISTEP
       include 'INPUT'           ! IFREGUO
-      include 'CHKPOINTD'       ! CHKPTSTEP
+      include 'CHKPOINTD'       ! chpt_step
       include 'CHKPTMSTPD'      ! CHKPTNRSF, CHKPTSET_O, CHKPTNSET
 
 !     local variables
@@ -297,15 +297,15 @@
 !     there is some problem with nfld_save; sometimes it would be good
 !     to increase its value, but restart_nfld doesn't allow for that
       save_size=8  ! For checkpoint
-      call restart_save_pert(CHKPTSTEP,save_size,chkptnrsf)
+      call restart_save_pert(chpt_step,save_size,chkptnrsf)
 
 !     save file set in SESSION.restart
 !     we do it after the last file in the set was sucsesfully written
       ierr=0
       if(NID.eq.0) then
          iotest = 0
-         if (ISTEP.gt.CHKPTSTEP/2.and.
-     $     mod(ISTEP+CHKPTSTEP-iotest,CHKPTSTEP).eq.(CHKPTNRSF-1)) then
+         if (ISTEP.gt.chpt_step/2.and.
+     $     mod(ISTEP+chpt_step-iotest,chpt_step).eq.(CHKPTNRSF-1)) then
 
             CHKPTSET_O = mod(CHKPTSET_O+1,CHKPTNSET)
 

@@ -37,6 +37,13 @@
      $  spng_dictkey(13) / 'DROPRY'  /     ! spng_dr(2)
      $  spng_dictkey(14) / 'DROPRZ'  /     ! spng_dr(3)
 
+!     runtime parameters used for 3D run only
+      integer spng_n3dkeys
+      parameter (spng_n3dkeys = 4)
+      integer spng_l3dkey(spng_n3dkeys)
+      data spng_l3dkey / 5, 8, 11, 14 /
+      
+
 !     common block section
       common /SPONGER/ spng_str, spng_wl, spng_wr, spng_dl, spng_dr
 

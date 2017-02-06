@@ -40,14 +40,14 @@
 @param_list Parameters provided by checkpoint module (include file - \a CHKPOINTD):
 |Varaible | Type | Runtime parameter | Description |
 |---------|------|-------------------|-------------|
-| ifchkptrst | logical | _chkpoint:ifchkptrst | if restart |
-| chkptstep | integer | _chkpoint:chkptstep | checkpiont dump frequency (number of time steps) |
+| chpt_ifrst | logical | _chkpoint:readchkpt | if restart |
+| chpt_step | integer | _chkpoint:chkpInterval | checkpiont dump frequency (number of time steps) |
 
 @mod_param_example
 @code{.txt}
 [_CHKPOINT]
-chkptstep = 10
-ifchkptrst = no
+chkpInterval = 10
+readchkpt = no
 @endcode
 
 */

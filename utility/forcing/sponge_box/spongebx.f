@@ -17,11 +17,10 @@
 !     local variables
       integer il, ip  ! loop index
 !     dictionary operations
-      integer nkey, ifnd, i_out
+      integer ifnd, i_out
       real d_out
-      character*132 key, lkey
-      character*1024 val
-      logical ifsec, ifvar
+      character*132 lkey
+      logical ifsec
 !     for broadcasting
       integer llen, lsent
       parameter (lsent = (1+4*LDIM))
@@ -39,51 +38,11 @@
 !     dictionary
       if (NID.eq.0) then
 !     check consistency
-!     key number in dictionary
-         call finiparser_getdictentries(nkey)
+         call rprm_check(spng_nkeys, spng_dictkey, spng_n3dkeys,
+     $           spng_l3dkey, ifsec)
 
-!     check if the section name shows up and runtime parameters are
-!     spelled correctly
-!     set marker for finding module's section
-         ifsec = .FALSE.
-         do il=1,nkey
-!     get a key
-            call finiparser_getpair(key,val,il,ifnd)
-            call capit(key,132)
-
-!     does it belong to current module's section
-            ifnd = index(key,trim(spng_dictkey(1)))
-            if (ifnd.eq.1) then
-!     section was found, check variable
-               ifsec = .TRUE.
-               ifvar = .FALSE.
-               do ip = spng_nkeys,1,-1
-                  lkey = trim(adjustl(spng_dictkey(1)))
-                  if (ip.gt.1) lkey =trim(adjustl(lkey))//
-     $                ':'//trim(adjustl(spng_dictkey(ip)))
-                  if(index(key,trim(lkey)).eq.1) then
-                     ifvar = .TRUE.
-                     exit
-                  endif
-               enddo
-               if (ifvar) then
-!     check 2D versus 3D
-                  if ((.not.IF3D).and.(ip.eq.5.or.ip.eq.8.or.
-     $                          ip.eq.11.or.ip.eq.14)) then
-                     write(*,*) 'Module ',trim(spng_dictkey(1))
-                     write(*,*) '3D parameter specified for 2D run'
-                     write(*,*) trim(key)
-                  endif
-               else
-!     variable not found
-                  write(*,*) 'Module ',trim(spng_dictkey(1))
-                  write(*,*) 'Unknown runtime parameter:'
-                  write(*,*) trim(key)
-               endif
-            endif
-         enddo
+!     if section present read parameters
          if (ifsec) then
-!     section present; read parameters
 !     strenght
             lkey = trim(adjustl(spng_dictkey(1)))//':'//
      $             trim(adjustl(spng_dictkey(2)))
@@ -131,11 +90,6 @@
                   spng_dr(il) = d_out
                endif
             enddo
-
-         else
-!     nor parameter section; give warning
-            write(*,*) 'Module ',trim(spng_dictkey(1))
-            write(*,*) 'runtime parameter section not found.'
          endif
 
 !     print prarameters values

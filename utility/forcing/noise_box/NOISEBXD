@@ -26,5 +26,11 @@
      $  nseb_dictkey(8) / 'BOXMAXY'   / ! nseb_bmax(2)
      $  nseb_dictkey(9) / 'BOXMAXZ'   / ! nseb_bmax(3)
 
+!     runtime parameters used for 3D run only
+      integer nseb_n3dkeys
+      parameter (nseb_n3dkeys = 2)
+      integer nseb_l3dkey(nseb_n3dkeys)
+      data nseb_l3dkey / 6, 9 /
+
 !     common block section
       common /NOISEBX/ nseb_tim, nseb_amp, nseb_bmin, nseb_bmax
