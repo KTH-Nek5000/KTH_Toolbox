@@ -4,51 +4,29 @@
 @defgroup runparam Runtime parameters
 @ingroup driver
 
-@brief User/module runtime parameters.
-
-@deprecated This module and its submodules are deprecated. It is currently replaced by Nek5000 dictionary.
+@brief Routines related to module's runtime parameters.
 
 @details
-Set of subroutines to read user and module parameters using Fortran90 namelists.
 
 @mod_interface
-This module provides following interface:
--# runprm_main
-
-@par 
-This module requires following interfaces:
--# user_param_in(iunit)
--# user_param_out(iunit)
-
-@mod_interface_example
-@code{.f}
-      subroutine usrdat
-      
-!     to read user/module runtime parameters
-      call runprm_main
-
-      return
-      end
-@endcode
-@attention  @ref runprm_main has to be executed before any of module initialisation routine is called.
+@interface_list Interface provided:
+-# @ref rprm_check
 
 */
 #List of existing submodules
-SUBMODULES uparam \
-           dummy
+SUBMODULES
 
 #List of conflicting submodules
-EXCLUSIVE uparam \
-          dummy
+EXCLUSIVE
 
 #Default submodules
-DEFAULT dummy
+DEFAULT
 
 #List of conflicting modules
 CONFLICTS
 
 #List of required modules
-REQUIRED io/io_tools
+REQUIRED
 
 #List of object files
 OBJECT runparam.o

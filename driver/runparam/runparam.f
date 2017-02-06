@@ -1,103 +1,99 @@
 !> @file runparam.f
 !! @ingroup runparam
-!! @brief Set of subroutines to read user and module runtime parameters.
+!! @brief Set of subroutines related to module's runtime parameters.
 !! @author Adam Peplinski
-!! @date Mar 7, 2016
+!! @date Feb 5, 2017
 !=======================================================================
-!> @brief Main interface of runtime parameter module.
-!! @details This routine reads runtime parameters from .rpar file using
-!! Fortran90 namelists and writes them to standard outpu (log file).
-!! @attention This routine should be executed before any of module
-!! initialisation routnes would be called (e.g. inside usrdat).
+!> @brief Check consistency of module's runtime parameters
 !! @ingroup runparam
-!! @see @ref readers_writers_page, @ref parameter_list_page
-      subroutine runprm_main
+!! @param[in]    mod_nkeys    number of module's keys
+!! @param[in]    mod_dictkey  module's dictionary keys
+!! @param[in]    mod_n3dkeys  number of keys used for 3D run only
+!! @param[in]    mod_l3dkey   list of positions of 3D keys
+!! @param[out]   ifsec        is section present
+!! @details Check if the section name shows up and runtime parameters are
+!!  spelled correctly. Give warning if section is missing, or the key is
+!!  unknown. Check possible 2D - 3D parameter mismatch..
+!! @warning This routine should be executed within runtime parameter reader
+!!  by the master node only
+      subroutine rprm_check(mod_nkeys, mod_dictkey, mod_n3dkeys,
+     $           mod_l3dkey, ifsec)
       implicit none
 
-      include 'SIZE_DEF'
-      include 'SIZE'            ! NID, NIO
-      include 'INPUT_DEF'
-      include 'INPUT'           ! REAFLE
+      include 'SIZE'
+      include 'INPUT'    ! IF3D
+
+!     argument list
+      integer mod_nkeys, mod_n3dkeys, mod_l3dkey(mod_n3dkeys)
+      character*132 mod_dictkey(mod_nkeys)
+      logical ifsec
 
 !     local variables
-      integer lenstr, ierr
-      integer iunit
-      character*132 fname 
+      integer il, jl, ip  ! loop index
+!     dictionary operations
+      integer nkey, ifnd, i_out
+      real d_out
+      character*132 key, lkey
+      character*1024 val
+      logical ifvar, if3dkey
 !-----------------------------------------------------------------------
-!     Open parameter file and read contents
-      ierr=0
-      if (NID.eq.0) then
-!     find free unit
-         call io_file_freeid(iunit, ierr)
-!     get file name and open file
-         if(ierr.eq.0) then
-            fname=adjustl(REAFLE)
-            ! overwrite .rea
-            lenstr = len_trim(fname) - 4
-            fname(lenstr+1:lenstr+6)='.rpar'
-            write(6,*) 'Openning runtime parameter file: ',trim(fname)
-            open (unit=iunit,file=fname,status='old',action='read',
-     $          iostat=ierr)
+
+!     check consistency
+!     key number in dictionary
+      call finiparser_getdictentries(nkey)
+
+!     set marker for finding module's section
+      ifsec = .FALSE.
+      do il=1,nkey
+!     get a key
+         call finiparser_getpair(key,val,il,ifnd)
+         call capit(key,132)
+
+!     does it belong to current module's section
+         ifnd = index(key,trim(mod_dictkey(1)))
+         if (ifnd.eq.1) then
+!     section was found, check variable
+            ifsec = .TRUE.
+            ifvar = .FALSE.
+            do ip = mod_nkeys,1,-1
+               lkey = trim(adjustl(mod_dictkey(1)))
+               if (ip.gt.1) lkey =trim(adjustl(lkey))//
+     $            ':'//trim(adjustl(mod_dictkey(ip)))
+               if(index(key,trim(lkey)).eq.1) then
+                  ifvar = .TRUE.
+                  exit
+               endif
+            enddo
+            if (ifvar) then
+!     check 2D versus 3D
+               if (.not.IF3D) then
+                  if3dkey = .FALSE.
+                  do jl=1,mod_n3dkeys
+                     if (ip.eq.mod_l3dkey(jl)) then
+                        if3dkey = .TRUE.
+                        exit
+                     endif
+                  enddo
+                  if (if3dkey) then
+                     write(*,*) 'Module ',trim(mod_dictkey(1))
+                     write(*,*) '3D parameter specified for 2D run'
+                     write(*,*) trim(key)
+                  endif
+               endif
+            else
+!     variable not found
+               write(*,*) 'Module ',trim(mod_dictkey(1))
+               write(*,*) 'Unknown runtime parameter:'
+               write(*,*) trim(key)
+            endif
          endif
+      enddo
+
+!     no parameter section; give warning
+      if (.not.ifsec) then
+         write(*,*) 'Module ',trim(mod_dictkey(1))
+         write(*,*) 'runtime parameter section not found.'
       endif
-      call err_chk(ierr,'Error opening .rpar file.$')
-
-!     place to call user/module _param_in routines
-      call runprm_in(iunit)
-
-!     close the file
-      ierr=0
-      if (NID.eq.0) close(unit=iunit,iostat=ierr)
-      call err_chk(ierr,'Error closing .rpar file.$')
-
-!     stamp logs
-      if (NIO.eq.0) write(*,*) 'Runtime parameter list:'
-      call runprm_out(6)
-      if (NIO.eq.0) write(*,*) 
-
-      return
-      end
-!=======================================================================
-!> @brief Execute user/module parameter reading routines.
-!! @ingroup runparam
-!! @param[in]  iunit    file unit
-!! @warning This routine has to be modified by the use or generated by
-!!  script, as it shoud point out to the used modules only. Use this
-!!  routine as and example only.
-!! @todo Develop script generating this routine or move to user space
-!! @see @ref readers_writers_page
-      subroutine runprm_in(iunit)
-      implicit none
-
-!     argument list
-      integer iunit
-!-----------------------------------------------------------------------
-!     place to call module _param_in routines
-
-!     user parameters
-      call user_param_in(iunit)
-
-      return
-      end
-!=======================================================================
-!> @brief Execute user/module parameter writing routines.
-!! @ingroup runparam
-!! @param[in]  iunit    file unit
-!! @warning This routine has to be modified by the use or generated by
-!!  script, as it shoud point out to the used modules only. Use this
-!!  routine as and example only.
-!! @todo Develop script generating this routine or move to user space
-!! @see @ref readers_writers_page
-      subroutine runprm_out(iunit)
-      implicit none
-
-!     argument list
-      integer iunit
-!-----------------------------------------------------------------------
-!     place to call module _param_in routines
-
-!     user parameters
-      call user_param_out(iunit)
 
       return
       end
