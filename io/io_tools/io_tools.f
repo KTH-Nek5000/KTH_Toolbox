@@ -86,7 +86,7 @@
       integer ierr
 
 !     local variables
-      integer ndigit
+      integer ndigit, itmp
       real rfileo
 
       character*6  six
@@ -167,7 +167,7 @@
 !     initialise variables
       ierr = 0
 !     work on local copy
-      fname = trim(adjustl(bname))
+      fname = trim(adjustl(hname))
 
 !     test string length
       itmp = len_trim(fname)
