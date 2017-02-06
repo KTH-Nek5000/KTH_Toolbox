@@ -113,7 +113,8 @@ DEFAULT
 CONFLICTS
 
 #List of required modules
-REQUIRED utility/math
+REQUIRED utility/math \
+         driver/runparam
 
 #List of object files
 OBJECT spongebx.o

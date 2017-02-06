@@ -10,7 +10,7 @@
 Dummy replacemnt for checkpointing routines.
 
 @mod_interface
-This module provides folowing interface to checkpoint:
+@interface_list Interface provided to [checkpoint] (@ref chkpoint):
 -# chkpt_init
 -# chkpt_read
 -# chkpt_write

@@ -13,7 +13,7 @@
 !! @param[out]   ifsec        is section present
 !! @details Check if the section name shows up and runtime parameters are
 !!  spelled correctly. Give warning if section is missing, or the key is
-!!  unknown. Check possible 2D - 3D parameter mismatch..
+!!  unknown. Check possible 2D - 3D parameter mismatch.
 !! @warning This routine should be executed within runtime parameter reader
 !!  by the master node only
       subroutine rprm_check(mod_nkeys, mod_dictkey, mod_n3dkeys,

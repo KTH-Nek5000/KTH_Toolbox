@@ -68,7 +68,7 @@ DEFAULT mstep
 CONFLICTS
 
 #List of required modules
-REQUIRED io/io_tools
+REQUIRED driver/runparam
 
 #List of object files
 OBJECT chkpoint.o
