@@ -1,0 +1,106 @@
+#Configuration file for Nek5000 framework developed at KTH
+# Place for short description; doxygen style
+/**
+@defgroup sfd   SFD module
+@ingroup baseflow
+
+@brief Set of rutine for selective frequency damping
+
+@details 
+Place for SFD detailed decription.
+
+@mod_interface
+@interface_list Interface provided:
+-# @ref sfd_forcing
+-# @ref sfd
+
+@mod_interface_example
+@code{.f}
+      subroutine userf  (ix,iy,iz,ieg)
+      include 'SIZE'
+      include 'NEKUSE'          ! FF[XYZ]
+      include 'SOLN'            ! V[XYZ]
+
+      FFX = 0.0
+      FFY = 0.0
+      FFZ = 0.0
+
+!     add sfd forcing
+      call sfd_forcing(FFX,FFY,FFZ,ix,iy,iz,ieg)
+
+      return
+      end
+!-----------------------------------------------------------------------
+      subroutine userchk
+      include 'TSTEP'           ! ISTEP
+      include 'SOLN'            ! V[XYZ]
+      
+      if (ISTEP.eq.0) then
+!     initialise runtime parameters
+         call chkpt_param_get
+         call sfd_param_get
+!     initialise module
+      endif
+
+!     save/load files for full-restart
+      call checkpoint_main
+
+!     SFD evolution
+      call sfd_main
+
+      return
+      end
+@endcode
+
+@warning This module's restart prosedure depends on multistep checkpointing. As multisetep checpointeing sets
+the number of the restart file set \a checkpoint_main must be called before \a sfd_main.
+
+@mod_param
+@param_list Parameters provided by sfd module (include file - \a SFD):
+|Varaible | Type |Runtime parameter | Description|
+|---------|------|------------------|------------|
+| ifsfd | logical | _sfd:runsfd | do we prform SFD |
+| sfdd | real | _sfd:filtwdth | filter width |
+| sfdchi | real | _sfd:controlcff | control coefficient |
+| sfdtol | real | _sfd:residualtol | tolerance for residual |
+| sfdfconv | integer | _sfd:loginterval | frequency for saving convegence data |
+
+@mod_param
+@param_reqr Parameters required by sfd module:
+-# [CHKPOINTD] (@ref chkpoint):
+   + chpt_step - checkpiont dump frequency (number of time steps)
+   + chpt_ifrst - if restart
+   + chpt_fnum - restart set number
+
+@mod_param_example
+@code{.txt}
+[_SFD]
+runsfd = yes
+filtwdth = 1.05
+controlcff = 0.5
+residualtol = 0.1E-06
+loginterval = 50
+@endcode
+
+*/
+#List of existing submodules
+SUBMODULES
+
+#List of conflicting submodules
+EXCLUSIVE
+
+#Default submodules
+DEFAULT
+
+#List of conflicting modules
+CONFLICTS
+
+#List of required modules
+REQUIRED driver/runparam \
+         io/checkpoint/chkpt_mstep
+
+#List of object files
+OBJECT sfd.o
+
+#List of include files
+INCLUDE SFD
