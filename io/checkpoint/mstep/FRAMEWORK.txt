@@ -11,13 +11,14 @@
 @details
 In the case of multistep time-integration method one needs data
 from NBDINP timestep. I use standard full_restart and
-\a full_restart_save subroutines. There are four 'rs8...' reatart
+\a full_restart_save subroutines. There are four 'rsX...' reatart
 files saved in double precission. Only .f format is supported.
-In any case two sets of restart files (1-4;5-8) are created.
+In any case two sets of restart files (e.g. 1-3;4-6) are created.
 
-@attention To make this varsion to work correctly
+@attention To make this version to work correctly
 \a mod(total_number_of_steps,chkp_step).ge.NBDINP
 Otherwise last checkpoint will not be complete.
+Moreover Nek5000 will always start from writing the first file set.
 
 @mod_interface
 @interface_list Interface provided to [checkpoint] (@ref chkpoint):

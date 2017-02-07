@@ -136,63 +136,6 @@
       return
       end
 !=======================================================================
-!> @brief Generate restart file names
-!! @ingroup chkpoint_mstep
-!! @param[out] fname  restart file name
-!! @param[in]  bname  base name
-!! @param[in]  prefix prefix
-!! @param[in]  nset   file set number
-!! @param[out] ierr   error mark
-      subroutine chkpt_fname(fname, bname, prefix, nset, ierr)
-      implicit none
-
-      include 'SIZE'            ! NIO
-      include 'CHKPTMSTPD'      ! chpm_nsnap, chpm_nset
-
-!     argument list
-      character*80 fname(chpm_snmax)
-      character*132 bname
-      character*3 prefix
-      integer nset, ierr
-
-!     local variables
-      character*132 fnamel   ! local file name
-      character*3 prefixl    ! local prefix
-      integer itmp
-
-      character*6  str
-
-      character*17 kst
-      save         kst
-      data         kst / '0123456789abcdefx' /
-!-----------------------------------------------------------------------
-!     create prefix and name for DNS
-      ierr = 0
-      prefixl(1:2) = prefix(1:2)
-      itmp=min(17,chpm_nset*chpm_nsnap) + 1
-      prefixl(3:3)=kst(itmp:itmp)
-      call io_mfo_fname(fnamel,bname,prefixl,ierr)
-      if (ierr.ne.0) then
-         if (NIO.eq.0) write(*,*) 'ERROR: checkpoint: file name error'
-         return
-      endif
-
-!     is fname too long?
-      if (len_trim(fnamel).gt.(80-5)) then
-         if (NIO.eq.0)
-     $      write(6,*) 'ERROR: checkpoint: too long file name'
-         ierr = 1
-         return
-      endif
-
-      do itmp=1,chpm_nsnap
-         write(str,'(i5.5)') chpm_nsnap*nset+itmp
-         fname(itmp) = trim(fnamel)//trim(str)//char(0)
-      enddo
-
-      return
-      end
-!=======================================================================
 !> @brief Read full file restart set.
 !! @ingroup chkpoint_mstep
 !! @note This interface is defined in @ref checkpoint_main
@@ -296,6 +239,63 @@
       return
       end
 !=======================================================================
+!> @brief Generate restart file names
+!! @ingroup chkpoint_mstep
+!! @param[out] fname  restart file name
+!! @param[in]  bname  base name
+!! @param[in]  prefix prefix
+!! @param[in]  nset   file set number
+!! @param[out] ierr   error mark
+      subroutine chkpt_fname(fname, bname, prefix, nset, ierr)
+      implicit none
+
+      include 'SIZE'            ! NIO
+      include 'CHKPTMSTPD'      ! chpm_nsnap, chpm_nset
+
+!     argument list
+      character*80 fname(chpm_snmax)
+      character*132 bname
+      character*3 prefix
+      integer nset, ierr
+
+!     local variables
+      character*132 fnamel   ! local file name
+      character*3 prefixl    ! local prefix
+      integer itmp
+
+      character*6  str
+
+      character*17 kst
+      save         kst
+      data         kst / '0123456789abcdefx' /
+!-----------------------------------------------------------------------
+!     create prefix and name for DNS
+      ierr = 0
+      prefixl(1:2) = prefix(1:2)
+      itmp=min(17,chpm_nset*chpm_nsnap) + 1
+      prefixl(3:3)=kst(itmp:itmp)
+      call io_mfo_fname(fnamel,bname,prefixl,ierr)
+      if (ierr.ne.0) then
+         if (NIO.eq.0) write(*,*) 'ERROR: checkpoint: file name error'
+         return
+      endif
+
+!     is fname too long?
+      if (len_trim(fnamel).gt.(80-5)) then
+         if (NIO.eq.0)
+     $      write(6,*) 'ERROR: checkpoint: too long file name'
+         ierr = 1
+         return
+      endif
+
+      do itmp=1,chpm_nsnap
+         write(str,'(i5.5)') chpm_nsnap*nset+itmp
+         fname(itmp) = trim(fnamel)//trim(str)//char(0)
+      enddo
+
+      return
+      end
+!=======================================================================
 !     VERSION FOR PERTURBATION MODE
 !     following two subroutines are modiffications of
 !     full_restart_save
@@ -312,7 +312,7 @@
 !! @param[in] iosave
 !! @param[in] save_size
 !! @param[in] nfldi
-!! @note This is version of @ref restart_save routine.
+!! @note This is version of @ref restart_save routines.
       subroutine restart_save_pert(iosave,save_size,nfldi)
       implicit none
 
@@ -637,7 +637,7 @@
 !! @param[in] pm1    pressure loaded form the file
 !! @note This is version of @ref axis_interp_ic taking into account fact
 !! pressure does not have to be written on velocity mesh.
-!! @remark This routine uses global scratch space CTMP0.
+!! @remark This routine uses global scratch space \a CTMP0.
       subroutine axis_interp_ic_full_pres(pm1)
       implicit none
 
