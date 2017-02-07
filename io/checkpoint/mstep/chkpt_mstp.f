@@ -312,7 +312,7 @@
 !! @param[in] iosave
 !! @param[in] save_size
 !! @param[in] nfldi
-!! @note This is version of @ref restart_save routines.
+!! @note This is version of @ref restart_save routine.
       subroutine restart_save_pert(iosave,save_size,nfldi)
       implicit none
 
@@ -465,7 +465,7 @@
 !! @param[in] fname  file name
 !! @param[in] ifile  field pointer (nonlinear, mhd, perturbation; at the same time file number)
 !! @note This is version of @ref mfi including perturbation field.
-!! @remark This routine uses global scratch space SCRNS, SCRCG.
+!! @remark This routine uses global scratch space \a SCRNS, \a SCRCG.
       subroutine mfi_pert(fname,ifile)
       implicit none
 
