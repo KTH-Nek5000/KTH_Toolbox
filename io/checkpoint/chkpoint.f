@@ -62,8 +62,8 @@
          else
             lkey = 'no'
          endif
-         write(*,*) trim(chpt_dictkey(2)),' = ', trim(lkey)
-         write(*,*) trim(chpt_dictkey(3)),' = ', chpt_step
+         write(*,*) trim(chpt_dictkey(2)),' = ', chpt_step
+         write(*,*) trim(chpt_dictkey(3)),' = ', trim(lkey)
          write(*,*) trim(chpt_dictkey(4)),' = ', chpt_fnum
       endif
 

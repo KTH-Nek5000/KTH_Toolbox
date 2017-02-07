@@ -11,12 +11,6 @@
       real spng_dl(LDIM) !<  @var sponge drop/rise width (left section)
       real spng_dr(LDIM) !<  @var sponge drop/rise width (right section)
 
-!     sponge function
-      real spng_fun(LX1*LY1*LZ1*LELV)
-
-!     reference velocity field
-      real spng_vr(LX1*LY1*LZ1*LELV,LDIM)
-
 !     runtime parameter name section
       integer spng_nkeys
       parameter (spng_nkeys = 14)
@@ -43,6 +37,11 @@
       integer spng_l3dkey(spng_n3dkeys)
       data spng_l3dkey / 5, 8, 11, 14 /
       
+!     sponge function
+      real spng_fun(LX1*LY1*LZ1*LELV)
+
+!     reference velocity field
+      real spng_vr(LX1*LY1*LZ1*LELV,LDIM)
 
 !     common block section
       common /SPONGER/ spng_str, spng_wl, spng_wr, spng_dl, spng_dr
