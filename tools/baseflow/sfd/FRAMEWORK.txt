@@ -4,15 +4,26 @@
 @defgroup sfd   SFD module
 @ingroup baseflow
 
-@brief Set of rutine for selective frequency damping
+@brief Set of rutine for Selective Frequency Damping
 
 @details 
-Place for SFD detailed decription.
+The base flow is computed using Selective Frequency Damping (SFD) method @cite Akervik2006, which damps 
+the oscillations of the unsteady part of the solution using a temporal low-pass filter by setting 
+the forcing term to 
+\f$\vec{f} = - \chi (\vec{u} - \vec{\bar{u}}),\f$
+where \f$\vec{u}\f$ is the solution of the non--linear Navier-Stokes equations, and \f$\vec{\bar{u}}\f$ is 
+a temporally low--pass--filtered state given by the differential exponential filter 
+\f$\dot{\vec{\bar{u}}} = (\vec{u} - \vec{\bar{u}})/\Delta.\f$
+The filter parameters \f$\chi\f$ and \f$\Delta\f$ (control coefficient and filter width) can be determined 
+based on the DNS simulations of the studied case. During the calculations we control the magnitude of 
+the forcing term \f$\epsilon=\|(\vec{u} - \vec{\bar{u}})\|\f$ in \f$\Omega\f$, which is a good indicator of convergence.
+Description of the implementation and performed tests can be found in @cite Peplinski2014.
 
 @mod_interface
 @interface_list Interface provided:
+-# @ref sfd_param_get
 -# @ref sfd_forcing
--# @ref sfd
+-# @ref sfd_main
 
 @mod_interface_example
 @code{.f}
