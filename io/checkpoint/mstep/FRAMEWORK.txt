@@ -10,8 +10,8 @@
 
 @details
 In the case of multistep time-integration method one needs data
-from NBDINP timestep. I use standard full_restart and
-\a full_restart_save subroutines. There are four 'rsX...' reatart
+from NBDINP timestep. I use standard  @ref full_restart and
+@ref full_restart_save subroutines. There are four 'rsX...' reatart
 files saved in double precission. Only .f format is supported.
 In any case two sets of restart files (e.g. 1-3;4-6) are created.
 
@@ -33,6 +33,7 @@ Moreover Nek5000 will always start from writing the first file set.
    + chpt_ifrst - if restart
    + chpt_fnum - restart set number
 -# Nek5000 \a PARAM array
+   + PARAM(27) - if negative number of files is equal NBDINP otherwise chpm_snmax
    + PARAM(66) - write format
    + PARAM(67) - read format
 
