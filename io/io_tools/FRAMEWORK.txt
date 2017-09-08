@@ -14,7 +14,12 @@ Set of I/O speciffic routines for toolbox
 -# @ref io_file_freeid
 -# @ref io_file_close
 -# @ref io_mfo_fname
--# @ref io_mbyte_open_srl
+-# @ref io_mbyte_open
+-# @ref io_mbyte_close
+-# @ref io_mfo_outv
+-# @ref io_mfo_outs
+-# @ref io_mfi_getv
+-# @ref io_mfi_gets
 
 */
 #List of existing submodules
