@@ -6,12 +6,12 @@
 
 @brief Checkopinting routines for toolbox
 
-@details
+@details This is the main interface to checkpinting.
 
 @mod_interface
 @interface_list Interface provided:
 -# @ref chkpt_param_get
--# @ref checkpoint_main
+-# @ref chkpt_main
 
 @par
 @interface_reqr Interface required:
@@ -30,7 +30,7 @@
       endif
 
 !     save/load files for full-restart
-      call checkpoint_main
+      call chkpt_main
 
       return
       end
