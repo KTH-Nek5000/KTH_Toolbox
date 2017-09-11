@@ -1028,7 +1028,7 @@ c      if (ibsw_out.ne.0) call set_bytesw_write(ibsw_out)
       common /SCRCG/ pm1
 !-----------------------------------------------------------------------
       if (NIO.eq.0) then
-         write(*,*) 'ERROR: chkpt_interp, nothing done yet'
+         write(*,*) 'ERROR: chkpt_interp; nothing done yet'
          call exitt
       endif
 

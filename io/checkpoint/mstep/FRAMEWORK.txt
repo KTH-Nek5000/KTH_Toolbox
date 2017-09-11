@@ -15,19 +15,26 @@ by this module:
 -# 'rsX...' storing DNS data,
 -# 'rbX...' storing MHD data,
 -# 'rpX...' storing perturbation data,
+
 where X is equal to 2*NBDINP and gives a max number of restart files. 
 Only NBDINP files is requiered for restart and there are two file sets 
 to avoid overwritting. Checkpoints are saved in double precission in 
-binary ###.f format. The possible combinations of files are:
+binary ###.f format. 
+
+The possible combinations of files are:
 -# 'rsX...' alone for DNS mode,
 -# 'rsX...' and 'rbX...' for MHD mode,
 -# 'rsX...' and 'rpX...' for perturbation mode.
+
 In the perturbation mode only the first perturbation is written to 
 the checkpoint file. To save disc space the mesh data is written only to 
 the 'rsX...' file. For not moving boundaries (IFMVBD=FALSE) only the 
 first 'rsX...' file in the set contains mehs data. 
 In the similar way in the perturbation mode with fixed base flow
 (IFBASE=FALSE) only single 'rsX...' file is generated.
+
+Notice for multistep checkpointing runtime parameter @a chkpFnumber gives
+the fiel set number, so it can be equal 1 or 2 only.
 
 
 @mod_interface
@@ -44,8 +51,6 @@ In the similar way in the perturbation mode with fixed base flow
    + chpt_fnum - restart set number
 -# Nek5000 \a PARAM array
    + PARAM(27) - if negative number of files is equal NBDINP otherwise chpm_snmax
-   + PARAM(66) - write format
-   + PARAM(67) - read format
 
 */
 #List of existing submodules

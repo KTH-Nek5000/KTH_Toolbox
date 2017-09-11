@@ -7,7 +7,7 @@
 @brief Diverse utilities for toolboxes
 
 @details 
-This directory contains number of different utilities used by toolboxes. It corers number of different simulation 
+This directory contains number of different utilities used by toolboxes. It covers number of different simulation 
 aspects like mathematical functions, fluid forcing or initial conditions.
 
 

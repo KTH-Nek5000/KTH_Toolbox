@@ -4,7 +4,7 @@
 @defgroup noise_box  Noise_box module
 @ingroup forcing
 
-@brief Add white noise to velocity field at given tiven time in a box
+@brief Add white noise to velocity field at given time in a box
 
 @details
 This set of routines adds a white noise in the rectangular box performing global face averaging at the end. 

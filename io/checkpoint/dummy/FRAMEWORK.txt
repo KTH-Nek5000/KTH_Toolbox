@@ -7,7 +7,8 @@
 @brief Dummy routines for checkpointing.
 
 @details 
-Dummy replacemnt for checkpointing routines.
+Dummy replacemnt for checkpointing routines. Some toolboxes would have their own restarting routines, but would need
+e.g. checkpointing runtime parameters. In this cas dummy @a chkpt_init, @a chkpt_read and @a chkpt_write can be used.
 
 @mod_interface
 @interface_list Interface provided to [checkpoint] (@ref chkpoint):
