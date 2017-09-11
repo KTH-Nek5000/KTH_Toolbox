@@ -649,7 +649,7 @@
 
 !     close file
       call io_mbyte_close(ierr)
-      call err_chk(ierr,'ERROR: io_mfo; file not closed. $')
+      call err_chk(ierr,'ERROR: chkpt_mfo; file not closed. $')
 
       tio = dnekclock_sync()-tiostart
       if (tio.le.0) tio=1.
@@ -965,7 +965,7 @@ c      if (ibsw_out.ne.0) call set_bytesw_write(ibsw_out)
 
 !     close file
       call io_mbyte_close(ierr)
-      call err_chk(ierr,'ERROR: io_mfo_outfld; file not closed. $')
+      call err_chk(ierr,'ERROR: chkpt_mfi; file not closed. $')
 
       tio = dnekclock_sync()-tiostart
       if (tio.le.0) tio=1.
@@ -991,7 +991,7 @@ c      if (ibsw_out.ne.0) call set_bytesw_write(ibsw_out)
       return
       end
 !=======================================================================
-!> @brief Interpolate variables
+!> @brief Interpolate checkpoint variables
 !! @details This routine interpolates fields from nxr to nx1 (nx2) polynomial order
 !! @ingroup chkpoint_mstep
 !! @param[in]   fname      file name
