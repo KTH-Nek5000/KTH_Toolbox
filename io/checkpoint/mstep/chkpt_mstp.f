@@ -70,6 +70,9 @@
          chpm_set_o = 0
       endif
 
+!     set reset flag
+      chpm_reset = -1
+
       return
       end
 !=======================================================================
@@ -151,9 +154,11 @@
          if (ifile.eq.chpm_nsnap) then
             if (NIO.eq.0) write(*,*)
      $              'Written checkpoint snapshot number: ',chpm_set_o+1
-            chpm_set_o = mod(chpm_set_o+1,chpm_nset)
+            chpm_reset = mod(chpm_set_o+1,chpm_nset)
          endif
-
+      elseif (chpm_reset.ge.0) then
+         chpm_set_o = chpm_reset
+         chpm_reset = -1
       endif
 
 !     put parameters back
@@ -549,6 +554,11 @@
 !-----------------------------------------------------------------------
 !     simple timing
       tiostart=dnekclock_sync()
+
+!     set elelemnt size
+      NXO  = NX1
+      NYO  = NY1
+      NZO  = NZ1
 
 !     open file
       call io_mbyte_open(fname,ierr)
