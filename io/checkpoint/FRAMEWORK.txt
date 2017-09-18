@@ -43,6 +43,8 @@
 | chpt_step | integer | _chkpoint:chkpInterval | checkpiont dump frequency (number of time steps) |
 | chpt_ifrst | logical | _chkpoint:readchkpt | if restart |
 | chpt_fnum | integer | _chkpoint:chkpFnumber | restart file number |
+| chpt_wtime | real   | _chkpoint:chkpWallTime | simulation wall time |
+
 
 @mod_param_example
 @code{.txt}
@@ -50,6 +52,7 @@
 chkpInterval = 10
 readchkpt = no
 chkpFnumber = 1
+chkpWallTime = 02:05
 @endcode
 
 */
