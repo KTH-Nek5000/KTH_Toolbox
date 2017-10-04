@@ -1,0 +1,48 @@
+!> @file MNTRD
+!! @ingroup monitor
+!! @brief Include file for monitor module 
+!! @author Adam Peplinski
+!! @date Sep 28, 2017
+!=======================================================================
+      integer mntr_lp_def  !  default log threshold
+
+!     master node for logging
+      integer mntr_pid0
+      
+!     nek5000 and monitor names and mids
+!     they are the first and the second registered modules respectively
+      integer mntr_nek_id
+      character*(*) mntr_nek_name
+      parameter(mntr_nek_name='NEK5000')
+      integer mntr_id
+      character*(*) mntr_name
+      parameter(mntr_name='MONITOR')
+
+!     module registration      
+      integer mntr_id_max  ! max number of modules to register
+      parameter (mntr_id_max=99)
+      integer mntr_mod_num  ! number of registered modules
+      integer mntr_mod_mpos ! max position of registered module
+      integer mntr_mod_id(mntr_id_max)  ! occupied slot marker and number of parent module (if not specified 0)
+      integer mntr_lstl_mnm    ! length of module name string
+      parameter (mntr_lstl_mnm = 10)
+      character*(*) mntr_blname  ! balnk module name
+      parameter (mntr_blname='          ')
+      character*10 mntr_mod_name(mntr_id_max) ! names of registered modules
+      integer mntr_lstl_mds    ! length of module description string
+      parameter (mntr_lstl_mds = 132)
+      character*132 mntr_mod_dscr(mntr_id_max) ! descriptions of registered modules
+
+!     this stuff should be in other place as it is quite general, but for now it is here
+      integer mntr_lstl_log !< length of comment string
+      parameter (mntr_lstl_log = 200)
+
+
+!     common blocks
+!     integer variables
+      common /MNTRI/ mntr_pid0, mntr_lp_def, mntr_nek_id, mntr_id, 
+     $      mntr_mod_id, mntr_mod_num, mntr_mod_mpos
+      
+!     string variables
+      common /MNTRC/ mntr_mod_name, mntr_mod_dscr
+ 

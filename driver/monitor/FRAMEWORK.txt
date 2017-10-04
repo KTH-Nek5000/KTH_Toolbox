@@ -1,0 +1,47 @@
+#Configuration file for Nek5000 framework developed at KTH
+# Place for short description; doxygen style
+/**
+@defgroup monitor  Simulation monitoring module
+@ingroup driver
+
+@brief Monitoring routines for toolboxes
+
+@details 
+Monitor module provides basic services allowing to monitor tooboxes during the simulation.
+Its basic tasks are module registration, timing and message logging.
+
+@mod_interface
+@interface_list Interface provided:
+-# @ref mntr_init
+-# @ref mntr_mod_reg
+-# @ref mntr_mod_is_reg
+-# @ref mntr_log
+-# @ref mntr_logi
+-# @ref mntr_logr
+-# @ref mntr_warn
+-# @ref mntr_error
+-# @ref mntr_abort
+-# @ref mntr_check_abort
+
+*/
+#List of existing submodules
+SUBMODULES 
+
+#List of conflicting submodules
+EXCLUSIVE
+
+#Default submodules
+DEFAULT
+
+#List of conflicting modules
+CONFLICTS
+
+#List of required modules
+REQUIRED
+
+#List of object files
+OBJECT mntr_block.o \
+       mntr.o
+
+#List of include files
+INCLUDE MBNTRD
