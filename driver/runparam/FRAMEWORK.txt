@@ -10,6 +10,11 @@
 
 @mod_interface
 @interface_list Interface provided:
+-# @ref rprm_register
+-# @ref rprm_int_reg
+-# @ref rprm_real_reg
+-# @ref rprm_log_reg
+-# @ref rprm_str_reg
 -# @ref rprm_check
 
 */
@@ -29,7 +34,8 @@ CONFLICTS
 REQUIRED
 
 #List of object files
-OBJECT runparam.o
+OBJECT rprm.o \
+       rprm_block.o
 
 #List of include files
 INCLUDE
