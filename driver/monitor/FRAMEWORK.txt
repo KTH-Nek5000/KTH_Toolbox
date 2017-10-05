@@ -14,7 +14,8 @@ Its basic tasks are module registration, timing and message logging.
 @interface_list Interface provided:
 -# @ref mntr_init
 -# @ref mntr_mod_reg
--# @ref mntr_mod_is_reg
+-# @ref mntr_mod_is_name_reg
+-# @ref mntr_mod_is_id_reg
 -# @ref mntr_log
 -# @ref mntr_logi
 -# @ref mntr_logr

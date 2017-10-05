@@ -4,11 +4,6 @@
 !! @author Adam Peplinski
 !! @date Sep 28, 2017
 !=======================================================================
-      integer mntr_lp_def  !  default log threshold
-
-!     master node for logging
-      integer mntr_pid0
-      
 !     nek5000 and monitor names and mids
 !     they are the first and the second registered modules respectively
       integer mntr_nek_id
@@ -17,6 +12,17 @@
       integer mntr_id
       character*(*) mntr_name
       parameter(mntr_name='MONITOR')
+
+!     initialisation flag
+      logical mntr_ifinit
+
+!     runtime parameter section
+!     default log threshold + parameter id
+      integer mntr_lp_def, mntr_lp_def_id
+
+!     module variable section
+!     master node for logging
+      integer mntr_pid0
 
 !     module registration      
       integer mntr_id_max  ! max number of modules to register
@@ -40,8 +46,11 @@
 
 !     common blocks
 !     integer variables
-      common /MNTRI/ mntr_pid0, mntr_lp_def, mntr_nek_id, mntr_id, 
-     $      mntr_mod_id, mntr_mod_num, mntr_mod_mpos
+      common /MNTRI/ mntr_nek_id, mntr_id, mntr_pid0, mntr_lp_def,
+     $      mntr_lp_def_id, mntr_mod_id, mntr_mod_num, mntr_mod_mpos
+ 
+!     logical variables
+      common /MNTRL/ mntr_ifinit
       
 !     string variables
       common /MNTRC/ mntr_mod_name, mntr_mod_dscr

@@ -4,8 +4,9 @@
 !! @author Adam Peplinski
 !! @date Sep 28, 2017
 !=======================================================================
-!> @brief Initialise monitor by registering Nek5000 an dmonitor
-      subroutine mntr_init
+!> @brief Initialise monitor by registering Nek5000 and monitor
+!! @ingroup monitor
+      subroutine mntr_register_mod
       implicit none
 
       include 'SIZE'
@@ -14,6 +15,7 @@
 
 !     local variables
       character*2 str
+      character*200 lstring
 !-----------------------------------------------------------------------
 !     first register neck5000
       mntr_nek_id = 1
@@ -32,14 +34,68 @@
       mntr_mod_mpos = mntr_mod_mpos + 1
 
 !     set log threshold
-      mntr_lp_def = 0 ! just for now
+      mntr_lp_def = lp_inf
+
+!     log changes
+      lstring = 'Registered module ['//trim(mntr_mod_name(mntr_nek_id))
+      lstring= trim(lstring)//']: '//trim(mntr_mod_dscr(mntr_nek_id))
+      call mntr_log(mntr_id,lp_inf,trim(lstring))
+
+      lstring = 'Registered module ['//trim(mntr_mod_name(mntr_id))
+      lstring= trim(lstring)//']: '//trim(mntr_mod_dscr(mntr_id))
+      call mntr_log(mntr_id,lp_inf,trim(lstring))
+
       write(str,'(I2)') mntr_lp_def
-      call mntr_log(mntr_id,lp_ess,'Log threshold set to: '//trim(str))
+      call mntr_log(mntr_id,lp_inf,
+     $     'Initial log threshold set to: '//trim(str))
 
       return
-      end
+      end subroutine
+!=======================================================================
+!> @brief Register monitor runtime parameters
+!! @ingroup monitor
+      subroutine mntr_register_par
+      implicit none
+
+      include 'SIZE'
+      include 'MNTRD'
+      include 'MNTRLP'
+
+!     local variables
+      integer rpid,itmp
+      real rtmp
+      logical ltmp
+      character*20 ctmp
+!-----------------------------------------------------------------------
+      call rprm_rp_int_reg(mntr_lp_def_id,mntr_id,'LOGLEVEL',
+     $     'Logging threshold for toolboxes',lp_inf)
+
+      return
+      end subroutine
+!=======================================================================
+!> @brief Initialise monitor module
+!! @ingroup monitor
+      subroutine mntr_init
+      implicit none
+
+      include 'SIZE'
+      include 'MNTRD'
+      include 'MNTRLP'
+
+!     local variables
+      character*2 str
+!-----------------------------------------------------------------------
+      call rprm_rp_int_get(mntr_lp_def,mntr_lp_def_id)
+
+      write(str,'(I2)') mntr_lp_def
+      call mntr_log(mntr_id,lp_inf,
+     $     'Reseting log threshold to: '//trim(str))
+
+      return
+      end subroutine
 !=======================================================================
 !> @brief Register new module
+!! @ingroup monitor
 !! @param[out] mid      current module id
 !! @param[in]  pmid     parent module id
 !! @param[in]  mname    module name
@@ -117,7 +173,7 @@
 !     broadcast mid
       call bcast(ipos,isize)
 
-!     error; no space found
+!     error; no free space found
       if (ipos.eq.0) then
          mid = ipos
          call mntr_abort(mntr_id,
@@ -154,12 +210,13 @@
       endif
 
       return
-      end
+      end subroutine
 !=======================================================================
-!> @brief Check if module is registered and return its id.
+!> @brief Check if module name is registered and return its id.
+!! @ingroup monitor
 !! @param[out] mid      module id
 !! @param[in]  mname    module name
-      subroutine mntr_mod_is_reg(mid,mname)
+      subroutine mntr_mod_is_name_reg(mid,mname)
       implicit none
 
       include 'SIZE'
@@ -206,26 +263,95 @@
          enddo
       endif
 
-!     broadcast mid
+!     broadcast ipos
       call bcast(ipos,isize)
 
-!     error; no space found
-      if (ipos.gt.0) then
+      if (ipos.eq.0) then
+         mid = -1
+         call mntr_log(mntr_id,lp_inf,
+     $        'Module ['//trim(lname)//'] not registered')
+      else
          mid = ipos
          write(str,'(I3)') ipos
-         call mntr_log(mntr_id,lp_vrb,
+         call mntr_log(mntr_id,lp_inf,
      $        'Module ['//trim(lname)//'] registered with mid='//str)
-!     module already exist
-      else
-         mid = -1
-         call mntr_log(mntr_id,lp_vrb,
-     $        'Module ['//trim(lname)//'] not registered')
       endif
 
       return
-      end
+      end subroutine
+!=======================================================================
+!> @brief Check if module id is registered. This operation is performed locally
+!! @ingroup monitor
+!! @param[in] mid      module id
+      logical function mntr_mod_is_id_reg(mid)
+      implicit none
+
+      include 'SIZE'
+      include 'PARALLEL'
+      include 'MNTRD'
+      include 'MNTRLP'
+
+!     argument list
+      integer mid
+!-----------------------------------------------------------------------
+      mntr_mod_is_id_reg = mntr_mod_id(mid).ge.0
+
+      return
+      end function
+!=======================================================================
+!> @brief Get number of registered modules. This operation is performed locally
+!! @ingroup monitor
+!! @param[out]    nmod     module number
+!! @param[out]    mmod     max module id
+      subroutine mntr_mod_get_number(nmod,mmod)
+      implicit none
+
+      include 'SIZE'
+      include 'MNTRD'
+
+!     argument list
+      integer nmod, mmod
+!-----------------------------------------------------------------------
+      nmod = mntr_mod_num
+      mmod = mntr_mod_mpos
+
+      return
+      end subroutine
+!=======================================================================
+!> @brief Get module name an parent id for given module id. This operation is performed locally
+!! @ingroup monitor
+!! @param[out]    pmid     parent module id
+!! @param[out]    mname    module name
+!! @param[inout]  mid      module id
+      subroutine mntr_mod_get_info(mname, pmid,mid)
+      implicit none
+
+      include 'SIZE'
+      include 'MNTRD'
+      include 'MNTRLP'
+
+!     argument list
+      character*10 mname
+      integer mid, pmid
+
+!     local variables
+      character*5 str
+!-----------------------------------------------------------------------
+      if (mntr_mod_id(mid).ge.0) then
+         pmid = mntr_mod_id(mid)
+         mname = mntr_mod_name(mid)
+      else
+         mid = -1
+         write(str,'(I3)') mid
+         call mntr_log(mntr_id,lp_vrb,
+     $        'Module id'//trim(str)//' not registered')
+      endif
+
+      return
+      end subroutine
 !=======================================================================
 !> @brief Write log message
+!! @ingroup monitor
 !! @param[in] mid       module id
 !! @param[in] priority  log priority
 !! @param[in] logs      log body
@@ -244,7 +370,6 @@
       character*200 llogs
       character*5 str
       integer slen, slena
-
 !-----------------------------------------------------------------------
 !     check log priority
       if (priority.lt.mntr_lp_def) return
@@ -277,9 +402,64 @@
       endif
 
       return
-      end
+      end subroutine
+!=======================================================================
+!> @brief Write log message from given process
+!! @ingroup monitor
+!! @param[in] mid       module id
+!! @param[in] priority  log priority
+!! @param[in] logs      log body
+!! @param[in] prid      process id
+      subroutine mntr_log_local(mid,priority,logs,prid)
+      implicit none
+
+      include 'SIZE'
+      include 'MNTRD'
+      include 'MNTRLP'
+
+!     argument list
+      integer mid,priority, prid
+      character*(*) logs
+
+!     local variables
+      character*200 llogs
+      character*5 str
+      integer slen, slena
+!-----------------------------------------------------------------------
+!     check log priority
+      if (priority.lt.mntr_lp_def) return
+
+!     done only by given process
+
+!     check description length
+      slena = len_trim(adjustl(logs))
+!     remove trailing blanks
+      slen = len_trim(logs) - slena + 1
+      if (slena.ge.mntr_lstl_log) then
+         if (mntr_lp_def.le.lp_deb) write(*,*)' ['//mntr_name//'] ',
+     $       'too long log string; shortenning'
+         slena = min(slena,mntr_lstl_log)
+      endif
+      call blank(llogs,mntr_lstl_mds)
+      llogs= logs(slen:slen + slena - 1)
+
+!     check module id
+      if (mntr_mod_id(mid).ge.0) then
+!     add module name
+       write(*,*) ' ['//trim(mntr_mod_name(mid))//'] nid= ',prid,
+     $      ' '//trim(llogs)
+      else
+         write(str,'(I3)') mid
+         write(*,*) ' ['//trim(mntr_name)//'] ',
+     $   ' WARNING: module'//trim(str)//' not registered;'
+         write(*,*) 'Log body: nid= ',prid,' '//trim(llogs)
+      endif
+
+      return
+      end subroutine
 !=======================================================================
 !> @brief Write log message adding single integer
+!! @ingroup monitor
 !! @param[in] mid       module id
 !! @param[in] priority  log priority
 !! @param[in] logs      log body
@@ -298,13 +478,14 @@
       call mntr_log(mid,priority,trim(logs)//' '//trim(str))
 
       return
-      end
+      end subroutine
 !=======================================================================
 !> @brief Write log message adding single real
+!! @ingroup monitor
 !! @param[in] mid       module id
 !! @param[in] priority  log priority
 !! @param[in] logs      log body
-!! @param[in] rvar      integer variable
+!! @param[in] rvar      real variable
       subroutine mntr_logr(mid,priority,logs,rvar)
       implicit none
 
@@ -320,9 +501,33 @@
       call mntr_log(mid,priority,trim(logs)//' '//trim(str))
 
       return
-      end
+      end subroutine
+!=======================================================================
+!> @brief Write log message adding single logical
+!! @ingroup monitor
+!! @param[in] mid       module id
+!! @param[in] priority  log priority
+!! @param[in] logs      log body
+!! @param[in] rvar      logical variable
+      subroutine mntr_logl(mid,priority,logs,lvar)
+      implicit none
+
+!     argument list
+      integer mid,priority
+      character*(*) logs
+      logical lvar
+
+!     local variables
+      character*2 str
+!-----------------------------------------------------------------------
+      write(str,'(L2)') lvar
+      call mntr_log(mid,priority,trim(logs)//' '//trim(str))
+
+      return
+      end subroutine
 !=======================================================================
 !> @brief Write warning message
+!! @ingroup monitor
 !! @param[in] mid       module id
 !! @param[in] logs      log body
       subroutine mntr_warn(mid,logs)
@@ -336,9 +541,10 @@
 !-----------------------------------------------------------------------
       call mntr_log(mid,lp_inf,'WARNING: '//logs)
       return
-      end
+      end subroutine
 !=======================================================================
 !> @brief Write error message
+!! @ingroup monitor
 !! @param[in] mid       module id
 !! @param[in] logs      log body
       subroutine mntr_error(mid,logs)
@@ -352,9 +558,10 @@
 !-----------------------------------------------------------------------
       call mntr_log(mid,lp_err,'ERROR: '//logs)
       return
-      end
+      end subroutine
 !=======================================================================
 !> @brief Abort simulation
+!! @ingroup monitor
 !! @param[in] mid       module id
 !! @param[in] logs      log body
       subroutine mntr_abort(mid,logs)
@@ -369,9 +576,10 @@
       call mntr_log(mid,lp_err,'ABORT: '//logs)
       call exitt
       return
-      end
+      end subroutine
 !=======================================================================
 !> @brief Abort simulation
+!! @ingroup monitor
 !! @param[in] mid       module id
 !! @param[in] ierr      error flag
 !! @param[in] logs      log body
@@ -399,6 +607,6 @@
          call exitt
       endif
       return
-      end
+      end subroutine
 !=======================================================================
 

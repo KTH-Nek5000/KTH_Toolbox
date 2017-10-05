@@ -8,6 +8,7 @@
       block data mntr_common_init
       include 'MNTRD'
 
+      data mntr_ifinit /.false./
       data mntr_pid0 /0/
       data mntr_mod_num /0/
       data mntr_mod_mpos /0/
