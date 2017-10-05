@@ -4,9 +4,17 @@
 !! @author Adam Peplinski
 !! @date Mar 7, 2016
 !=======================================================================
+!> @brief Dummy replacement for checkpoint registration.
+!! @ingroup chkptdummy
+      subroutine chkpts_register
+      implicit none
+!-----------------------------------------------------------------------
+      return
+      end
+!=======================================================================
 !> @brief Dummy replacement for checkpoint initialisation.
 !! @ingroup chkptdummy
-      subroutine chkpt_init
+      subroutine chkpts_init
       implicit none
 !-----------------------------------------------------------------------
       return
@@ -14,7 +22,7 @@
 !=======================================================================
 !> @brief Dummy replacement for checkpoint reader.
 !! @ingroup chkptdummy
-      subroutine chkpt_read
+      subroutine chkpts_read
       implicit none
 !-----------------------------------------------------------------------
       return
@@ -22,7 +30,7 @@
 !=======================================================================
 !> @brief Dummy replacement for checkpoint writer.
 !! @ingroup chkptdummy
-      subroutine chkpt_write
+      subroutine chkpts_write
       implicit none
 !-----------------------------------------------------------------------
       return

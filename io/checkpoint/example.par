@@ -1,5 +1,5 @@
 [_CHKPOINT]
-chkpInterval = 500
 readchkpt = yes
 chkpFnumber = 1
-chkpWallTime = 02:05
+chkpInterval = 500
+WallTime = 02:05

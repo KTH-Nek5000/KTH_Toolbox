@@ -4,14 +4,58 @@
 !! @details This is a main interface reading/writing runtime parameters
 !! and calling proper submodule.
 !=======================================================================
-!> @brief Set checkpoint parameters
+!> @brief Register checkpointing module
 !! @ingroup chkpoint
-      subroutine chkpt_param_get()
+!! @note This routine should be called in userchk during first step
+!!    after call to rprm_dict_get
+      subroutine chkpt_register()
       implicit none
 
-      include 'SIZE'            !
-      include 'PARALLEL'        ! ISIZE, WDSIZE, LSIZE,CSIZE
+      include 'SIZE'
       include 'CHKPOINTD'
+      include 'MNTRLP'
+
+!     local variables
+      integer lpmid
+!-----------------------------------------------------------------------
+!     find parent module
+      call mntr_mod_is_name_reg(lpmid,'NEK5000')
+!     register module
+      call mntr_mod_reg(chpt_id,lpmid,chpt_name,'Checkpointing I/O')
+      if (lpmid.le.0) then
+         call mntr_log(chpt_id,lp_vrb,
+     $        'ERROR: parent module ['//'NEK5000'//'] not registered')
+      endif
+
+!     register parameters
+      call rprm_rp_log_reg(chpt_ifrst_id,chpt_id,'READCHKPT',
+     $     'Restat from checkpoint',.false.)
+
+      call rprm_rp_int_reg(chpt_fnum_id,chpt_id,'CHKPFNUMBER',
+     $     'Restart file number',1)
+
+      call rprm_rp_int_reg(chpt_step_id,chpt_id,'CHKPINTERVAL',
+     $     'Checkpiont saving frequency (number of time steps)',500)
+
+      call rprm_rp_str_reg(chpt_wtime_id,chpt_id,'WALLTIME',
+     $     'Simulation wall time','00:00')
+
+!     call submodule registration
+      call chkpts_register
+
+      return
+      end subroutine
+!=======================================================================
+!> @brief Initilise checkpointing module
+!! @ingroup chkpoint
+!! @note This routine should be called in userchk during first step
+!!    after call to rprm_dict_get
+      subroutine chkpt_init()
+      implicit none
+
+      include 'SIZE'
+      include 'CHKPOINTD'
+      include 'MNTRLP'
 
 !     local variables
       character*132 lkey, c_out
@@ -19,88 +63,34 @@
       real d_out
       logical ifsec
 !-----------------------------------------------------------------------
-!     default values
-      chpt_step = 100
-      chpt_ifrst = .FALSE.
-      chpt_fnum = 1
-      chpt_wtime = 0.0
+!     get runtime parameters
+      call rprm_rp_log_get(chpt_ifrst,chpt_ifrst_id)
+      call rprm_rp_int_get(chpt_fnum,chpt_fnum_id)
+      call rprm_rp_int_get(chpt_step,chpt_step_id)
+      call rprm_rp_str_get(chpt_wtimes,chpt_wtime_id)
 
-!     dictionary
-      if (NID.eq.0) then
-!     check consistency
-         call rprm_check(chpt_nkeys, chpt_dictkey, chpt_n3dkeys,
-     $           chpt_l3dkey, ifsec)
-
-!     if section present read parameters
-         if (ifsec) then
-!     checkpoint frequency
-            lkey = trim(adjustl(chpt_dictkey(1)))//':'//
-     $             trim(adjustl(chpt_dictkey(2)))
-            call finiparser_getDbl(d_out,trim(lkey),ifnd)
-            if (ifnd.eq.1) then
-               chpt_step = int(d_out)
-            endif
-!     do we restart
-            lkey = trim(adjustl(chpt_dictkey(1)))//':'//
-     $             trim(adjustl(chpt_dictkey(3)))
-            call finiparser_getBool(i_out,trim(lkey),ifnd)
-            if (ifnd.eq.1.and.i_out.eq.1) then
-               chpt_ifrst = .TRUE.
-            endif
-!     restart file number
-            lkey = trim(adjustl(chpt_dictkey(1)))//':'//
-     $             trim(adjustl(chpt_dictkey(4)))
-            call finiparser_getDbl(d_out,trim(lkey),ifnd)
-            if (ifnd.eq.1) then
-               chpt_fnum = int(d_out)
-            endif
-!     simulation wall time
-            lkey = trim(adjustl(chpt_dictkey(1)))//':'//
-     $             trim(adjustl(chpt_dictkey(5)))
-            call finiparser_getString(c_out,trim(lkey),ifnd)
-            if (ifnd.eq.1) then
-               lkey = trim(adjustl(c_out))
+!     get wall clock
+      lkey = trim(adjustl(chpt_wtimes))
 !     check string format
-               ierr = 0
-               if (lkey(3:3).ne.':') ierr = 1
-               if (.not.(LGE(lkey(1:1),'0').and.LLE(lkey(1:1),'9')))
-     $             ierr = 1
-               if (.not.(LGE(lkey(2:2),'0').and.LLE(lkey(2:2),'9')))
-     $             ierr = 1
-               if (.not.(LGE(lkey(4:4),'0').and.LLE(lkey(4:4),'9')))
-     $             ierr = 1
-               if (.not.(LGE(lkey(5:5),'0').and.LLE(lkey(5:5),'9')))
-     $             ierr = 1
+      ierr = 0
+      if (lkey(3:3).ne.':') ierr = 1
+      if (.not.(LGE(lkey(1:1),'0').and.LLE(lkey(1:1),'9'))) ierr = 1
+      if (.not.(LGE(lkey(2:2),'0').and.LLE(lkey(2:2),'9'))) ierr = 1
+      if (.not.(LGE(lkey(4:4),'0').and.LLE(lkey(4:4),'9'))) ierr = 1
+      if (.not.(LGE(lkey(5:5),'0').and.LLE(lkey(5:5),'9'))) ierr = 1
 
-               if (ierr.eq.0) then
-                  read(lkey(1:2),'(I2)') nhour
-                  read(lkey(4:5),'(I2)') nmin
-                  chpt_wtime = 60.0*(nmin +60*nhour)
-               else
-                  write(*,*)
-     $              'WARNING: chkpt_param_get; wrong wall time format'
-               endif
-            endif
-         endif
-
-!     print prarameters values
-         write(*,*) '[',trim(chpt_dictkey(1)),']'
-         if (chpt_ifrst) then
-            lkey = 'yes'
-         else
-            lkey = 'no'
-         endif
-         write(*,*) trim(chpt_dictkey(2)),' = ', chpt_step
-         write(*,*) trim(chpt_dictkey(3)),' = ', trim(lkey)
-         write(*,*) trim(chpt_dictkey(4)),' = ', chpt_fnum
-         write(*,*) trim(chpt_dictkey(5)),' = ', chpt_wtime,' sec'
+      if (ierr.eq.0) then
+         read(lkey(1:2),'(I2)') nhour
+         read(lkey(4:5),'(I2)') nmin
+         chpt_wtime = 60.0*(nmin +60*nhour)
+      else
+         call mntr_log(chpt_id,lp_inf,'Wrong wall time format')
       endif
 
-!     broadcast data
-      call bcast(chpt_step,ISIZE)
-      call bcast(chpt_fnum,ISIZE)
-      call bcast(chpt_ifrst,LSIZE)
-      call bcast(chpt_wtime,WDSIZE)
+!     call submodule initialisation
+      call chkpts_init
+
+      chpt_ifinit=.true.
 
       return
       end
@@ -111,21 +101,16 @@
       subroutine chkpt_main
       implicit none
 
-      include 'CHKPOINTD'        ! chpt_ifrst
+      include 'SIZE'
+      include 'CHKPOINTD'
+      include 'MNTRLP'
 
-!     local variables
-      logical ifcalled
-      save ifcalled
-      data ifcalled /.FALSE./
 !-----------------------------------------------------------------------
-      if(.not.ifcalled) then
-        ifcalled=.TRUE.
-        call chkpt_init
+      if(chpt_ifrst) then
+         call chkpts_read
       endif
 
-      if(chpt_ifrst) call chkpt_read
-
-      call chkpt_write
+      call chkpts_write
 
       return
       end

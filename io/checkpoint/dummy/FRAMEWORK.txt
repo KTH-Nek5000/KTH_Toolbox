@@ -12,9 +12,10 @@ e.g. checkpointing runtime parameters. In this cas dummy @a chkpt_init, @a chkpt
 
 @mod_interface
 @interface_list Interface provided to [checkpoint] (@ref chkpoint):
--# chkpt_init
--# chkpt_read
--# chkpt_write
+-# chkpts_register
+-# chkpts_init
+-# chkpts_read
+-# chkpts_write
 
 */
 #List of existing submodules

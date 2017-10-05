@@ -6,18 +6,20 @@
 
 @brief Checkopinting routines for toolbox
 
-@details This is the main interface to checkpinting.
+@details This is the main interface to I/O checkpinting.
 
 @mod_interface
 @interface_list Interface provided:
--# @ref chkpt_param_get
+-# @ref chkpt_register
+-# @ref chkpt_init
 -# @ref chkpt_main
 
 @par
 @interface_reqr Interface required:
--# chkpt_init
--# chkpt_read
--# chkpt_write
+-# chkpts_register
+-# chkpts_init
+-# chkpts_read
+-# chkpts_write
 
 @mod_interface_example
 @code{.f}
@@ -25,8 +27,14 @@
       include 'TSTEP'
       
       if (ISTEP.eq.0) then
-!     initialise runtime parameters
-         call chkpt_param_get
+!     register modules and parameters
+         call mntr_register_mod
+         call rprm_register
+         call mntr_register_par
+         call chkpt_register
+         call rprm_dict_get
+         call mntr_init
+         call chkpt_init
       endif
 
 !     save/load files for full-restart
@@ -40,10 +48,10 @@
 @param_list Parameters provided by checkpoint module (include file - \a CHKPOINTD):
 |Varaible | Type | Runtime parameter | Description |
 |---------|------|-------------------|-------------|
-| chpt_step | integer | _chkpoint:chkpInterval | checkpiont dump frequency (number of time steps) |
-| chpt_ifrst | logical | _chkpoint:readchkpt | if restart |
+| chpt_ifrst | logical | _chkpoint:readchkpt | start simulation form checkpoint |
 | chpt_fnum | integer | _chkpoint:chkpFnumber | restart file number |
-| chpt_wtime | real   | _chkpoint:chkpWallTime | simulation wall time |
+| chpt_step | integer | _chkpoint:chkpInterval | checkpiont dump frequency (number of time steps) |
+| chpt_wtimes | string | _chkpoint:WallTime | simulation wall time |
 
 
 @mod_param_example
@@ -52,7 +60,7 @@
 chkpInterval = 10
 readchkpt = no
 chkpFnumber = 1
-chkpWallTime = 02:05
+WallTime = 02:05
 @endcode
 
 */
@@ -73,7 +81,8 @@ DEFAULT mstep
 CONFLICTS
 
 #List of required modules
-REQUIRED driver/runparam
+REQUIRED driver/monitor  \
+         driver/runparam
 
 #List of object files
 OBJECT chkpoint.o

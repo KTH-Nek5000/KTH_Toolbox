@@ -6,19 +6,50 @@
 !!    MHD (rbX...) and perturbation (rpX...). In perturbation mode only
 !!    single perturbation (NPERT=1) is supported right now.
 !=======================================================================
+!> @brief Register multi step checkpointing module
+!! @ingroup chkpoint_mstep
+      subroutine chkpts_register()
+      implicit none
+
+      include 'SIZE'
+      include 'CHKPOINTD'
+      include 'CHKPTMSTPD'
+      include 'MNTRLP'
+
+!     local variables
+      integer lpmid
+!-----------------------------------------------------------------------
+!     find parent module
+      call mntr_mod_is_name_reg(lpmid,chpt_name)
+!     register module
+      call mntr_mod_reg(chpm_id,lpmid,chpm_name,
+     $         'Multi-file checkpointing')
+      if (lpmid.le.0) then
+        call mntr_log(chpm_id,lp_vrb,
+     $   'ERROR: parent ['//trim(chpt_name)//'] module not registered')
+      endif
+
+!     register parameters
+
+      return
+      end
+
+!=======================================================================
 !> @brief Initialise multi-file checkpoint routines
 !! @ingroup chkpoint_mstep
 !! @note This interface is defined in @ref chkpt_main
 !! @todo Add timestep reader to ensure proper restart
-      subroutine chkpt_init
+      subroutine chkpts_init
       implicit none
 
       include 'SIZE'            ! NID, NPERT
       include 'TSTEP'           ! ISTEP, NSTEPS
       include 'INPUT'           ! IFPERT, PARAM
+      include 'MNTRLP'
       include 'CHKPOINTD'       ! chpt_step, chpt_ifrst, chpt_fnum
       include 'CHKPTMSTPD'      ! chpm_set_o, chpm_set_i, chpm_snmax,
                                 ! chpm_nset, chpm_nsnap
+
 
 !     local variables
       integer itmp
@@ -83,6 +114,8 @@
 !     set reset flag
       chpm_reset = -1
 
+      chpm_ifinit = .true.
+
       return
       end
 !=======================================================================
@@ -90,7 +123,7 @@
 !! @ingroup chkpoint_mstep
 !! @note This interface is defined in @ref chkpt_main.
 !! @note This is version of @ref full_restart_save routine.
-      subroutine chkpt_write()
+      subroutine chkpts_write()
       implicit none
 
       include 'SIZE'            !
@@ -240,7 +273,7 @@
 !! @ingroup chkpoint_mstep
 !! @note This interface is defined in @ref chkpt_main
 !! @note This is version of @ref full_restart routine.
-      subroutine chkpt_read()
+      subroutine chkpts_read()
       implicit none
 
       include 'SIZE'            !

@@ -4,38 +4,36 @@
 !! @author Adam Peplinski
 !! @date Mar 7, 2016
 !=======================================================================
-!     parameter section
-!     Do we restart form the checkpoint
+!     module id and name
+      integer chpt_id
+      character*(*) chpt_name
+      parameter(chpt_name='CHKPOINT')
+
+!     initialisation flag
+      logical chpt_ifinit
+
+!     runtime parameter section
+!     Do we restart form the checkpoint + parameter id
       logical chpt_ifrst
+      integer chpt_ifrst_id
 
-!     checkpoint frequency
-      integer chpt_step
+!     restart file number + parameter id
+      integer chpt_fnum, chpt_fnum_id
 
-!     restart file number
-      integer chpt_fnum
-      
-!     simulation wall time
+!     checkpoint frequency + parameter id
+      integer chpt_step, chpt_step_id
+
+!     simulation wall time + parameter id
       real chpt_wtime
-
-!     runtime parameter name section
-      integer chpt_nkeys
-      parameter (chpt_nkeys = 5)
-      character*132 chpt_dictkey(chpt_nkeys)
-      data
-     $  chpt_dictkey(1)  / '_CHKPOINT' /    ! section name
-     $  chpt_dictkey(2)  / 'CHKPINTERVAL' / ! chpt_ifrst
-     $  chpt_dictkey(3)  / 'READCHKPT' /    ! chpt_step
-     $  chpt_dictkey(4)  / 'CHKPFNUMBER' /  ! chpt_fnum
-     $  chpt_dictkey(5)  / 'CHKPWALLTIME' / ! chpt_wtime
-     
-!     runtime parameters used for 3D run only
-      integer chpt_n3dkeys
-      parameter (chpt_n3dkeys = 0)
-      integer chpt_l3dkey(chpt_n3dkeys)
+      character*20 chpt_wtimes
+      integer chpt_wtime_id
 
 !     common blocks
-      common /CHKPNTI/ chpt_step, chpt_fnum
-      
+      common /CHKPNTI/ chpt_id, chpt_ifrst_id, chpt_fnum, 
+     $  chpt_fnum_id, chpt_step, chpt_step_id, chpt_wtime_id
+
       common /CHKPNTR/ chpt_wtime
 
-      common /CHKPNTL/ chpt_ifrst
+      common /CHKPNTL/ chpt_ifinit, chpt_ifrst
+      
+      common /CHKPNTC/ chpt_wtimes
