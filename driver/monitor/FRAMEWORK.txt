@@ -8,17 +8,24 @@
 
 @details 
 Monitor module provides basic services allowing to monitor tooboxes during the simulation.
-Its basic tasks are module registration, timing and message logging.
+Its basic tasks are module registration, timing and message logging which is done by building
+dynamical databases.
 
 @mod_interface
 @interface_list Interface provided:
+-# @ref mntr_register_mod
+-# @ref mntr_register_par
 -# @ref mntr_init
 -# @ref mntr_mod_reg
 -# @ref mntr_mod_is_name_reg
 -# @ref mntr_mod_is_id_reg
+-# @ref mntr_get_number
+-# @ref mntr_get_info
 -# @ref mntr_log
+-# @ref mntr_log_local
 -# @ref mntr_logi
 -# @ref mntr_logr
+-# @ref mntr_logl
 -# @ref mntr_warn
 -# @ref mntr_error
 -# @ref mntr_abort
