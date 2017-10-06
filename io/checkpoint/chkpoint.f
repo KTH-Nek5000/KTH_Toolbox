@@ -12,11 +12,16 @@
       implicit none
 
       include 'SIZE'
-      include 'CHKPOINTD'
+      include 'RPRMD'
       include 'MNTRLP'
+      include 'CHKPOINTD'
 
 !     local variables
       integer lpmid
+      integer itest
+      real rtest
+      logical ltest
+      character*20 ctest
 !-----------------------------------------------------------------------
 !     find parent module
       call mntr_mod_is_name_reg(lpmid,'NEK5000')
@@ -27,18 +32,24 @@
      $        'ERROR: parent module ['//'NEK5000'//'] not registered')
       endif
 
+!     register and set active section
+      call rprm_sec_reg(chpt_sec_id,chpt_id,'_'//adjustl(chpt_name),
+     $     'Runtime paramere section for checkpoint module')
+      call rprm_sec_set_act(.true.,chpt_sec_id)
+
 !     register parameters
-      call rprm_rp_log_reg(chpt_ifrst_id,chpt_id,'READCHKPT',
-     $     'Restat from checkpoint',.false.)
+      call rprm_rp_reg(chpt_ifrst_id,chpt_sec_id,'READCHKPT',
+     $     'Restat from checkpoint',rprm_par_log,0,0.0,.false.,' ')
 
-      call rprm_rp_int_reg(chpt_fnum_id,chpt_id,'CHKPFNUMBER',
-     $     'Restart file number',1)
+      call rprm_rp_reg(chpt_fnum_id,chpt_sec_id,'CHKPFNUMBER',
+     $     'Restart file number',rprm_par_int,1,0.0,.false.,' ')
 
-      call rprm_rp_int_reg(chpt_step_id,chpt_id,'CHKPINTERVAL',
-     $     'Checkpiont saving frequency (number of time steps)',500)
+      call rprm_rp_reg(chpt_step_id,chpt_sec_id,'CHKPINTERVAL',
+     $     'Checkpiont saving frequency (number of time steps)',
+     $      rprm_par_int,500,0.0,.false.,' ')
 
-      call rprm_rp_str_reg(chpt_wtime_id,chpt_id,'WALLTIME',
-     $     'Simulation wall time','00:00')
+      call rprm_rp_reg(chpt_wtime_id,chpt_sec_id,'WALLTIME',
+     $     'Simulation wall time',rprm_par_str,0,0.0,.false.,'00:00')
 
 !     call submodule registration
       call chkpts_register
@@ -54,34 +65,40 @@
       implicit none
 
       include 'SIZE'
-      include 'CHKPOINTD'
+      include 'RPRMD'
       include 'MNTRLP'
+      include 'CHKPOINTD'
 
 !     local variables
-      character*132 lkey, c_out
-      integer i_out,ifnd, ierr, nhour, nmin
-      real d_out
-      logical ifsec
+      integer ierr, nhour, nmin
+      integer itmp
+      real rtmp
+      logical ltmp
+      character*20 ctmp
 !-----------------------------------------------------------------------
 !     get runtime parameters
-      call rprm_rp_log_get(chpt_ifrst,chpt_ifrst_id)
-      call rprm_rp_int_get(chpt_fnum,chpt_fnum_id)
-      call rprm_rp_int_get(chpt_step,chpt_step_id)
-      call rprm_rp_str_get(chpt_wtimes,chpt_wtime_id)
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,chpt_ifrst_id,rprm_par_log)
+      chpt_ifrst = ltmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,chpt_fnum_id,rprm_par_int)
+      chpt_fnum = itmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,chpt_step_id,rprm_par_int)
+      chpt_step = itmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,chpt_wtime_id,rprm_par_str)
+      chpt_wtimes = ctmp
 
 !     get wall clock
-      lkey = trim(adjustl(chpt_wtimes))
+      ctmp = trim(adjustl(chpt_wtimes))
 !     check string format
       ierr = 0
-      if (lkey(3:3).ne.':') ierr = 1
-      if (.not.(LGE(lkey(1:1),'0').and.LLE(lkey(1:1),'9'))) ierr = 1
-      if (.not.(LGE(lkey(2:2),'0').and.LLE(lkey(2:2),'9'))) ierr = 1
-      if (.not.(LGE(lkey(4:4),'0').and.LLE(lkey(4:4),'9'))) ierr = 1
-      if (.not.(LGE(lkey(5:5),'0').and.LLE(lkey(5:5),'9'))) ierr = 1
+      if (ctmp(3:3).ne.':') ierr = 1
+      if (.not.(LGE(ctmp(1:1),'0').and.LLE(ctmp(1:1),'9'))) ierr = 1
+      if (.not.(LGE(ctmp(2:2),'0').and.LLE(ctmp(2:2),'9'))) ierr = 1
+      if (.not.(LGE(ctmp(4:4),'0').and.LLE(ctmp(4:4),'9'))) ierr = 1
+      if (.not.(LGE(ctmp(5:5),'0').and.LLE(ctmp(5:5),'9'))) ierr = 1
 
       if (ierr.eq.0) then
-         read(lkey(1:2),'(I2)') nhour
-         read(lkey(4:5),'(I2)') nmin
+         read(ctmp(1:2),'(I2)') nhour
+         read(ctmp(4:5),'(I2)') nmin
          chpt_wtime = 60.0*(nmin +60*nhour)
       else
          call mntr_log(chpt_id,lp_inf,'Wrong wall time format')

@@ -58,6 +58,7 @@
       implicit none
 
       include 'SIZE'
+      include 'RPRMD'
       include 'MNTRD'
       include 'MNTRLP'
 
@@ -67,8 +68,15 @@
       logical ltmp
       character*20 ctmp
 !-----------------------------------------------------------------------
-      call rprm_rp_int_reg(mntr_lp_def_id,mntr_id,'LOGLEVEL',
-     $     'Logging threshold for toolboxes',lp_inf)
+!     register and set active section
+      call rprm_sec_reg(mntr_sec_id,mntr_id,'_'//adjustl(mntr_name),
+     $     'Runtime paramere section for monitor module')
+      call rprm_sec_set_act(.true.,mntr_sec_id)
+
+!     register parameters
+      call rprm_rp_reg(mntr_lp_def_id,mntr_sec_id,'LOGLEVEL',
+     $     'Logging threshold for toolboxes',rprm_par_int,lp_inf,
+     $      0.0,.false.,' ')
 
       return
       end subroutine
@@ -79,13 +87,19 @@
       implicit none
 
       include 'SIZE'
+      include 'RPRMD'
       include 'MNTRD'
       include 'MNTRLP'
 
 !     local variables
+      integer itmp
+      real rtmp
+      logical ltmp
+      character*20 ctmp
       character*2 str
 !-----------------------------------------------------------------------
-      call rprm_rp_int_get(mntr_lp_def,mntr_lp_def_id)
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,mntr_lp_def_id,rprm_par_int)
+      mntr_lp_def = itmp
 
       write(str,'(I2)') mntr_lp_def
       call mntr_log(mntr_id,lp_inf,
@@ -181,11 +195,8 @@
 !     module already registered
       elseif (ipos.lt.0) then
          mid = abs(ipos)
-         call mntr_log(mntr_id,lp_inf,
+         call mntr_abort(mntr_id,
      $    'Module ['//trim(lname)//'] is already registered')
-!     check parent
-         if(pmid.ne.mntr_mod_id(mid)) call mntr_warn(mntr_id,
-     $      "Module's ["//trim(lname)//"] parent inconsistent")
 !     new module
       else
          mid = ipos

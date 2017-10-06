@@ -31,14 +31,13 @@
       return
       end subroutine
 !=======================================================================
-!> @brief Register new integer runtime parameter
+!> @brief Register new parameter section
 !! @ingroup runparam
-!! @param[out] rpid     current runtime parameter id
+!! @param[out] rpid     current section id
 !! @param[in]  mid      registering module id
-!! @param[in]  pname    parameter name
-!! @param[in]  pdscr    paramerer description
-!! @param[in]  pval     default value
-      subroutine rprm_rp_int_reg(rpid,mid,pname,pdscr,pval)
+!! @param[in]  pname    section name
+!! @param[in]  pdscr    section description
+      subroutine rprm_sec_reg(rpid,mid,pname,pdscr)
       implicit none
 
       include 'SIZE'
@@ -47,7 +46,7 @@
       include 'MNTRLP'
 
 !     argument list
-      integer rpid, mid, pval
+      integer rpid, mid
       character*(*) pname, pdscr
 
 !     local variables
@@ -69,7 +68,7 @@
       slen = len_trim(pname) - slena + 1
       if (slena.gt.rprm_lstl_mnm) then
          call mntr_log(rprm_id,lp_deb,
-     $        'too long parameter name; shortenning')
+     $        'too long section name; shortenning')
          slena = min(slena,rprm_lstl_mnm)
       endif
       call blank(lname,rprm_lstl_mnm)
@@ -82,7 +81,7 @@
       slen = len_trim(pdscr) - slena + 1
       if (slena.ge.rprm_lstl_mds) then
          call mntr_log(rprm_id,lp_deb,
-     $        'too long parameter description; shortenning')
+     $        'too long section description; shortenning')
          slena = min(slena,rprm_lstl_mnm)
       endif
       call blank(ldscr,rprm_lstl_mds)
@@ -95,9 +94,9 @@
       if (nid.eq.rprm_pid0) then
 
 !     check if parameter name is already registered
-         do il=1,rprm_par_mpos
-            if (rprm_par_id(rprm_par_mark,il).gt.0.and.
-     $          rprm_par_name(il).eq.lname) then
+         do il=1,rprm_sec_mpos
+            if (rprm_sec_id(il).gt.0.and.
+     $          rprm_sec_name(il).eq.lname) then
                ipos = -il
                exit
             endif
@@ -105,8 +104,8 @@
 
 !     find empty spot
          if (ipos.eq.0) then
-            do il=1,rprm_id_max
-               if (rprm_par_id(rprm_par_mark,il).eq.-1) then
+            do il=1,rprm_sec_id_max
+               if (rprm_sec_id(il).eq.-1) then
                   ipos = il
                   exit
                endif
@@ -121,61 +120,43 @@
       if (ipos.eq.0) then
          rpid = ipos
          call mntr_abort(rprm_id,
-     $        'Parameter '//trim(lname)//' cannot be registered')
-!     parameter already registered
+     $        'Section '//trim(lname)//' cannot be registered')
+!     Section already registered
       elseif (ipos.lt.0) then
          rpid = abs(ipos)
-         call mntr_log(rprm_id,lp_inf,
-     $    'Parameter '//trim(lname)//' is already registered')
-!     check module
-         if(mid.ne.rprm_par_id(rprm_par_mark,rpid))
-     $      call mntr_abort(rprm_id,
-     $      "Parameter's "//trim(lname)//" module inconsistent")
-!     check type
-         if(rprm_par_int.ne.rprm_par_id(rprm_par_type,rpid))
-     $      call mntr_abort(rprm_id,
-     $      "Parameter's "//trim(lname)//" type inconsistent")
-!     new module
+         call mntr_abort(rprm_id,
+     $    'Section '//trim(lname)//' is already registered')
+!     new section
       else
          rpid = ipos
 !        check if module is registered
          if (mntr_mod_is_id_reg(mid)) then
-            rprm_par_id(rprm_par_mark,ipos) = mid
+            rprm_sec_id(ipos) = mid
          else
             call mntr_abort(rprm_id,
-     $          "Parameter's "//trim(lname)//" module not registered")
+     $          "Sections's "//trim(lname)//" module not registered")
          endif
-         rprm_par_id(rprm_par_type,ipos) = rprm_par_int
-         rprm_par_name(ipos)=lname
-         rprm_par_dscr(ipos)=ldscr
-         rprm_par_num = rprm_par_num + 1
-         if (rprm_par_mpos.lt.ipos) rprm_par_mpos = ipos
-
-!     broadcast pval; to keep consistency
-         lval = pval
-         call bcast(lval,isize)
-         rprm_parv_int(ipos) = lval
+         rprm_sec_name(ipos)=lname
+         rprm_sec_dscr(ipos)=ldscr
+         rprm_sec_num = rprm_sec_num + 1
+         if (rprm_sec_mpos.lt.ipos) rprm_sec_mpos = ipos
 
 !     logging
          call mntr_mod_get_info(mname,ipos,mid)
-         llog='Module ['//trim(mname)//'] registered integer parameter '
+         llog='Module ['//trim(mname)//'] registered section '
          llog=trim(llog)//' '//trim(lname)//': '//trim(ldscr)
          call mntr_log(rprm_id,lp_inf,trim(llog))
-         call mntr_logi(rprm_id,lp_inf,
-     $       'Default value '//trim(lname)//' = ',lval)
       endif
 
       return
       end subroutine
 !=======================================================================
-!> @brief Register new real runtime parameter
+!> @brief Check if section name is registered and return its id. Check mid as well.
 !! @ingroup runparam
-!! @param[out] rpid     current runtime parameter id
+!! @param[out] rpid     section id
 !! @param[in]  mid      registering module id
-!! @param[in]  pname    parameter name
-!! @param[in]  pdscr    paramerer description
-!! @param[in]  pval     default value
-      subroutine rprm_rp_real_reg(rpid,mid,pname,pdscr,pval)
+!! @param[in]  pname    section name
+      subroutine rprm_sec_is_name_reg(rpid,mid,pname)
       implicit none
 
       include 'SIZE'
@@ -185,21 +166,16 @@
 
 !     argument list
       integer rpid, mid
-      real pval
-      character*(*) pname, pdscr
+      character*(*) pname
 
 !     local variables
+      character*3 str
       character*10  mname
       character*20  lname
-      character*132 ldscr
       character*132 llog
       integer slen,slena
 
       integer il, ipos
-      real lval
-
-!     functions
-      logical mntr_mod_is_id_reg
 !-----------------------------------------------------------------------
 !     check name length
       slena = len_trim(adjustl(pname))
@@ -207,251 +183,178 @@
       slen = len_trim(pname) - slena + 1
       if (slena.gt.rprm_lstl_mnm) then
          call mntr_log(rprm_id,lp_deb,
-     $        'too long parameter name; shortenning')
+     $        'too long section name; shortenning')
          slena = min(slena,rprm_lstl_mnm)
       endif
       call blank(lname,rprm_lstl_mnm)
       lname= pname(slen:slen+slena- 1)
       call capit(lname,slena)
 
-!     check description length
-      slena = len_trim(adjustl(pdscr))
-!     remove trailing blanks
-      slen = len_trim(pdscr) - slena + 1
-      if (slena.ge.rprm_lstl_mds) then
-         call mntr_log(rprm_id,lp_deb,
-     $        'too long parameter description; shortenning')
-         slena = min(slena,rprm_lstl_mnm)
-      endif
-      call blank(ldscr,rprm_lstl_mds)
-      ldscr= pdscr(slen:slen + slena - 1)
-
-!     find empty space
+!     find parameter
       ipos = 0
 
 !     to ensure consistency I do it on master and broadcast result
       if (nid.eq.rprm_pid0) then
 
 !     check if parameter name is already registered
-         do il=1,rprm_par_mpos
-            if (rprm_par_id(rprm_par_mark,il).gt.0.and.
-     $          rprm_par_name(il).eq.lname) then
-               ipos = -il
+         do il=1,rprm_sec_mpos
+            if (rprm_sec_id(il).gt.0.and.
+     $          rprm_sec_name(il).eq.lname) then
+               ipos = il
                exit
             endif
          enddo
 
-!     find empty spot
-         if (ipos.eq.0) then
-            do il=1,rprm_id_max
-               if (rprm_par_id(rprm_par_mark,il).eq.-1) then
-                  ipos = il
-                  exit
-               endif
-            enddo
-         endif
       endif
 
 !     broadcast ipos
       call bcast(ipos,isize)
 
-!     error; no free space found
       if (ipos.eq.0) then
-         rpid = ipos
-         call mntr_abort(rprm_id,
-     $        'Parameter '//trim(lname)//' cannot be registered')
-!     parameter already registered
-      elseif (ipos.lt.0) then
-         rpid = abs(ipos)
+         rpid = -1
          call mntr_log(rprm_id,lp_inf,
-     $    'Parameter '//trim(lname)//' is already registered')
-!     check module
-         if(mid.ne.rprm_par_id(rprm_par_mark,rpid))
-     $      call mntr_abort(rprm_id,
-     $      "Parameter's "//trim(lname)//" module inconsistent")
-!     check type
-         if(rprm_par_real.ne.rprm_par_id(rprm_par_type,rpid))
-     $      call mntr_abort(rprm_id,
-     $      "Parameter's "//trim(lname)//" type inconsistent")
-!     new module
+     $        'Section '//trim(lname)//' not registered')
       else
          rpid = ipos
-!        check if module is registered
-         if (mntr_mod_is_id_reg(mid)) then
-            rprm_par_id(rprm_par_mark,ipos) = mid
-         else
-            call mntr_abort(rprm_id,
-     $          "Parameter's "//trim(lname)//" module not registered")
+         write(str,'(I3)') ipos
+         call mntr_log(rprm_id,lp_inf,
+     $   'Section '//trim(lname)//' registered with id = '//trim(str))
+!     check module
+         if (mid.ne.rprm_sec_id(ipos)) then
+            call mntr_log(rprm_id,lp_inf,
+     $      "Section's "//trim(lname)//" module inconsistent")
+            rpid = -1
          endif
-         rprm_par_id(rprm_par_type,ipos) = rprm_par_real
-         rprm_par_name(ipos)=lname
-         rprm_par_dscr(ipos)=ldscr
-         rprm_par_num = rprm_par_num + 1
-         if (rprm_par_mpos.lt.ipos) rprm_par_mpos = ipos
-
-!     broadcast pval; to keep consistency
-         lval = pval
-         call bcast(lval,wdsize)
-         rprm_parv_real(ipos) = lval
-
-!     logging
-         call mntr_mod_get_info(mname,ipos,mid)
-         llog='Module ['//trim(mname)//'] registered real parameter '
-         llog=trim(llog)//' '//trim(lname)//': '//trim(ldscr)
-         call mntr_log(rprm_id,lp_inf,trim(llog))
-         call mntr_logr(rprm_id,lp_inf,
-     $       'Default value '//trim(lname)//' = ',lval)
       endif
 
       return
       end subroutine
 !=======================================================================
-!> @brief Register new logical runtime parameter
+!> @brief Check if section id is registered. This operation is performed locally
 !! @ingroup runparam
-!! @param[out] rpid     current runtime parameter id
-!! @param[in]  mid      registering module id
-!! @param[in]  pname    parameter name
-!! @param[in]  pdscr    paramerer description
-!! @param[in]  pval     default value
-      subroutine rprm_rp_log_reg(rpid,mid,pname,pdscr,pval)
+!! @param[in]  rpid     section id
+      logical function rprm_sec_is_id_reg(rpid)
       implicit none
 
       include 'SIZE'
-      include 'PARALLEL'        ! ISIZE
+      include 'RPRMD'
+      include 'MNTRLP'
+
+!     argument list
+      integer rpid
+!-----------------------------------------------------------------------
+      rprm_sec_is_id_reg = rprm_sec_id(rpid).gt.0
+
+      return
+      end function
+!=======================================================================
+!> @brief Get section info based on its id. This operation is performed locally
+!! @ingroup runparam
+!! @param[out]    pname    section name
+!! @param[out]    mid      registering module id
+!! @param[out]    ifact    activation flag
+!! @param[inout]  rpid     section id
+      subroutine rprm_sec_get_info(pname,mid,ifact,rpid)
+      implicit none
+
+      include 'SIZE'
       include 'RPRMD'
       include 'MNTRLP'
 
 !     argument list
       integer rpid, mid
-      logical pval
-      character*(*) pname, pdscr
+      character*20 pname
+      logical ifact
 
 !     local variables
-      character*10  mname
-      character*20  lname
-      character*132 ldscr
-      character*132 llog
-      integer slen,slena
+      character*5 str
+!-----------------------------------------------------------------------
+      if (rprm_sec_id(rpid).gt.0) then
+         pname = rprm_sec_name(rpid)
+         mid = rprm_sec_id(rpid)
+         ifact = rprm_sec_act(rpid)
+      else
+         write(str,'(I3)') rpid
+         call mntr_log(rprm_id,lp_inf,
+     $        'Section id'//trim(str)//' not registered')
+         rpid = -1
+      endif
 
-      integer il, ipos
+      return
+      end subroutine
+!=======================================================================
+!> @brief Set section's activation flag. Master value is broadcasted.
+!! @details This routine is added because Nek5000 uses existence of
+!!    section in .par file itself as a variable, what introduces problem
+!!    with their registration as sections should be registered before reading
+!!    runtime parameter file. That is why I decided to split registration
+!!    and activation stages. One can register all the possible sections
+!!    and activate those present in .par
+!! @ingroup runparam
+!! @param[in]  ifact    activation flag
+!! @param[in]  rpid     runtime parameter id
+      subroutine rprm_sec_set_act(ifact,rpid)
+      implicit none
+
+      include 'SIZE'
+      include 'PARALLEL'
+      include 'RPRMD'
+      include 'MNTRLP'
+
+!     argument list
+      integer rpid
+      logical ifact
+
+!     local variables
       logical lval
-
-!     functions
-      logical mntr_mod_is_id_reg
+      character*5 str
 !-----------------------------------------------------------------------
-!     check name length
-      slena = len_trim(adjustl(pname))
-!     remove trailing blanks
-      slen = len_trim(pname) - slena + 1
-      if (slena.gt.rprm_lstl_mnm) then
-         call mntr_log(rprm_id,lp_deb,
-     $        'too long parameter name; shortenning')
-         slena = min(slena,rprm_lstl_mnm)
-      endif
-      call blank(lname,rprm_lstl_mnm)
-      lname= pname(slen:slen+slena- 1)
-      call capit(lname,slena)
-
-!     check description length
-      slena = len_trim(adjustl(pdscr))
-!     remove trailing blanks
-      slen = len_trim(pdscr) - slena + 1
-      if (slena.ge.rprm_lstl_mds) then
-         call mntr_log(rprm_id,lp_deb,
-     $        'too long parameter description; shortenning')
-         slena = min(slena,rprm_lstl_mnm)
-      endif
-      call blank(ldscr,rprm_lstl_mds)
-      ldscr= pdscr(slen:slen + slena - 1)
-
-!     find empty space
-      ipos = 0
-
-!     to ensure consistency I do it on master and broadcast result
-      if (nid.eq.rprm_pid0) then
-
-!     check if parameter name is already registered
-         do il=1,rprm_par_mpos
-            if (rprm_par_id(rprm_par_mark,il).gt.0.and.
-     $          rprm_par_name(il).eq.lname) then
-               ipos = -il
-               exit
-            endif
-         enddo
-
-!     find empty spot
-         if (ipos.eq.0) then
-            do il=1,rprm_id_max
-               if (rprm_par_id(rprm_par_mark,il).eq.-1) then
-                  ipos = il
-                  exit
-               endif
-            enddo
-         endif
-      endif
-
-!     broadcast ipos
-      call bcast(ipos,isize)
-
-!     error; no free space found
-      if (ipos.eq.0) then
-         rpid = ipos
-         call mntr_abort(rprm_id,
-     $        'Parameter '//trim(lname)//' cannot be registered')
-!     parameter already registered
-      elseif (ipos.lt.0) then
-         rpid = abs(ipos)
-         call mntr_log(rprm_id,lp_inf,
-     $    'Parameter '//trim(lname)//' is already registered')
-!     check module
-         if(mid.ne.rprm_par_id(rprm_par_mark,rpid))
-     $      call mntr_abort(rprm_id,
-     $      "Parameter's "//trim(lname)//" module inconsistent")
-!     check type
-         if(rprm_par_log.ne.rprm_par_id(rprm_par_type,rpid))
-     $      call mntr_abort(rprm_id,
-     $      "Parameter's "//trim(lname)//" type inconsistent")
-!     new module
-      else
-         rpid = ipos
-!        check if module is registered
-         if (mntr_mod_is_id_reg(mid)) then
-            rprm_par_id(rprm_par_mark,ipos) = mid
-         else
-            call mntr_abort(rprm_id,
-     $          "Parameter's "//trim(lname)//" module not registered")
-         endif
-         rprm_par_id(rprm_par_type,ipos) = rprm_par_log
-         rprm_par_name(ipos)=lname
-         rprm_par_dscr(ipos)=ldscr
-         rprm_par_num = rprm_par_num + 1
-         if (rprm_par_mpos.lt.ipos) rprm_par_mpos = ipos
-
+      if (rprm_sec_id(rpid).gt.0) then
 !     broadcast pval; to keep consistency
-         lval = pval
+         lval = ifact
          call bcast(lval,lsize)
-         rprm_parv_log(ipos) = lval
-
-!     logging
-         call mntr_mod_get_info(mname,ipos,mid)
-         llog='Module ['//trim(mname)//'] registered logical parameter '
-         llog=trim(llog)//' '//trim(lname)//': '//trim(ldscr)
-         call mntr_log(rprm_id,lp_inf,trim(llog))
-         call mntr_logl(rprm_id,lp_inf,
-     $       'Default value '//trim(lname)//' = ',lval)
+         rprm_sec_act(rpid) = lval
+      else
+         write(str,'(I3)') rpid
+         call mntr_abort(rprm_id,
+     $          "Section "//trim(str)//" activation error")
       endif
 
       return
       end subroutine
 !=======================================================================
-!> @brief Register new string runtime parameter
+!> @brief Check if section id is registered and activated. This operation is performed locally
+!! @ingroup runparam
+!! @param[in]  rpid     section id
+      logical function rprm_sec_is_id_act(rpid)
+      implicit none
+
+      include 'SIZE'
+      include 'RPRMD'
+      include 'MNTRLP'
+
+!     argument list
+      integer rpid
+!-----------------------------------------------------------------------
+      rprm_sec_is_id_act = rprm_sec_id(rpid).gt.0.and.
+     $                     rprm_sec_act(rpid)
+
+      return
+      end function
+!=======================================================================
+!> @brief Register new runtime parameter
 !! @ingroup runparam
 !! @param[out] rpid     current runtime parameter id
-!! @param[in]  mid      registering module id
+!! @param[in]  mid      section id
 !! @param[in]  pname    parameter name
 !! @param[in]  pdscr    paramerer description
-!! @param[in]  pval     default value
-      subroutine rprm_rp_str_reg(rpid,mid,pname,pdscr,pval)
+!! @param[in]  ptype    parameter type
+!! @param[in]  ipval    integer default value
+!! @param[in]  rpval    real default value
+!! @param[in]  lpval    logical default value
+!! @param[in]  cpval    string default value
+      subroutine rprm_rp_reg(rpid,mid,pname,pdscr,ptype ,
+     $ ipval, rpval, lpval, cpval)
       implicit none
 
       include 'SIZE'
@@ -460,21 +363,26 @@
       include 'MNTRLP'
 
 !     argument list
-      integer rpid, mid
-      character*(*) pval
-      character*(*) pname, pdscr
+      integer rpid, mid, ptype, ipval
+      real rpval
+      logical lpval
+      character*(*) pname, pdscr, cpval
 
 !     local variables
       character*10  mname
-      character*20  lname, lpval
+      character*20  lname
       character*132 ldscr
-      character*132 llog
+      character*200 llog
       integer slen,slena
 
       integer il, ipos
+      integer ivall
+      real rvall
+      logical lvall
+      character*20 cvall
 
 !     functions
-      logical mntr_mod_is_id_reg
+      logical rprm_sec_is_id_reg
 !-----------------------------------------------------------------------
 !     check name length
       slena = len_trim(adjustl(pname))
@@ -518,7 +426,7 @@
 
 !     find empty spot
          if (ipos.eq.0) then
-            do il=1,rprm_id_max
+            do il=1,rprm_par_id_max
                if (rprm_par_id(rprm_par_mark,il).eq.-1) then
                   ipos = il
                   exit
@@ -538,54 +446,75 @@
 !     parameter already registered
       elseif (ipos.lt.0) then
          rpid = abs(ipos)
-         call mntr_log(rprm_id,lp_inf,
+         call mntr_abort(rprm_id,
      $    'Parameter '//trim(lname)//' is already registered')
-!     check module
-         if(mid.ne.rprm_par_id(rprm_par_mark,rpid))
-     $      call mntr_abort(rprm_id,
-     $      "Parameter's "//trim(lname)//" module inconsistent")
-!     check type
-         if(rprm_par_str.ne.rprm_par_id(rprm_par_type,rpid))
-     $      call mntr_abort(rprm_id,
-     $      "Parameter's "//trim(lname)//" type inconsistent")
-!     new module
+!     new parameter
       else
          rpid = ipos
-!        check if module is registered
-         if (mntr_mod_is_id_reg(mid)) then
+!        check if section is registered
+         if (rprm_sec_is_id_reg(mid)) then
             rprm_par_id(rprm_par_mark,ipos) = mid
          else
             call mntr_abort(rprm_id,
-     $          "Parameter's "//trim(lname)//" module not registered")
+     $          "Parameter's "//trim(lname)//" section not registered")
          endif
-         rprm_par_id(rprm_par_type,ipos) = rprm_par_str
+         rprm_par_id(rprm_par_type,ipos) = ptype
          rprm_par_name(ipos)=lname
          rprm_par_dscr(ipos)=ldscr
          rprm_par_num = rprm_par_num + 1
          if (rprm_par_mpos.lt.ipos) rprm_par_mpos = ipos
 
-!     check value length
-         slena = len_trim(adjustl(pval))
-!     remove trailing blanks
-         slen = len_trim(pval) - slena + 1
-         if (slena.gt.rprm_lstl_mnm) then
-            call mntr_log(rprm_id,lp_deb,
-     $           'too long parameter value; shortenning')
-            slena = min(slena,rprm_lstl_mnm)
-         endif
-         call blank(lpval,rprm_lstl_mnm)
-         lpval= pval(slen:slen+slena- 1)
 !     broadcast pval; to keep consistency
-         call bcast(lpval,rprm_lstl_mnm*csize)
-         rprm_parv_str(ipos) = lpval
+         if (ptype.eq.rprm_par_int) then
+            ivall = ipval
+            call bcast(ivall,isize)
+            rprm_parv_int(ipos) = ivall
+         elseif (ptype.eq.rprm_par_real) then
+            rvall = rpval
+            call bcast(rvall,wdsize)
+            rprm_parv_real(ipos) = rvall
+         elseif (ptype.eq.rprm_par_log) then
+            lvall = lpval
+            call bcast(lvall,lsize)
+            rprm_parv_log(ipos) = lvall
+         elseif (ptype.eq.rprm_par_str) then
+!     check value length
+            slena = len_trim(adjustl(cpval))
+!     remove trailing blanks
+            slen = len_trim(cpval) - slena + 1
+            if (slena.gt.rprm_lstl_mnm) then
+               call mntr_log(rprm_id,lp_deb,
+     $           'too long parameter default value; shortenning')
+               slena = min(slena,rprm_lstl_mnm)
+            endif
+            call blank(cvall,rprm_lstl_mnm)
+            cvall= cpval(slen:slen+slena- 1)
+!     broadcast pval; to keep consistency
+            call bcast(cvall,rprm_lstl_mnm*csize)
+            rprm_parv_str(ipos) = cvall
+         else
+            call mntr_abort(rprm_id,
+     $      "Parameter's "//trim(lname)//" wrong type")
+         endif
 
 !     logging
-         call mntr_mod_get_info(mname,ipos,mid)
-         llog='Module ['//trim(mname)//'] registered string parameter '
+         mname = trim(rprm_sec_name(mid))
+         llog='Section '//trim(mname)//' registered parameter '
          llog=trim(llog)//' '//trim(lname)//': '//trim(ldscr)
          call mntr_log(rprm_id,lp_inf,trim(llog))
-         call mntr_log(rprm_id,lp_inf,
-     $       'Default value '//trim(lname)//' = '//trim(lpval))
+         if (ptype.eq.rprm_par_int) then
+            call mntr_logi(rprm_id,lp_inf,
+     $       'Default value '//trim(lname)//' = ',ivall)
+         elseif (ptype.eq.rprm_par_real) then
+            call mntr_logr(rprm_id,lp_inf,
+     $       'Default value '//trim(lname)//' = ',rvall)
+         elseif (ptype.eq.rprm_par_log) then
+            call mntr_logl(rprm_id,lp_inf,
+     $       'Default value '//trim(lname)//' = ',lvall)
+         elseif (ptype.eq.rprm_par_str) then
+            call mntr_log(rprm_id,lp_inf,
+     $       'Default value '//trim(lname)//' = '//trim(cvall))
+         endif
       endif
 
       return
@@ -594,7 +523,7 @@
 !> @brief Check if parameter name is registered and return its id. Check flags as well.
 !! @ingroup runparam
 !! @param[out] rpid     runtime parameter id
-!! @param[in]  mid      registering module id
+!! @param[in]  mid      section id
 !! @param[in]  pname    parameter name
 !! @param[in]  ptype    parameter type
       subroutine rprm_rp_is_name_reg(rpid,mid,pname,ptype)
@@ -663,7 +592,7 @@
 !     check module
          if (mid.ne.rprm_par_id(rprm_par_mark,ipos)) then
             call mntr_log(rprm_id,lp_inf,
-     $      "Parameter's "//trim(lname)//" module inconsistent")
+     $      "Parameter's "//trim(lname)//" section inconsistent")
             rpid = -1
          endif
 !     check type
@@ -700,7 +629,7 @@
 !> @brief Get parameter info based on its id. This operation is performed locally
 !! @ingroup runparam
 !! @param[out]    pname    parameter name
-!! @param[out]    mid      registering module id
+!! @param[out]    mid      section id
 !! @param[out]    ptype    parameter type
 !! @param[inout]  rpid     runtime parameter id
       subroutine rprm_rp_get_info(pname,mid,ptype,rpid)
@@ -731,11 +660,15 @@
       return
       end subroutine
 !=======================================================================
-!> @brief Set integer variable. Master value is broadcasted.
+!> @brief Set runtime parameter of active section. Master value is broadcasted.
 !! @ingroup runparam
-!! @param[in]  pval     parameter value
 !! @param[in]  rpid     runtime parameter id
-      subroutine rprm_rp_int_set(pval,rpid)
+!! @param[in]  ptype    parameter type
+!! @param[in]  ipval    integer value
+!! @param[in]  rpval    real value
+!! @param[in]  lpval    logical value
+!! @param[in]  cpval    string value
+      subroutine rprm_rp_set(rpid,ptype,ipval,rpval,lpval,cpval)
       implicit none
 
       include 'SIZE'
@@ -744,18 +677,62 @@
       include 'MNTRLP'
 
 !     argument list
-      integer rpid, pval
+      integer rpid, ptype
+      integer ipval
+      real rpval
+      logical lpval
+      character*(*) cpval
 
 !     local variables
-      integer lval
+      integer ivall
+      real rvall
+      logical lvall
+      character*20 cvall
       character*5 str
+      integer slen,slena
+
 !-----------------------------------------------------------------------
       if (rprm_par_id(rprm_par_mark,rpid).gt.0.and.
-     $    rprm_par_id(rprm_par_type,rpid).eq.rprm_par_int) then
+     $    rprm_par_id(rprm_par_type,rpid).eq.ptype) then
+         if(rprm_sec_act(rprm_par_id(rprm_par_mark,rpid))) then
 !     broadcast pval; to keep consistency
-         lval = pval
-         call bcast(lval,isize)
-         rprm_parv_int(rpid) = lval
+            if (ptype.eq.rprm_par_int) then
+               ivall = ipval
+               call bcast(ivall,isize)
+               rprm_parv_int(rpid) = ivall
+            elseif (ptype.eq.rprm_par_real) then
+               rvall = rpval
+               call bcast(rvall,wdsize)
+               rprm_parv_real(rpid) = rvall
+            elseif (ptype.eq.rprm_par_log) then
+               lvall = lpval
+               call bcast(lvall,lsize)
+               rprm_parv_log(rpid) = lvall
+            elseif (ptype.eq.rprm_par_str) then
+!     check value length
+               slena = len_trim(adjustl(cpval))
+!     remove trailing blanks
+               slen = len_trim(cpval) - slena + 1
+               if (slena.gt.rprm_lstl_mnm) then
+                  call mntr_log(rprm_id,lp_deb,
+     $           'too long parameter value; shortenning')
+                  slena = min(slena,rprm_lstl_mnm)
+               endif
+               call blank(cvall,rprm_lstl_mnm)
+               cvall= cpval(slen:slen+slena- 1)
+!     broadcast pval; to keep consistency
+               call bcast(cvall,rprm_lstl_mnm*csize)
+               rprm_parv_str(rpid) = cvall
+            else
+               write(str,'(I3)') rpid
+               call mntr_abort(rprm_id,
+     $         "Parameter set "//trim(str)//" wrong type")
+            endif
+         else
+            write(str,'(I3)') rpid
+               call mntr_warn(rprm_id,
+     $         "Parameter set "//trim(str)//" section not active")
+         endif
       else
          write(str,'(I3)') rpid
          call mntr_abort(rprm_id,
@@ -765,116 +742,15 @@
       return
       end subroutine
 !=======================================================================
-!> @brief Set real variable. Master value is broadcasted.
+!> @brief Get runtime parameter form active section. This operation is performed locally
 !! @ingroup runparam
-!! @param[in]  pval     parameter value
-!! @param[in]  rpid     runtime parameter id
-      subroutine rprm_rp_real_set(pval,rpid)
-      implicit none
-
-      include 'SIZE'
-      include 'PARALLEL'
-      include 'RPRMD'
-      include 'MNTRLP'
-
-!     argument list
-      integer rpid
-      real pval
-
-!     local variables
-      real lval
-      character*5 str
-!-----------------------------------------------------------------------
-      if (rprm_par_id(rprm_par_mark,rpid).gt.0.and.
-     $    rprm_par_id(rprm_par_type,rpid).eq.rprm_par_real) then
-!     broadcast pval; to keep consistency
-         lval = pval
-         call bcast(lval,wdsize)
-         rprm_parv_real(rpid) = lval
-      else
-         write(str,'(I3)') rpid
-         call mntr_abort(rprm_id,
-     $          "Parameter "//trim(str)//" setting error")
-      endif
-
-      return
-      end subroutine
-!=======================================================================
-!> @brief Set logical variable. Master value is broadcasted.
-!! @ingroup runparam
-!! @param[in]  pval     parameter value
-!! @param[in]  rpid     runtime parameter id
-      subroutine rprm_rp_log_set(pval,rpid)
-      implicit none
-
-      include 'SIZE'
-      include 'PARALLEL'
-      include 'RPRMD'
-      include 'MNTRLP'
-
-!     argument list
-      integer rpid
-      logical pval
-
-!     local variables
-      logical lval
-      character*5 str
-!-----------------------------------------------------------------------
-      if (rprm_par_id(rprm_par_mark,rpid).gt.0.and.
-     $    rprm_par_id(rprm_par_type,rpid).eq.rprm_par_log) then
-!     broadcast pval; to keep consistency
-         lval = pval
-         call bcast(lval,lsize)
-         rprm_parv_log(rpid) = lval
-      else
-         write(str,'(I3)') rpid
-         call mntr_abort(rprm_id,
-     $          "Parameter "//trim(str)//" setting error")
-      endif
-
-      return
-      end subroutine
-!=======================================================================
-!> @brief Set string variable. Master value is broadcasted.
-!! @ingroup runparam
-!! @param[in]  pval     parameter value
-!! @param[in]  rpid     runtime parameter id
-      subroutine rprm_rp_str_set(pval,rpid)
-      implicit none
-
-      include 'SIZE'
-      include 'PARALLEL'
-      include 'RPRMD'
-      include 'MNTRLP'
-
-!     argument list
-      integer rpid
-      character*20 pval
-
-!     local variables
-      character*20 lval
-      character*5 str
-!-----------------------------------------------------------------------
-      if (rprm_par_id(rprm_par_mark,rpid).gt.0.and.
-     $    rprm_par_id(rprm_par_type,rpid).eq.rprm_par_str) then
-!     broadcast pval; to keep consistency
-         lval = pval
-         call bcast(lval,rprm_lstl_mnm*csize)
-         rprm_parv_str(rpid) = lval
-      else
-         write(str,'(I3)') rpid
-         call mntr_abort(rprm_id,
-     $          "Parameter "//trim(str)//" setting error")
-      endif
-
-      return
-      end subroutine
-!=======================================================================
-!> @brief Get integer variable. This operation is performed locally
-!! @ingroup runparam
-!! @param[out]  pval     parameter value
-!! @param[in]  rpid     runtime parameter id
-      subroutine rprm_rp_int_get(pval,rpid)
+!! @param[out]  ipval    integer value
+!! @param[out]  rpval    real value
+!! @param[out]  lpval    logical value
+!! @param[out]  cpval    string value
+!! @param[in]   rpid     runtime parameter id
+!! @param[in]   ptype    parameter type
+      subroutine rprm_rp_get(ipval,rpval,lpval,cpval,rpid,ptype)
       implicit none
 
       include 'SIZE'
@@ -882,104 +758,37 @@
       include 'MNTRLP'
 
 !     argument list
-      integer rpid, pval
+      integer rpid, ptype
+      integer ipval
+      real rpval
+      logical lpval
+      character*20 cpval
 
 !     local variables
       character*5 str
 !-----------------------------------------------------------------------
       if (rprm_par_id(rprm_par_mark,rpid).gt.0.and.
-     $    rprm_par_id(rprm_par_type,rpid).eq.rprm_par_int) then
-         pval=rprm_parv_int(rpid)
-      else
-         write(str,'(I3)') rpid
-         call mntr_abort(rprm_id,
-     $          "Parameter "//trim(str)//" getting error")
-      endif
+     $    rprm_par_id(rprm_par_type,rpid).eq.ptype) then
+         if(rprm_sec_act(rprm_par_id(rprm_par_mark,rpid))) then
 
-      return
-      end subroutine
-!=======================================================================
-!> @brief Get real variable. This operation is performed locally
-!! @ingroup runparam
-!! @param[out]  pval     parameter value
-!! @param[in]  rpid     runtime parameter id
-      subroutine rprm_rp_real_get(pval,rpid)
-      implicit none
-
-      include 'SIZE'
-      include 'RPRMD'
-      include 'MNTRLP'
-
-!     argument list
-      integer rpid
-      real pval
-
-!     local variables
-      character*5 str
-!-----------------------------------------------------------------------
-      if (rprm_par_id(rprm_par_mark,rpid).gt.0.and.
-     $    rprm_par_id(rprm_par_type,rpid).eq.rprm_par_real) then
-         pval=rprm_parv_real(rpid)
-      else
-         write(str,'(I3)') rpid
-         call mntr_abort(rprm_id,
-     $          "Parameter "//trim(str)//" getting error")
-      endif
-
-      return
-      end subroutine
-!=======================================================================
-!> @brief Get logical variable. This operation is performed locally
-!! @ingroup runparam
-!! @param[out]  pval     parameter value
-!! @param[in]  rpid     runtime parameter id
-      subroutine rprm_rp_log_get(pval,rpid)
-      implicit none
-
-      include 'SIZE'
-      include 'RPRMD'
-      include 'MNTRLP'
-
-!     argument list
-      integer rpid
-      logical pval
-
-!     local variables
-      character*5 str
-!-----------------------------------------------------------------------
-      if (rprm_par_id(rprm_par_mark,rpid).gt.0.and.
-     $    rprm_par_id(rprm_par_type,rpid).eq.rprm_par_log) then
-         pval=rprm_parv_log(rpid)
-      else
-         write(str,'(I3)') rpid
-         call mntr_abort(rprm_id,
-     $          "Parameter "//trim(str)//" getting error")
-      endif
-
-      return
-      end subroutine
-!=======================================================================
-!> @brief Get string variable. This operation is performed locally
-!! @ingroup runparam
-!! @param[out]  pval     parameter value
-!! @param[in]  rpid     runtime parameter id
-      subroutine rprm_rp_str_get(pval,rpid)
-      implicit none
-
-      include 'SIZE'
-      include 'RPRMD'
-      include 'MNTRLP'
-
-!     argument list
-      integer rpid
-      character*20 pval
-
-!     local variables
-      character*5 str
-!-----------------------------------------------------------------------
-      if (rprm_par_id(rprm_par_mark,rpid).gt.0.and.
-     $    rprm_par_id(rprm_par_type,rpid).eq.rprm_par_str) then
-         pval=rprm_parv_str(rpid)
+            if (ptype.eq.rprm_par_int) then
+               ipval = rprm_parv_int(rpid)
+            elseif (ptype.eq.rprm_par_real) then
+               rpval = rprm_parv_real(rpid)
+            elseif (ptype.eq.rprm_par_log) then
+               lpval = rprm_parv_log(rpid)
+            elseif (ptype.eq.rprm_par_str) then
+               cpval = rprm_parv_str(rpid)
+            else
+               write(str,'(I3)') rpid
+               call mntr_abort(rprm_id,
+     $      "Parameter get "//trim(str)//" wrong type")
+            endif
+         else
+            write(str,'(I3)') rpid
+            call mntr_warn(rprm_id,
+     $         "Parameter get "//trim(str)//" section not active")
+         endif
       else
          write(str,'(I3)') rpid
          call mntr_abort(rprm_id,
@@ -1002,14 +811,13 @@
 !     local variables
       integer il, jl, kl
       integer nkey, ifnd, i_out
-      integer nmod, max_id, pmid, mid
+      integer nmod, pmid
       character*132 key, lkey
       character*1024 val
-      logical ifoundm, ifoundp
+      logical ifoundm, ifoundp, ifact
       integer itmp
       real rtmp
 
-      character*10  mname
       character*20  lname
       character*132 ldscr
       character*200 llog
@@ -1021,9 +829,6 @@
 !     key number in dictionary
         call finiparser_getdictentries(nkey)
 
-!     registered module number
-        call mntr_mod_get_number(nmod,max_id)
-
         do il=1,nkey!rprm_par_mpos
 
 !     get a key
@@ -1033,20 +838,20 @@
 
 !     find section key belongs to
           ifoundm=.false.
-          do jl=1,max_id
-            mid = jl
-            call mntr_mod_get_info(mname,pmid,mid)
-            if (mid.ge.0) then
-              lname='_'//trim(adjustl(mname))
+          do jl=1,rprm_sec_mpos
+            if (rprm_sec_id(jl).gt.0) then
+              lname=trim(adjustl(rprm_sec_name(jl)))
               ifnd = index(key,trim(lname))
               if (ifnd.eq.1) then
+!     set section to active
+                rprm_sec_act(jl) = .true.
                 ifoundm=.true.
-!     skip section names
+!     looking for more than section name
                 if (trim(key).ne.trim(lname)) then
 !     add variable name
                   ifoundp =.false.
                   do kl=1,rprm_par_mpos
-                    if (rprm_par_id(rprm_par_mark,kl).eq.mid) then
+                    if (rprm_par_id(rprm_par_mark,kl).eq.jl) then
                       lkey = trim(lname)//':'//trim(rprm_par_name(kl))
                       if (trim(key).eq.trim(lkey)) then
                         ifoundp=.true.
@@ -1094,16 +899,19 @@
             endif
           enddo
           if (.not.ifoundm) then
-          ! possible palce for worning that section not found
+          ! possible palce for warning that section not found
           endif
         enddo
       endif
 
 !     broadcast array data
-      call bcast(rprm_parv_int,rprm_id_max*isize)
-      call bcast(rprm_parv_real,rprm_id_max*wdsize)
-      call bcast(rprm_parv_log,rprm_id_max*lsize)
-      call bcast(rprm_parv_str,rprm_id_max*rprm_lstl_mnm*csize)
+      call bcast(rprm_parv_int,rprm_par_id_max*isize)
+      call bcast(rprm_parv_real,rprm_par_id_max*wdsize)
+      call bcast(rprm_parv_log,rprm_par_id_max*lsize)
+      call bcast(rprm_parv_str,rprm_par_id_max*rprm_lstl_mnm*csize)
+
+! broadcast activation lfag
+      call bcast(rprm_sec_act,rprm_sec_id_max*lsize)
 
       return
       end subroutine

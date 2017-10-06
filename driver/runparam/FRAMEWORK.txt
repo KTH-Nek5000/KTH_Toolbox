@@ -12,21 +12,17 @@ This module builds global parameter database for all registered tools.
 @mod_interface
 @interface_list Interface provided:
 -# @ref rprm_register
--# @ref rprm_rp_int_reg
--# @ref rprm_rp_real_reg
--# @ref rprm_rp_log_reg
--# @ref rprm_rp_str_reg
+-# @ref rprm_sec_reg
+-# @ref rprm_sec_is_name_reg
+-# @ref rprm_sec_is_id_reg
+-# @ref rprm_sec_get_info
+-# @ref rprm_sec_is_id_act
+-# @ref rprm_sec_set_act
 -# @ref rprm_rp_is_name_reg
 -# @ref rprm_rp_is_id_reg
 -# @ref rprm_rp_get_info
--# @ref rprm_rp_int_set
--# @ref rprm_rp_real_set
--# @ref rprm_rp_log_set
--# @ref rprm_rp_str_set
--# @ref rprm_rp_int_get
--# @ref rprm_rp_real_get
--# @ref rprm_rp_log_get
--# @ref rprm_rp_str_get
+-# @ref rprm_rp_set
+-# @ref rprm_rp_get
 -# @ref rprm_dict_get
 -# @ref rprm_check
 
