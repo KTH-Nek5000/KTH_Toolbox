@@ -12,6 +12,18 @@
 !     initialisation flag
       logical rprm_ifinit
 
+!     runtime parameter part
+!     this section id
+      integer rprm_lsec_id
+
+!     write .par file + parameter id
+      logical rprm_ifparf
+      integer rprm_ifparf_id
+      
+!     .par file name (without .par)
+      character*20 rprm_parfnm
+      integer rprm_parfnm_id
+
 !     master node for runtime parameter reading
       integer rprm_pid0
 
@@ -70,7 +82,8 @@
 
 !     common blocks
 !     integer variables
-      common /RPRMI/ rprm_id, rprm_pid0, rprm_sec_num, rprm_sec_mpos, 
+      common /RPRMI/ rprm_id, rprm_lsec_id, rprm_ifparf_id, 
+     $      rprm_parfnm_id, rprm_pid0, rprm_sec_num, rprm_sec_mpos, 
      $      rprm_sec_id, rprm_par_num, rprm_par_mpos, rprm_par_id, 
      $      rprm_parv_int
 
@@ -78,9 +91,10 @@
       common /RPRMR/ rprm_parv_real
       
 !     logical variables
-      common /RPRML/ rprm_ifinit, rprm_sec_act, rprm_parv_log
+      common /RPRML/ rprm_ifinit, rprm_ifparf, rprm_sec_act, 
+     $       rprm_parv_log
       
 !     string variables
-      common /RPRMC/ rprm_sec_name, rprm_sec_dscr, rprm_par_name, 
-     $       rprm_par_dscr, rprm_parv_str
+      common /RPRMC/ rprm_parfnm, rprm_sec_name, rprm_sec_dscr, 
+     $       rprm_par_name, rprm_par_dscr, rprm_parv_str
  

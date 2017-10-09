@@ -6,12 +6,16 @@
 !=======================================================================
 !> @brief Initialise monitor by registering Nek5000 and monitor
 !! @ingroup monitor
-      subroutine mntr_register_mod
+!! @param[in]  log_thr   initial log threshold
+      subroutine mntr_register_mod(log_thr)
       implicit none
 
       include 'SIZE'
       include 'MNTRD'
       include 'MNTRLP'
+
+!     argument list
+      integer log_thr
 
 !     local variables
       character*2 str
@@ -34,7 +38,7 @@
       mntr_mod_mpos = mntr_mod_mpos + 1
 
 !     set log threshold
-      mntr_lp_def = lp_inf
+      mntr_lp_def = log_thr
 
 !     log changes
       lstring = 'Registered module ['//trim(mntr_mod_name(mntr_nek_id))
@@ -70,12 +74,12 @@
 !-----------------------------------------------------------------------
 !     register and set active section
       call rprm_sec_reg(mntr_sec_id,mntr_id,'_'//adjustl(mntr_name),
-     $     'Runtime paramere section for monitor module')
+     $     'Runtime parameter section for monitor module')
       call rprm_sec_set_act(.true.,mntr_sec_id)
 
 !     register parameters
       call rprm_rp_reg(mntr_lp_def_id,mntr_sec_id,'LOGLEVEL',
-     $     'Logging threshold for toolboxes',rprm_par_int,lp_inf,
+     $     'Logging threshold for toolboxes',rprm_par_int,mntr_lp_def,
      $      0.0,.false.,' ')
 
       return
@@ -105,8 +109,39 @@
       call mntr_log(mntr_id,lp_inf,
      $     'Reseting log threshold to: '//trim(str))
 
+!     write summary
+      call mntr_mod_summary_print()
+
+      mntr_ifinit = .true.
+
       return
       end subroutine
+!=======================================================================
+!> @brief Check if module was initialised
+!! @ingroup monitor
+!! @return mntr_is_initialised
+      logical function mntr_is_initialised()
+
+      include 'SIZE'
+      include 'MNTRD'
+!-----------------------------------------------------------------------
+      mntr_is_initialised = mntr_ifinit
+
+      return
+      end function
+!=======================================================================
+!> @brief Get logging threashold
+!! @ingroup monitor
+!! @return mntr_lp_def_get
+      integer function mntr_lp_def_get()
+
+      include 'SIZE'
+      include 'MNTRD'
+!-----------------------------------------------------------------------
+      mntr_lp_def_get = mntr_lp_def
+
+      return
+      end function
 !=======================================================================
 !> @brief Register new module
 !! @ingroup monitor
@@ -294,6 +329,7 @@
 !> @brief Check if module id is registered. This operation is performed locally
 !! @ingroup monitor
 !! @param[in] mid      module id
+!! @return mntr_mod_is_id_reg
       logical function mntr_mod_is_id_reg(mid)
       implicit none
 
@@ -620,4 +656,154 @@
       return
       end subroutine
 !=======================================================================
+!> @brief Print registered modules showing tree structure
+!! @ingroup monitor
+      subroutine mntr_mod_summary_print()
+      implicit none
 
+      include 'SIZE'
+      include 'MNTRD'
+      include 'MNTRLP'
+
+!     local variables
+      integer il
+      integer olist(2,mntr_id_max), ierr
+      character*25 ftm
+      character*3 str
+!-----------------------------------------------------------------------
+      call mntr_log(mntr_id,lp_prd,
+     $         'Summary of registered modules')
+
+      if (nid.eq.mntr_pid0) then
+!     get ordered list
+         call mntr_get_olist(olist, ierr)
+
+
+         if(ierr.eq.0.and.mntr_lp_def.le.lp_prd) then
+            do il=1,mntr_mod_num
+               write(str,'(I3)') 4*(olist(2,il))
+               ftm = '('//trim(str)//'X,"[",A,"] : ",A)'
+               write(*,ftm) mntr_mod_name(olist(1,il)),
+     $                mntr_mod_dscr(olist(1,il))
+            enddo
+         endif
+      endif
+
+      return
+      end subroutine
+!=======================================================================
+!> @brief Provide ordered list of registered modules for printing.
+!! @ingroup monitor
+!! @param[out]   olist    ordered list
+!! @param[out]   ierr     error flag
+      subroutine mntr_get_olist(olist,ierr)
+      implicit none
+
+      include 'SIZE'
+      include 'MNTRD'
+      include 'MNTRLP'
+
+!     argument list
+      integer olist(2,mntr_id_max), ierr
+
+!     local variables
+      integer ind(mntr_id_max), level, parent, ipos
+      integer slist(2,mntr_id_max), itmp1(2)
+      integer npos, key
+      integer il, jl
+      integer istart, in, itest
+!-----------------------------------------------------------------------
+      ierr = 0
+
+!     sort module index array
+!     copy data removing possible empty slots
+      npos=0
+      do il=1,mntr_mod_mpos
+         if (mntr_mod_id(il).ge.0) then
+            npos = npos + 1
+            slist(1,npos) = mntr_mod_id(il)
+            slist(2,npos) = il
+         endif
+      enddo
+      if(npos.ne.mntr_mod_num) then
+         ierr = 1
+         call mntr_log(mntr_id,lp_inf,
+     $         'Inconsistent module number; return')
+         return
+      endif
+
+!     sort with respect to parent id
+      key = 1
+      call ituple_sort(slist,2,npos,key,1,ind,itmp1)
+
+!     sort within children of single parent with respect to children id
+      istart = 1
+      itest = slist(1,istart)
+      do il=1,npos
+         if(itest.ne.slist(1,il).or.il.eq.npos) then
+           if (il.eq.npos.and.itest.eq.slist(1,il)) then
+              jl = npos + 1
+           else
+              jl = il
+           endif
+           in = jl - istart
+           if (itest.eq.0.and.in.ne.1) then
+              call mntr_log(mntr_id,lp_inf,
+     $         'Must be single root of the graph; return')
+              return
+           endif
+           if (in.gt.1) then
+              key = 2
+              call ituple_sort(slist(1,istart),2,in,key,1,ind,itmp1)
+           endif
+           if (il.ne.npos) then
+              itest = slist(1,il)
+              istart = il
+           endif
+         endif
+      enddo
+
+      parent = 0
+      level = 0
+      ipos = 1
+      call mntr_build_ord_list(olist,slist,npos,ipos,parent,level)
+
+      return
+      end subroutine
+!=======================================================================
+!> @brief Build ordered list reflecting graph structure
+!! @ingroup monitor
+!! @param[out]   olist    ordered list
+!! @param[inout] slist    list sorted with respect to parent
+!! @param[in]    nlist    lists length
+!! @param[inout] npos     position in olist array
+!! @param[in]    parent   parent id
+!! @param[in]    level    parent level
+      recursive subroutine mntr_build_ord_list(olist,slist,nlist,npos,
+     $     parent,level)
+      implicit none
+
+!     argument list
+      integer nlist, npos, parent, level
+      integer olist(2,nlist),slist(2,nlist)
+
+!     local variables
+      integer il
+      integer lparent, llevel
+!-----------------------------------------------------------------------
+      llevel = level + 1
+      do il=1, nlist
+         if (slist(1,il).eq.parent) then
+            slist(1,il) = - parent
+            lparent = slist(2,il)
+            olist(1,npos) = lparent
+            olist(2,npos) = llevel
+            npos = npos +1
+            call mntr_build_ord_list(olist,slist,nlist,npos,lparent,
+     $           llevel)
+         endif
+      enddo
+
+      return
+      end subroutine
+!=======================================================================

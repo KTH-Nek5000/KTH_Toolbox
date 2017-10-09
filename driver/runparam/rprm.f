@@ -4,7 +4,7 @@
 !! @author Adam Peplinski
 !! @date Feb 5, 2017
 !=======================================================================
-!> @brief Initialise runtime parameters database
+!> @brief Register runtime parameters database
 !! @ingroup runparam
       subroutine rprm_register
       implicit none
@@ -26,10 +26,86 @@
      $        'ERROR: parent module ['//'NEK5000'//'] not registered')
       endif
 
+!     register and set active section
+      call rprm_sec_reg(rprm_lsec_id,rprm_id,'_'//adjustl(rprm_name),
+     $     'Runtime parameter section for rprm module')
+      call rprm_sec_set_act(.true.,rprm_lsec_id)
+
+!     register parameters
+      call rprm_rp_reg(rprm_ifparf_id,rprm_lsec_id,'PARFWRITE',
+     $     'Do we write runtime parameter file',rprm_par_log,0,
+     $      0.0,.false.,' ')
+
+      call rprm_rp_reg(rprm_parfnm_id,rprm_lsec_id,'PARFNAME',
+     $   'Runtime parameter file name for output (without .par)',
+     $   rprm_par_str,0,0.0,.false.,'outparfile')
+
+      return
+      end subroutine
+!=======================================================================
+!> @brief Initialise modules runtime parameters and write summary
+!! @ingroup runparam
+      subroutine rprm_init
+      implicit none
+
+      include 'SIZE'
+      include 'RPRMD'
+      include 'MNTRLP'
+
+!     local variables
+      integer itmp
+      real rtmp
+      logical ltmp
+      character*20 ctmp
+      integer iunit, ierr
+      character*30 fname
+!-----------------------------------------------------------------------
+!     get runtime parameters
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,rprm_ifparf_id,rprm_par_log)
+      rprm_ifparf = ltmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,rprm_parfnm_id,rprm_par_str)
+      rprm_parfnm = ctmp
+
+!     write summary
+      iunit = 6
+      call rprm_rp_summary_print(iunit)
+
+!     save .par file
+      if (rprm_ifparf) then
+         call io_file_freeid(iunit, ierr)
+         if (ierr.eq.0) then
+           fname=trim(adjustl(rprm_parfnm))//'.par'
+           open(unit=iunit,file=fname,status='new',iostat=ierr)
+           if (ierr.eq.0) then
+             call rprm_rp_summary_print(iunit)
+             close (iunit)
+           else
+             call mntr_log(rprm_id,lp_inf,
+     $        'ERROR: cannot open output .par file')
+           endif
+         else
+           call mntr_log(rprm_id,lp_inf,
+     $        'ERROR: cannot allocate iunit for output .par file')
+         endif
+      endif
+
       rprm_ifinit = .true.
 
       return
       end subroutine
+!=======================================================================
+!> @brief Check if module was initialised
+!! @ingroup monitor
+!! @return rprm_is_initialised
+      logical function rprm_is_initialised()
+
+      include 'SIZE'
+      include 'RPRMD'
+!-----------------------------------------------------------------------
+      rprm_is_initialised = rprm_ifinit
+
+      return
+      end function
 !=======================================================================
 !> @brief Register new parameter section
 !! @ingroup runparam
@@ -233,6 +309,7 @@
 !> @brief Check if section id is registered. This operation is performed locally
 !! @ingroup runparam
 !! @param[in]  rpid     section id
+!! @return rprm_sec_is_id_reg
       logical function rprm_sec_is_id_reg(rpid)
       implicit none
 
@@ -326,6 +403,7 @@
 !> @brief Check if section id is registered and activated. This operation is performed locally
 !! @ingroup runparam
 !! @param[in]  rpid     section id
+!! @return rprm_sec_id_id_act
       logical function rprm_sec_is_id_act(rpid)
       implicit none
 
@@ -610,6 +688,7 @@
 !! @ingroup runparam
 !! @param[in]  rpid     runtime parameter id
 !! @param[in]  ptype    parameter type
+!! @return rprm_rp_is_id_reg
       logical function rprm_rp_is_id_reg(rpid,ptype)
       implicit none
 
@@ -912,6 +991,144 @@
 
 ! broadcast activation lfag
       call bcast(rprm_sec_act,rprm_sec_id_max*lsize)
+
+      return
+      end subroutine
+!=======================================================================
+!> @brief Print out summary of registered runtime parameters (active sections only)
+!! @ingroup runparam
+!! @param[in]  unit   I/O unit (6 - standard I/O)
+      subroutine rprm_rp_summary_print(unit)
+      implicit none
+
+      include 'SIZE'
+      include 'RPRMD'
+      include 'MNTRLP'
+
+!     argument list
+      integer unit
+
+!     local variables
+      integer ind(rprm_par_id_max)
+      integer offset(2,rprm_par_id_max)
+      integer slist(2,rprm_par_id_max), itmp1(2)
+      integer npos, nset, key
+      integer il, jl
+      integer istart, in, itest
+      character*20 str
+      character*22 sname
+      character*(*) cmnt
+      parameter (cmnt='#')
+
+!     functions
+      integer mntr_lp_def_get
+!-----------------------------------------------------------------------
+      if (unit.eq.6) then
+         call mntr_log(rprm_id,lp_prd,
+     $   'Summary of registered runtime parameters for active sections')
+      else
+         call mntr_log(rprm_id,lp_prd,
+     $   'Generated .par file for active sections')
+      endif
+
+      if (nid.eq.rprm_pid0) then
+
+!     sort module index array
+!     copy data removing possible empty slots
+         npos=0
+         do il=1,rprm_par_mpos
+            in = rprm_par_id(rprm_par_mark,il)
+            if (in.ge.0.and.rprm_sec_act(in)) then
+               npos = npos + 1
+               slist(1,npos) = in
+               slist(2,npos) = il
+            endif
+         enddo
+
+!     sort with respect to section id
+         key = 1
+         call ituple_sort(slist,2,npos,key,1,ind,itmp1)
+
+!     sort parameters in single section with respect to parameter id
+         nset = 0
+         istart = 1
+         itest = slist(1,istart)
+         do il=1,npos
+            if(itest.ne.slist(1,il).or.il.eq.npos) then
+              if (il.eq.npos.and.itest.eq.slist(1,il)) then
+                 jl = npos + 1
+              else
+                 jl = il
+              endif
+              in = jl - istart
+              if (in.gt.1) then
+                 key = 2
+                 call ituple_sort(slist(1,istart),2,in,key,1,ind,itmp1)
+              endif
+              nset = nset +1
+              offset(1,nset) = istart
+              offset(2,nset) = in
+              if (il.ne.npos) then
+                 itest = slist(1,il)
+                 istart = il
+              elseif(itest.ne.slist(1,il)) then
+                 nset = nset +1
+                 offset(1,nset) = il
+                 offset(2,nset) = 1
+              endif
+            endif
+         enddo
+
+         if (mntr_lp_def_get.le.lp_prd.or.unit.ne.6) then
+           if (unit.ne.6) then
+             write(unit,'(A)') cmnt
+             write(unit,'(A,A)') cmnt,
+     $            ' runtime parameter file generated by'
+             write(unit,'(A,A)') cmnt,' rprm_rp_summary_print'
+             write(unit,'(A)') cmnt
+           endif
+           do il=1,nset
+             istart = offset(1,il)
+             in = offset(2,il)
+             key = rprm_sec_id(slist(1,istart))
+             sname = '['//trim(rprm_sec_name(slist(1,istart)))//']'
+             write(unit,'(A)') cmnt
+             write(unit,'(A,A)') sname,
+     $   '  '//cmnt//' '//trim(adjustl(rprm_sec_dscr(slist(1,istart))))
+             do jl = 0, in-1
+               key = slist(2,istart+jl)
+               if (rprm_par_id(rprm_par_type,key).eq.
+     $             rprm_par_int) then
+                 write(str,'(I8)') rprm_parv_int(key)
+               elseif (rprm_par_id(rprm_par_type,key).eq.
+     $             rprm_par_real) then
+                 write(str,'(E15.8)') rprm_parv_real(key)
+               elseif (rprm_par_id(rprm_par_type,key).eq.
+     $             rprm_par_log) then
+                 if (rprm_parv_log(key)) then
+                   str = 'yes'
+                 else
+                   str = 'no'
+                 endif
+               elseif (rprm_par_id(rprm_par_type,key).eq.
+     $             rprm_par_str) then
+                 str = rprm_parv_str(key)
+               endif
+               write(unit,'(A," = ",A,A)')
+     $           rprm_par_name(key), adjustl(str),
+     $           '   '//cmnt//' '//trim(adjustl(rprm_par_dscr(key)))
+             enddo
+           enddo
+           if (unit.ne.6) then
+             write(unit,'(A)') cmnt
+             write(unit,'(A,A)') cmnt,' end of runtime parameter file'
+             write(unit,'(A)') cmnt
+           else
+             write(unit,'(A1)') ' '
+           endif
+         endif
+      endif
+
 
       return
       end subroutine
