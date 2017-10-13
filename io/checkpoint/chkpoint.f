@@ -13,7 +13,7 @@
 
       include 'SIZE'
       include 'RPRMD'
-      include 'MNTRLP'
+      include 'FRAMELP'
       include 'CHKPOINTD'
 
 !     local variables
@@ -66,7 +66,7 @@
 
       include 'SIZE'
       include 'RPRMD'
-      include 'MNTRLP'
+      include 'FRAMELP'
       include 'CHKPOINTD'
 
 !     local variables
@@ -75,6 +75,9 @@
       real rtmp
       logical ltmp
       character*20 ctmp
+
+!     functions
+      logical chkpts_is_initialised
 !-----------------------------------------------------------------------
 !     get runtime parameters
       call rprm_rp_get(itmp,rtmp,ltmp,ctmp,chpt_ifrst_id,rprm_par_log)
@@ -107,10 +110,25 @@
 !     call submodule initialisation
       call chkpts_init
 
-      chpt_ifinit=.true.
+!     is everything initialised
+      if (chkpts_is_initialised) chpt_ifinit=.true.
 
       return
       end
+!=======================================================================
+!> @brief Check if module was initialised
+!! @ingroup chkpoint
+!! @return chkpt_is_initialised
+      logical function chkpt_is_initialised()
+      implicit none
+
+      include 'SIZE'
+      include 'CHKPOINTD'
+!-----------------------------------------------------------------------
+      chkpt_is_initialised = chpt_ifinit
+
+      return
+      end function
 !=======================================================================
 !> @brief Main checkpoint interface
 !! @ingroup chkpoint
@@ -120,7 +138,7 @@
 
       include 'SIZE'
       include 'CHKPOINTD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !-----------------------------------------------------------------------
       if(chpt_ifrst) then

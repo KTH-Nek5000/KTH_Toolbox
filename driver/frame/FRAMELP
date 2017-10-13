@@ -1,4 +1,4 @@
-!> @file MNTRLP
+!> @file FRAMELP
 !! @ingroup monitor
 !! @brief Include file for monitor module including log priorities 
 !! @author Adam Peplinski

@@ -1,0 +1,86 @@
+#Configuration file for Nek5000 framework developed at KTH
+# Place for short description; doxygen style
+/**
+@defgroup frame  Frame module
+@ingroup driver
+
+@brief Backbone for toolboxes
+
+@details 
+Frame module provides backbone of the whole framework consisting of dynamical 
+(as much as fortran 77 allows for it) databases for registered modules, runtime
+parameters and timers. This supposed to simplify interactions between different 
+modules, logging and operations on runtime parameters. To provides interfaces
+for intialisation and finalisation of framework. This module provides as well 
+include file FRAMELP defining log priorities. This module as well allows to 
+set the initial log threshold by reading enviromental variable FRAMELOGL.
+For bash shell this variable can be set by:
+@code{.sh}
+FRAMELOGL = 5
+export FRAMELOGL
+@code
+
+@mod_interface
+@interface_list Interface provided:
+-# @ref frame_start
+-# @ref frame_rparam
+-# @ref frame_end
+-# @ref frame_get_master
+
+@par
+@interface_reqr Interface required:
+-# mntr_register_mod
+-# mntr_register_par
+-# mntr_init
+-# rprm_register
+-# rprm_dict_get
+-# rprm_init
+
+@mod_interface_example
+@code{.f}
+      subroutine userchk
+      include 'TSTEP'
+      
+      if (ISTEP.eq.0) then
+!     start framework
+         call frame_start
+!     register modules
+
+!     get runtime parameters
+         call frame_rparam
+!     initialise modules
+
+      endif
+
+!     finalise framework
+      if (ISTEP.ge.NSTEPS.or.LASTEP.eq.1) then
+         call frame_end
+      endif
+
+      return
+      end
+@endcode
+
+*/
+#List of existing submodules
+SUBMODULES monitor \
+           runparam
+
+#List of conflicting submodules
+EXCLUSIVE
+
+#Default submodules
+DEFAULT monitor \
+        runparam
+
+#List of conflicting modules
+CONFLICTS
+
+#List of required modules
+REQUIRED io/io_tools
+
+#List of object files
+OBJECT frame.o
+
+#List of include files
+INCLUDE  FRAMELP

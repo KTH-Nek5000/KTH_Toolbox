@@ -14,7 +14,7 @@
       include 'SIZE'
       include 'CHKPOINTD'
       include 'CHKPTMSTPD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     local variables
       integer lpmid
@@ -45,11 +45,9 @@
       include 'SIZE'            ! NID, NPERT
       include 'TSTEP'           ! ISTEP, NSTEPS
       include 'INPUT'           ! IFPERT, PARAM
-      include 'MNTRLP'
-      include 'CHKPOINTD'       ! chpt_step, chpt_ifrst, chpt_fnum
-      include 'CHKPTMSTPD'      ! chpm_set_o, chpm_set_i, chpm_snmax,
-                                ! chpm_nset, chpm_nsnap
-
+      include 'FRAMELP'
+      include 'CHKPOINTD'
+      include 'CHKPTMSTPD'
 
 !     local variables
       integer itmp
@@ -118,6 +116,20 @@
 
       return
       end
+!=======================================================================
+!> @brief Check if module was initialised
+!! @ingroup chkpoint_mstep
+!! @return chkpts_is_initialised
+      logical function chkpts_is_initialised()
+      implicit none
+
+      include 'SIZE'
+      include 'CHKPTMSTPD'
+!-----------------------------------------------------------------------
+      chkpts_is_initialised = chpm_ifinit
+
+      return
+      end function
 !=======================================================================
 !> @brief Write full file restart set
 !! @ingroup chkpoint_mstep

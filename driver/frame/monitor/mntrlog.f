@@ -12,7 +12,7 @@
 
       include 'SIZE'
       include 'MNTRLOGD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer log_thr
@@ -64,7 +64,7 @@
       include 'SIZE'
       include 'RPRMD'
       include 'MNTRLOGD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     local variables
       integer rpid,itmp
@@ -93,7 +93,7 @@
       include 'SIZE'
       include 'RPRMD'
       include 'MNTRLOGD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     local variables
       integer itmp
@@ -121,6 +121,7 @@
 !! @ingroup monitor
 !! @return mntr_is_initialised
       logical function mntr_is_initialised()
+      implicit none
 
       include 'SIZE'
       include 'MNTRLOGD'
@@ -155,7 +156,7 @@
       include 'SIZE'
       include 'PARALLEL'        ! ISIZE
       include 'MNTRLOGD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer mid, pmid
@@ -268,7 +269,7 @@
       include 'SIZE'
       include 'PARALLEL'        ! ISIZE
       include 'MNTRLOGD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer mid
@@ -336,7 +337,7 @@
       include 'SIZE'
       include 'PARALLEL'
       include 'MNTRLOGD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer mid
@@ -375,7 +376,7 @@
 
       include 'SIZE'
       include 'MNTRLOGD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       character*10 mname
@@ -407,7 +408,7 @@
 
       include 'SIZE'
       include 'MNTRLOGD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer mid,priority
@@ -462,7 +463,7 @@
 
       include 'SIZE'
       include 'MNTRLOGD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer mid,priority, prid
@@ -580,7 +581,7 @@
       subroutine mntr_warn(mid,logs)
       implicit none
 
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer mid,priority
@@ -597,7 +598,7 @@
       subroutine mntr_error(mid,logs)
       implicit none
 
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer mid
@@ -614,7 +615,7 @@
       subroutine mntr_abort(mid,logs)
       implicit none
 
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer mid
@@ -633,7 +634,7 @@
       subroutine mntr_check_abort(mid,ierr,logs)
       implicit none
 
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer mid,ierr
@@ -663,7 +664,7 @@
 
       include 'SIZE'
       include 'MNTRLOGD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     local variables
       integer il
@@ -701,7 +702,7 @@
 
       include 'SIZE'
       include 'MNTRLOGD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer olist(2,mntr_id_max), ierr

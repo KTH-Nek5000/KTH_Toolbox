@@ -10,7 +10,7 @@
       implicit none
 
       include 'SIZE'
-      include 'MNTRLP'
+      include 'FRAMELP'
       include 'RPRMD'
 
 !     local variables
@@ -50,7 +50,7 @@
 
       include 'SIZE'
       include 'RPRMD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     local variables
       integer itmp
@@ -98,6 +98,7 @@
 !! @ingroup runparam
 !! @return rprm_is_initialised
       logical function rprm_is_initialised()
+      implicit none
 
       include 'SIZE'
       include 'RPRMD'
@@ -119,7 +120,7 @@
       include 'SIZE'
       include 'PARALLEL'        ! ISIZE
       include 'RPRMD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer rpid, mid
@@ -238,7 +239,7 @@
       include 'SIZE'
       include 'PARALLEL'        ! ISIZE
       include 'RPRMD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer rpid, mid
@@ -315,7 +316,7 @@
 
       include 'SIZE'
       include 'RPRMD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer rpid
@@ -336,7 +337,7 @@
 
       include 'SIZE'
       include 'RPRMD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer rpid, mid
@@ -376,7 +377,7 @@
       include 'SIZE'
       include 'PARALLEL'
       include 'RPRMD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer rpid
@@ -409,7 +410,7 @@
 
       include 'SIZE'
       include 'RPRMD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer rpid
@@ -438,7 +439,7 @@
       include 'SIZE'
       include 'PARALLEL'        ! ISIZE
       include 'RPRMD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer rpid, mid, ptype, ipval
@@ -610,7 +611,7 @@
       include 'SIZE'
       include 'PARALLEL'        ! ISIZE
       include 'RPRMD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer rpid, mid, ptype
@@ -694,7 +695,7 @@
 
       include 'SIZE'
       include 'RPRMD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer rpid, ptype
@@ -716,7 +717,7 @@
 
       include 'SIZE'
       include 'RPRMD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer rpid, mid, ptype
@@ -753,7 +754,7 @@
       include 'SIZE'
       include 'PARALLEL'
       include 'RPRMD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer rpid, ptype
@@ -834,7 +835,7 @@
 
       include 'SIZE'
       include 'RPRMD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer rpid, ptype
@@ -885,7 +886,7 @@
       include 'SIZE'
       include 'PARALLEL'
       include 'RPRMD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     local variables
       integer il, jl, kl
@@ -1003,7 +1004,7 @@
 
       include 'SIZE'
       include 'RPRMD'
-      include 'MNTRLP'
+      include 'FRAMELP'
 
 !     argument list
       integer unit

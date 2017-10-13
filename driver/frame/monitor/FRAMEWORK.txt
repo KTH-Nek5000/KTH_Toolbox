@@ -1,8 +1,8 @@
 #Configuration file for Nek5000 framework developed at KTH
 # Place for short description; doxygen style
 /**
-@defgroup monitor  Simulation monitoring module
-@ingroup driver
+@defgroup monitor  Monitoring module
+@ingroup frame
 
 @brief Monitoring routines for toolboxes
 
@@ -13,9 +13,11 @@ dynamical databases.
 
 @mod_interface
 @interface_list Interface provided:
--# @ref mntr_register_mod
--# @ref mntr_register_par
--# @ref mntr_init
+-# @ref mntr_register_mod (to [frame] (@ref frame))
+-# @ref mntr_register_par (to [frame] (@ref frame))
+-# @ref mntr_init (to [frame] (@ref frame))
+-# @ref mntr_is_initialised
+-# @ref mntr_lp_def_get
 -# @ref mntr_mod_reg
 -# @ref mntr_mod_is_name_reg
 -# @ref mntr_mod_is_id_reg
@@ -30,6 +32,19 @@ dynamical databases.
 -# @ref mntr_error
 -# @ref mntr_abort
 -# @ref mntr_check_abort
+-# @ref mntr_mod_summary_print (to [frame] (@ref frame))
+
+@mod_param
+@param_list Parameters provided by monitor module (include file - \a MNTRLOGD): 
+|Varaible | Type | Runtime parameter | Default value | Description |
+|---------|------|-------------------|---------------|-------------|
+| mntr_lp_def | integer | _monitor:loglevel | lp_inf | Logging threshold for toolboxes |
+
+@mod_param_example
+@code{.txt}
+[_MONITOR]
+LOGLEVEL = 4
+@endcode
 
 */
 #List of existing submodules
@@ -48,8 +63,8 @@ CONFLICTS
 REQUIRED
 
 #List of object files
-OBJECT mntr_block.o \
-       mntr.o
+OBJECT mntrlog_block.o \
+       mntrlog.o
 
 #List of include files
-INCLUDE MBNTRD
+INCLUDE MBNTRLOGD
