@@ -1,4 +1,4 @@
-!> @file mntr_block.f
+!> @file mntrlog_block.f
 !! @ingroup monitor
 !! @brief Block data to initialise common block for monitoring module
 !! @details Following Nek5000 standard I keep block data in seaprate file.
@@ -6,7 +6,7 @@
 !! @date Sep 28, 2017
 !=======================================================================
       block data mntr_common_init
-      include 'MNTRD'
+      include 'MNTRLOGD'
 
       data mntr_ifinit /.false./
       data mntr_pid0 /0/

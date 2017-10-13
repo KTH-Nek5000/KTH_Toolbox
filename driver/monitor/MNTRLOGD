@@ -1,4 +1,4 @@
-!> @file MNTRD
+!> @file MNTRLOGD
 !! @ingroup monitor
 !! @brief Include file for monitor module 
 !! @author Adam Peplinski

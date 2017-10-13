@@ -1,4 +1,4 @@
-!> @file mntr.f
+!> @file mntrlog.f
 !! @ingroup monitor
 !! @brief Set of monitoring routines for KTH framework
 !! @author Adam Peplinski
@@ -11,7 +11,7 @@
       implicit none
 
       include 'SIZE'
-      include 'MNTRD'
+      include 'MNTRLOGD'
       include 'MNTRLP'
 
 !     argument list
@@ -63,7 +63,7 @@
 
       include 'SIZE'
       include 'RPRMD'
-      include 'MNTRD'
+      include 'MNTRLOGD'
       include 'MNTRLP'
 
 !     local variables
@@ -92,7 +92,7 @@
 
       include 'SIZE'
       include 'RPRMD'
-      include 'MNTRD'
+      include 'MNTRLOGD'
       include 'MNTRLP'
 
 !     local variables
@@ -123,7 +123,7 @@
       logical function mntr_is_initialised()
 
       include 'SIZE'
-      include 'MNTRD'
+      include 'MNTRLOGD'
 !-----------------------------------------------------------------------
       mntr_is_initialised = mntr_ifinit
 
@@ -136,7 +136,7 @@
       integer function mntr_lp_def_get()
 
       include 'SIZE'
-      include 'MNTRD'
+      include 'MNTRLOGD'
 !-----------------------------------------------------------------------
       mntr_lp_def_get = mntr_lp_def
 
@@ -154,7 +154,7 @@
 
       include 'SIZE'
       include 'PARALLEL'        ! ISIZE
-      include 'MNTRD'
+      include 'MNTRLOGD'
       include 'MNTRLP'
 
 !     argument list
@@ -267,7 +267,7 @@
 
       include 'SIZE'
       include 'PARALLEL'        ! ISIZE
-      include 'MNTRD'
+      include 'MNTRLOGD'
       include 'MNTRLP'
 
 !     argument list
@@ -335,7 +335,7 @@
 
       include 'SIZE'
       include 'PARALLEL'
-      include 'MNTRD'
+      include 'MNTRLOGD'
       include 'MNTRLP'
 
 !     argument list
@@ -354,7 +354,7 @@
       implicit none
 
       include 'SIZE'
-      include 'MNTRD'
+      include 'MNTRLOGD'
 
 !     argument list
       integer nmod, mmod
@@ -374,7 +374,7 @@
       implicit none
 
       include 'SIZE'
-      include 'MNTRD'
+      include 'MNTRLOGD'
       include 'MNTRLP'
 
 !     argument list
@@ -406,7 +406,7 @@
       implicit none
 
       include 'SIZE'
-      include 'MNTRD'
+      include 'MNTRLOGD'
       include 'MNTRLP'
 
 !     argument list
@@ -461,7 +461,7 @@
       implicit none
 
       include 'SIZE'
-      include 'MNTRD'
+      include 'MNTRLOGD'
       include 'MNTRLP'
 
 !     argument list
@@ -662,7 +662,7 @@
       implicit none
 
       include 'SIZE'
-      include 'MNTRD'
+      include 'MNTRLOGD'
       include 'MNTRLP'
 
 !     local variables
@@ -700,7 +700,7 @@
       implicit none
 
       include 'SIZE'
-      include 'MNTRD'
+      include 'MNTRLOGD'
       include 'MNTRLP'
 
 !     argument list

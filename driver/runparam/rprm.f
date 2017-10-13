@@ -95,7 +95,7 @@
       end subroutine
 !=======================================================================
 !> @brief Check if module was initialised
-!! @ingroup monitor
+!! @ingroup runparam
 !! @return rprm_is_initialised
       logical function rprm_is_initialised()
 

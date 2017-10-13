@@ -1,2 +1,2 @@
-$(OBJDIR)/mntr_block.o      :mntr_block.f MNTRD;                     $(F77) -c $(FL2) -I./ $< -o $@
-$(OBJDIR)/mntr.o            :mntr.f MNTRD;                           $(F77) -c $(FL2) -I./ $< -o $@
+$(OBJDIR)/mntrlog_block.o   :mntrlog_block.f MNTRLOGD;               $(F77) -c $(FL2) -I./ $< -o $@
+$(OBJDIR)/mntrlog.o         :mntrlog.f MNTRLOGD;                     $(F77) -c $(FL2) -I./ $< -o $@
