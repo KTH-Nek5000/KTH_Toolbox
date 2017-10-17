@@ -1,17 +1,21 @@
 !> @file MNTRLOGD
 !! @ingroup monitor
-!! @brief Include file for monitor module 
+!! @brief Include file for monitor module containing module database 
 !! @author Adam Peplinski
 !! @date Sep 28, 2017
 !=======================================================================
-!     nek5000 and monitor names and mids
+!     frame and monitor names and mids
 !     they are the first and the second registered modules respectively
-      integer mntr_nek_id
-      character*(*) mntr_nek_name
-      parameter(mntr_nek_name='NEK5000')
+      integer mntr_frame_id
+      character*(*) mntr_frame_name
+      parameter(mntr_frame_name='FRAME')
       integer mntr_id
       character*(*) mntr_name
       parameter(mntr_name='MONITOR')
+
+!     framework timer
+      integer mntr_frame_tmr_id
+      real mntr_frame_tmini
 
 !     initialisation flag
       logical mntr_ifinit
@@ -23,11 +27,15 @@
 !     default log threshold + parameter id
       integer mntr_lp_def, mntr_lp_def_id
 
+!     do we write timer descriptions
+      integer mntr_iftdsc_id
+      logical mntr_iftdsc
+
 !     module variable section
 !     master node for logging
       integer mntr_pid0
 
-!     string sizes and blank parameters (for mntr_block.f)
+!     string sizes and blank parameters (for mntrlog_block.f and mntrtmr_block.f)
       integer mntr_lstl_mnm    ! length of module name string
       parameter (mntr_lstl_mnm = 10)
       character*(*) mntr_blname  ! balnk module name
@@ -51,13 +59,17 @@
 
 !     common blocks
 !     integer variables
-      common /MNTRI/ mntr_nek_id, mntr_id, mntr_sec_id, mntr_pid0, 
+      common /MNTRLOGI/ mntr_frame_id, mntr_id, mntr_frame_tmr_id, 
+     $      mntr_sec_id, mntr_pid0, 
      $      mntr_lp_def, mntr_lp_def_id, mntr_mod_id, mntr_mod_num, 
-     $      mntr_mod_mpos
+     $      mntr_mod_mpos, mntr_iftdsc_id
+
+!     real variables
+      common /MNTRLOGR/ mntr_frame_tmini
  
 !     logical variables
-      common /MNTRL/ mntr_ifinit
+      common /MNTRLOGL/ mntr_ifinit, mntr_iftdsc
       
 !     string variables
-      common /MNTRC/ mntr_mod_name, mntr_mod_dscr
+      common /MNTRLOGC/ mntr_mod_name, mntr_mod_dscr
  

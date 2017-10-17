@@ -68,6 +68,7 @@
       call io_file_close
 
 !     place for timers summary
+      call mntr_tmr_summary_print()
 
       return
       end subroutine

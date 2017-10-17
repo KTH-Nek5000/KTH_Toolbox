@@ -9,6 +9,9 @@
       character*(*) chpt_name
       parameter(chpt_name='CHKPOINT')
 
+!     timer id
+      integer chpt_tmr_id
+
 !     initialisation flag
       logical chpt_ifinit
 
@@ -32,9 +35,9 @@
       integer chpt_wtime_id
 
 !     common blocks
-      common /CHKPNTI/ chpt_id, chpt_sec_id, chpt_ifrst_id, 
-     $  chpt_fnum, chpt_fnum_id, chpt_step, chpt_step_id, 
-     $  chpt_wtime_id
+      common /CHKPNTI/ chpt_id, chpt_tmr_id, chpt_sec_id,  
+     $  chpt_ifrst_id, chpt_fnum, chpt_fnum_id, chpt_step, 
+     $  chpt_step_id, chpt_wtime_id
 
       common /CHKPNTR/ chpt_wtime
 

@@ -13,16 +13,13 @@ dynamical databases.
 
 @mod_interface
 @interface_list Interface provided:
--# @ref mntr_register_mod (to [frame] (@ref frame))
--# @ref mntr_register_par (to [frame] (@ref frame))
--# @ref mntr_init (to [frame] (@ref frame))
 -# @ref mntr_is_initialised
 -# @ref mntr_lp_def_get
 -# @ref mntr_mod_reg
 -# @ref mntr_mod_is_name_reg
 -# @ref mntr_mod_is_id_reg
--# @ref mntr_get_number
--# @ref mntr_get_info
+-# @ref mntr_mod_get_number
+-# @ref mntr_mod_get_info
 -# @ref mntr_log
 -# @ref mntr_log_local
 -# @ref mntr_logi
@@ -32,18 +29,23 @@ dynamical databases.
 -# @ref mntr_error
 -# @ref mntr_abort
 -# @ref mntr_check_abort
--# @ref mntr_mod_summary_print (to [frame] (@ref frame))
+-# @ref mntr_tmr_reg
+-# @ref mntr_tmr_is_name_reg
+-# @ref mntr_tmr_is_id_reg
+-# @ref mntr_tmr_add
 
 @mod_param
 @param_list Parameters provided by monitor module (include file - \a MNTRLOGD): 
 |Varaible | Type | Runtime parameter | Default value | Description |
 |---------|------|-------------------|---------------|-------------|
 | mntr_lp_def | integer | _monitor:loglevel | lp_inf | Logging threshold for toolboxes |
+| mntr_iftdsc | logical | _monitor:iftimdscr | .false. | Write timer description in the summary |
 
 @mod_param_example
 @code{.txt}
 [_MONITOR]
 LOGLEVEL = 4
+IFTIMDSCR = no
 @endcode
 
 */
@@ -65,6 +67,10 @@ REQUIRED
 #List of object files
 OBJECT mntrlog_block.o \
        mntrlog.o
+       mntrtmr_block.o \
+       mntrtmr.o
+
 
 #List of include files
-INCLUDE MBNTRLOGD
+INCLUDE MNTRLOGD \
+        MNTRTMRD

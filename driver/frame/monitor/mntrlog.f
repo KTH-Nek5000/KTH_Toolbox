@@ -1,10 +1,10 @@
 !> @file mntrlog.f
 !! @ingroup monitor
-!! @brief Set of monitoring routines for KTH framework
+!! @brief Set of module register and logging routines for KTH framework
 !! @author Adam Peplinski
 !! @date Sep 28, 2017
 !=======================================================================
-!> @brief Initialise monitor by registering Nek5000 and monitor
+!> @brief Initialise monitor by registering framework and monitor
 !! @ingroup monitor
 !! @param[in]  log_thr   initial log threshold
       subroutine mntr_register_mod(log_thr)
@@ -12,6 +12,7 @@
 
       include 'SIZE'
       include 'MNTRLOGD'
+      include 'MNTRTMRD'
       include 'FRAMELP'
 
 !     argument list
@@ -20,18 +21,24 @@
 !     local variables
       character*2 str
       character*200 lstring
+
+!     functions
+      integer frame_get_master
+      real dnekclock
 !-----------------------------------------------------------------------
-!     first register neck5000
-      mntr_nek_id = 1
-      mntr_mod_id(mntr_nek_id) = 0
-      mntr_mod_name(mntr_nek_id) = mntr_nek_name
-      mntr_mod_dscr(mntr_nek_id) = 'CFD solver'
+      mntr_pid0 = frame_get_master()
+
+!     first register framework
+      mntr_frame_id = 1
+      mntr_mod_id(mntr_frame_id) = 0
+      mntr_mod_name(mntr_frame_id) = mntr_frame_name
+      mntr_mod_dscr(mntr_frame_id) = 'Framework backbone'
       mntr_mod_num = mntr_mod_num + 1
       mntr_mod_mpos = mntr_mod_mpos + 1
 
 !     next monitor
       mntr_id = 2
-      mntr_mod_id(mntr_id) = mntr_nek_id
+      mntr_mod_id(mntr_id) = mntr_frame_id
       mntr_mod_name(mntr_id) = mntr_name
       mntr_mod_dscr(mntr_id) = 'Monitoring module'
       mntr_mod_num = mntr_mod_num + 1
@@ -41,13 +48,19 @@
       mntr_lp_def = log_thr
 
 !     log changes
-      lstring = 'Registered module ['//trim(mntr_mod_name(mntr_nek_id))
-      lstring= trim(lstring)//']: '//trim(mntr_mod_dscr(mntr_nek_id))
+      lstring ='Registered module ['//trim(mntr_mod_name(mntr_frame_id))
+      lstring= trim(lstring)//']: '//trim(mntr_mod_dscr(mntr_frame_id))
       call mntr_log(mntr_id,lp_inf,trim(lstring))
 
       lstring = 'Registered module ['//trim(mntr_mod_name(mntr_id))
       lstring= trim(lstring)//']: '//trim(mntr_mod_dscr(mntr_id))
       call mntr_log(mntr_id,lp_inf,trim(lstring))
+
+!     register framework timer and get initiaisation time
+      call mntr_tmr_reg(mntr_frame_tmr_id,0,
+     $     mntr_frame_id,'FRM_TOT','Total elapsed framework time')
+
+      mntr_frame_tmini = dnekclock()
 
       write(str,'(I2)') mntr_lp_def
       call mntr_log(mntr_id,lp_inf,
@@ -82,6 +95,10 @@
      $     'Logging threshold for toolboxes',rprm_par_int,mntr_lp_def,
      $      0.0,.false.,' ')
 
+      call rprm_rp_reg(mntr_iftdsc_id,mntr_sec_id,'IFTIMDSCR',
+     $     'Write timer description in the summary',rprm_par_log,0,
+     $      0.0,.false.,' ')
+
       return
       end subroutine
 !=======================================================================
@@ -104,6 +121,9 @@
 !-----------------------------------------------------------------------
       call rprm_rp_get(itmp,rtmp,ltmp,ctmp,mntr_lp_def_id,rprm_par_int)
       mntr_lp_def = itmp
+
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,mntr_iftdsc_id,rprm_par_log)
+      mntr_iftdsc = ltmp
 
       write(str,'(I2)') mntr_lp_def
       call mntr_log(mntr_id,lp_inf,
@@ -556,7 +576,7 @@
 !! @param[in] mid       module id
 !! @param[in] priority  log priority
 !! @param[in] logs      log body
-!! @param[in] rvar      logical variable
+!! @param[in] lvar      logical variable
       subroutine mntr_logl(mid,priority,logs,lvar)
       implicit none
 
@@ -667,7 +687,8 @@
       include 'FRAMELP'
 
 !     local variables
-      integer il
+      integer il, stride
+      parameter (stride=4)
       integer olist(2,mntr_id_max), ierr
       character*25 ftm
       character*3 str
@@ -677,12 +698,12 @@
 
       if (nid.eq.mntr_pid0) then
 !     get ordered list
-         call mntr_get_olist(olist, ierr)
+         call mntr_mod_get_olist(olist, ierr)
 
 
          if(ierr.eq.0.and.mntr_lp_def.le.lp_prd) then
             do il=1,mntr_mod_num
-               write(str,'(I3)') 4*(olist(2,il))
+               write(str,'(I3)') stride*(olist(2,il))
                ftm = '('//trim(str)//'X,"[",A,"] : ",A)'
                write(*,ftm) mntr_mod_name(olist(1,il)),
      $                mntr_mod_dscr(olist(1,il))
@@ -697,7 +718,7 @@
 !! @ingroup monitor
 !! @param[out]   olist    ordered list
 !! @param[out]   ierr     error flag
-      subroutine mntr_get_olist(olist,ierr)
+      subroutine mntr_mod_get_olist(olist,ierr)
       implicit none
 
       include 'SIZE'
@@ -751,6 +772,7 @@
            if (itest.eq.0.and.in.ne.1) then
               call mntr_log(mntr_id,lp_inf,
      $         'Must be single root of the graph; return')
+              ierr = 2
               return
            endif
            if (in.gt.1) then

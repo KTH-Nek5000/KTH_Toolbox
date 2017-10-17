@@ -24,12 +24,12 @@
       character*20 ctest
 !-----------------------------------------------------------------------
 !     find parent module
-      call mntr_mod_is_name_reg(lpmid,'NEK5000')
+      call mntr_mod_is_name_reg(lpmid,'FRAME')
 !     register module
       call mntr_mod_reg(chpt_id,lpmid,chpt_name,'Checkpointing I/O')
       if (lpmid.le.0) then
          call mntr_log(chpt_id,lp_vrb,
-     $        'ERROR: parent module ['//'NEK5000'//'] not registered')
+     $        'ERROR: parent module ['//'FRAME'//'] not registered')
       endif
 
 !     register and set active section
@@ -50,6 +50,11 @@
 
       call rprm_rp_reg(chpt_wtime_id,chpt_sec_id,'WALLTIME',
      $     'Simulation wall time',rprm_par_str,0,0.0,.false.,'00:00')
+
+!     find parent timers
+      call mntr_tmr_is_name_reg(lpmid,'FRM_TOT')
+      call mntr_tmr_reg(chpt_tmr_id,lpmid,chpt_id,
+     $      'CHP_TOT','Checkpointing total time')
 
 !     call submodule registration
       call chkpts_register
@@ -72,13 +77,17 @@
 !     local variables
       integer ierr, nhour, nmin
       integer itmp
-      real rtmp
+      real rtmp, ltim
       logical ltmp
       character*20 ctmp
 
 !     functions
       logical chkpts_is_initialised
+      real dnekclock
 !-----------------------------------------------------------------------
+!     timing
+      ltim = dnekclock()
+
 !     get runtime parameters
       call rprm_rp_get(itmp,rtmp,ltmp,ctmp,chpt_ifrst_id,rprm_par_log)
       chpt_ifrst = ltmp
@@ -112,6 +121,10 @@
 
 !     is everything initialised
       if (chkpts_is_initialised) chpt_ifinit=.true.
+
+!     timing
+      ltim = dnekclock() - ltim
+      call mntr_tmr_add(chpt_tmr_id,1,ltim)
 
       return
       end

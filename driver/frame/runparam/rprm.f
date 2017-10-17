@@ -1,4 +1,4 @@
-!> @file runparam.f
+!> @file rprm.f
 !! @ingroup runparam
 !! @brief Set of subroutines related to module's runtime parameters.
 !! @author Adam Peplinski
@@ -15,15 +15,20 @@
 
 !     local variables
       integer itmp
+
+!     functions
+      integer frame_get_master
 !-----------------------------------------------------------------------
+      rprm_pid0 = frame_get_master()
+
 !     register runtime parameter module
 !     find parent module
-      call mntr_mod_is_name_reg(itmp,'NEK5000')
+      call mntr_mod_is_name_reg(itmp,'FRAME')
 !     register module
       call mntr_mod_reg(rprm_id,itmp,rprm_name,'Runtime parameters')
       if (itmp.le.0) then
          call mntr_log(rprm_id,lp_vrb,
-     $        'ERROR: parent module ['//'NEK5000'//'] not registered')
+     $        'ERROR: parent module ['//'FRAME'//'] not registered')
       endif
 
 !     register and set active section
@@ -1144,8 +1149,7 @@
 !! @details Check if the section name shows up and runtime parameters are
 !!  spelled correctly. Give warning if section is missing, or the key is
 !!  unknown. Check possible 2D - 3D parameter mismatch.
-!! @warning This routine should be executed within runtime parameter reader
-!!  by the master node only
+!! @warning This routine deprecated.
       subroutine rprm_check(mod_nkeys, mod_dictkey, mod_n3dkeys,
      $           mod_l3dkey, ifsec)
       implicit none
