@@ -12,17 +12,21 @@
       implicit none
 
       include 'SIZE'
+      include 'INPUT'
       include 'RPRMD'
       include 'FRAMELP'
       include 'SPONGEBXD'
 
 !     local variables
       integer lpmid
-      integer itest
-      real rtest
-      logical ltest
-      character*20 ctest
+      real ltim
+
+!     functions
+      real dnekclock
 !-----------------------------------------------------------------------
+!     timing
+      ltim = dnekclock()
+
 !     find parent module
       call mntr_mod_is_name_reg(lpmid,'FRAME')
 !     register module
@@ -32,6 +36,11 @@
          call mntr_log(spng_id,lp_vrb,
      $        'ERROR: parent module ['//'FRAME'//'] not registered')
       endif
+
+!     register timer
+      call mntr_tmr_is_name_reg(lpmid,'FRM_TOT')
+      call mntr_tmr_reg(spng_tmr_id,lpmid,spng_id,
+     $      'SPNG_INI','Sponge calculation initialisation time')
 
 !     register and set active section
       call rprm_sec_reg(spng_sec_id,spng_id,'_'//adjustl(spng_name),
@@ -50,7 +59,7 @@
      $     'Sponge left section width; dimension Y ',
      $     rprm_par_real,0,0.0,.false.,' ')
 
-      if (ndim.eq.3) call rprm_rp_reg(spng_wl_id(ndim),spng_sec_id,
+      if (IF3D) call rprm_rp_reg(spng_wl_id(ndim),spng_sec_id,
      $     'WIDTHLZ','Sponge left section width; dimension Z ',
      $     rprm_par_real,0,0.0,.false.,' ')
 
@@ -62,7 +71,7 @@
      $     'Sponge right section width; dimension Y ',
      $     rprm_par_real,0,0.0,.false.,' ')
 
-      if (ndim.eq.3) call rprm_rp_reg(spng_wr_id(ndim),spng_sec_id,
+      if (IF3D) call rprm_rp_reg(spng_wr_id(ndim),spng_sec_id,
      $     'WIDTHRZ','Sponge right section width; dimension Z ',
      $     rprm_par_real,0,0.0,.false.,' ')
 
@@ -74,7 +83,7 @@
      $     'Sponge left drop/rise section width; dimension Y ',
      $     rprm_par_real,0,0.0,.false.,' ')
 
-      if (ndim.eq.3) call rprm_rp_reg(spng_dl_id(ndim),spng_sec_id,
+      if (IF3D) call rprm_rp_reg(spng_dl_id(ndim),spng_sec_id,
      $    'DROPLZ','Sponge left drop/rise section width; dimension Z ',
      $    rprm_par_real,0,0.0,.false.,' ')
 
@@ -86,14 +95,13 @@
      $     'Sponge right drop/rise section width; dimension Y ',
      $     rprm_par_real,0,0.0,.false.,' ')
 
-      if (ndim.eq.3) call rprm_rp_reg(spng_dr_id(ndim),spng_sec_id,
-     $    'DROPRZ','Sponge right drop/rise section width; dimension Z ',
+      if (IF3D) call rprm_rp_reg(spng_dr_id(ndim),spng_sec_id,
+     $   'DROPRZ','Sponge right drop/rise section width; dimension Z ',
      $    rprm_par_real,0,0.0,.false.,' ')
 
-!     find parent timers
-      call mntr_tmr_is_name_reg(lpmid,'FRM_TOT')
-      call mntr_tmr_reg(spng_tmr_id,lpmid,spng_id,
-     $      'SPNG_INI','Sponge calculation initialisation time')
+!     timing
+      ltim = dnekclock() - ltim
+      call mntr_tmr_add(spng_tmr_id,1,ltim)
 
       return
       end

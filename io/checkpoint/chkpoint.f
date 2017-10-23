@@ -18,11 +18,14 @@
 
 !     local variables
       integer lpmid
-      integer itest
-      real rtest
-      logical ltest
-      character*20 ctest
+      real ltim
+
+!     functions
+      real dnekclock
 !-----------------------------------------------------------------------
+!     timing
+      ltim = dnekclock()
+
 !     find parent module
       call mntr_mod_is_name_reg(lpmid,'FRAME')
 !     register module
@@ -31,6 +34,11 @@
          call mntr_log(chpt_id,lp_vrb,
      $        'ERROR: parent module ['//'FRAME'//'] not registered')
       endif
+
+!     register timer
+      call mntr_tmr_is_name_reg(lpmid,'FRM_TOT')
+      call mntr_tmr_reg(chpt_tmr_id,lpmid,chpt_id,
+     $      'CHP_TOT','Checkpointing initialisation time')
 
 !     register and set active section
       call rprm_sec_reg(chpt_sec_id,chpt_id,'_'//adjustl(chpt_name),
@@ -51,13 +59,12 @@
       call rprm_rp_reg(chpt_wtime_id,chpt_sec_id,'WALLTIME',
      $     'Simulation wall time',rprm_par_str,0,0.0,.false.,'00:00')
 
-!     find parent timers
-      call mntr_tmr_is_name_reg(lpmid,'FRM_TOT')
-      call mntr_tmr_reg(chpt_tmr_id,lpmid,chpt_id,
-     $      'CHP_TOT','Checkpointing initialisation time')
-
 !     call submodule registration
       call chkpts_register
+
+!     timing
+      ltim = dnekclock() - ltim
+      call mntr_tmr_add(chpt_tmr_id,1,ltim)
 
       return
       end subroutine
