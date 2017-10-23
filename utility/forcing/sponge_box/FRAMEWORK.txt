@@ -25,23 +25,29 @@ maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta
 
 @mod_interface
 @interface_list Interface provided:
--# @ref spng_box_param_get
--# @ref spng_box_init
--# @ref spng_box_forcing
+-# @ref spng_register
+-# @ref spng_init
+-# @ref spng_forcing
+-# @ref spng_is_initialised
 
 @mod_interface_example
 @code{.f}
       subroutine userf  (ix,iy,iz,ieg)
       include 'SIZE'
       include 'NEKUSE'          ! FF[XYZ]
+      include 'PARALLEL'        ! GLLEL
       include 'SOLN'            ! V[XYZ]
+
+      integer iel
+
+      iel=GLLEL(ieg)
 
       FFX = 0.0
       FFY = 0.0
       FFZ = 0.0
 
 !     add sponge
-      call spng_box_forcing(FFX,FFY,FFZ,ix,iy,iz,ieg)
+      call spng_forcing(FFX,FFY,FFZ,ix,iy,iz,iel)
 
       return
       end
@@ -50,12 +56,21 @@ maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta
       include 'TSTEP'           ! ISTEP
       include 'SOLN'            ! V[XYZ]
       
+
       if (ISTEP.eq.0) then
-!     initialise runtime parameters
-         call spng_box_param_get
-!     initialise module
-!     provide initial velocity condition as reference field for sponge
-         call spng_box_init(vx,vy,vz)
+!     start framework
+         call frame_start
+!     register modules
+         call spng_register
+!     get runtime parameters
+         call frame_rparam
+!     initialise modules
+         call spng_init(vx,vy,vz) ! initial field used as a reference one
+      endif
+
+!     finalise framework
+      if (ISTEP.ge.NSTEPS.or.LASTEP.eq.1) then
+         call frame_end
       endif
 
       return
@@ -64,21 +79,21 @@ maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta
 
 @mod_param
 @param_list Parameters provided by sponge_box module (include file - \a SPONGRBD):
-|Varaible | Type |Runtime parameter | Description|
-|---------|------|------------------|------------|
-|spng_str | real | _spongebx:strenght | sponge strength |
-|spng_wl(1) | real | _spongebx:widthlx | sponge left section width; dimension X |
-|spng_wl(2) | real | _spongebx:widthly | sponge left section width; dimension Y |
-|spng_wl(3) | real | _spongebx:widthlz | sponge left section width; dimension Z |
-|spng_wr(1) | real | _spongebx:widthrx | sponge right section width; dimension X |
-|spng_wr(2) | real | _spongebx:widthry | sponge right section width; dimension Y |
-|spng_wr(3) | real | _spongebx:widthrz | sponge right section width; dimension Z |
-|spng_dl(1) | real | _spongebx:droplx | sponge left drop/rise section width; dimension X |
-|spng_dl(2) | real | _spongebx:droply | sponge left drop/rise section width; dimension Y |
-|spng_dl(3) | real | _spongebx:droplz | sponge left drop/rise section width; dimension Z |
-|spng_dr(1) | real | _spongebx:droprx | sponge right drop/rise section width; dimension X |
-|spng_dr(2) | real | _spongebx:dropry | sponge right drop/rise section width; dimension Y |
-|spng_dr(3) | real | _spongebx:droprz | sponge right drop/rise section width; dimension Z |
+|Varaible | Type | Runtime parameter | Default value | Description |
+|---------|------|-------------------|---------------|-------------|
+|spng_str | real | _spongebx:strenght | 0.0 | sponge strength |
+|spng_wl(1) | real | _spongebx:widthlx | 0.0 | sponge left section width; dimension X |
+|spng_wl(2) | real | _spongebx:widthly | 0.0 | sponge left section width; dimension Y |
+|spng_wl(3) | real | _spongebx:widthlz | 0.0 | sponge left section width; dimension Z |
+|spng_wr(1) | real | _spongebx:widthrx | 0.0 | sponge right section width; dimension X |
+|spng_wr(2) | real | _spongebx:widthry | 0.0 | sponge right section width; dimension Y |
+|spng_wr(3) | real | _spongebx:widthrz | 0.0 | sponge right section width; dimension Z |
+|spng_dl(1) | real | _spongebx:droplx | 0.0 | sponge left drop/rise section width; dimension X |
+|spng_dl(2) | real | _spongebx:droply | 0.0 | sponge left drop/rise section width; dimension Y |
+|spng_dl(3) | real | _spongebx:droplz | 0.0 | sponge left drop/rise section width; dimension Z |
+|spng_dr(1) | real | _spongebx:droprx | 0.0 | sponge right drop/rise section width; dimension X |
+|spng_dr(2) | real | _spongebx:dropry | 0.0 | sponge right drop/rise section width; dimension Y |
+|spng_dr(3) | real | _spongebx:droprz | 0.0 | sponge right drop/rise section width; dimension Z |
 
 @mod_param_example
 @code{.txt}
@@ -114,7 +129,7 @@ CONFLICTS
 
 #List of required modules
 REQUIRED utility/math \
-         driver/runparam
+         driver/frame
 
 #List of object files
 OBJECT spongebx.o
