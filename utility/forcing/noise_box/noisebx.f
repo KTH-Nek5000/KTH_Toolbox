@@ -39,7 +39,7 @@
 !     register timer
       call mntr_tmr_is_name_reg(lpmid,'FRM_TOT')
       call mntr_tmr_reg(nseb_tmr_id,lpmid,nseb_id,
-     $      'NSEB_TOT','Noise box total time')
+     $      'NSEB_TOT','Noise box total time',.false.)
 
 !     register and set active section
       call rprm_sec_reg(nseb_sec_id,nseb_id,'_'//adjustl(nseb_name),

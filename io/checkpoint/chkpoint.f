@@ -36,8 +36,11 @@
 
 !     register timer
       call mntr_tmr_is_name_reg(lpmid,'FRM_TOT')
-      call mntr_tmr_reg(chpt_tmr_id,lpmid,chpt_id,
-     $      'CHP_TOT','Checkpointing initialisation time')
+      call mntr_tmr_reg(chpt_tmr_tot_id,lpmid,chpt_id,
+     $      'CHP_TOT','Checkpointing total time',.false.)
+
+      call mntr_tmr_reg(chpt_tmr_ini_id,chpt_tmr_tot_id,chpt_id,
+     $      'CHP_INI','Checkpointing initialisation time',.true.)
 
 !     register and set active section
       call rprm_sec_reg(chpt_sec_id,chpt_id,'_'//adjustl(chpt_name),
@@ -63,7 +66,7 @@
 
 !     timing
       ltim = dnekclock() - ltim
-      call mntr_tmr_add(chpt_tmr_id,1,ltim)
+      call mntr_tmr_add(chpt_tmr_ini_id,1,ltim)
 
       return
       end subroutine
@@ -129,7 +132,7 @@
 
 !     timing
       ltim = dnekclock() - ltim
-      call mntr_tmr_add(chpt_tmr_id,1,ltim)
+      call mntr_tmr_add(chpt_tmr_ini_id,1,ltim)
 
       return
       end

@@ -39,7 +39,7 @@
 !     register timer
       call mntr_tmr_is_name_reg(lpmid,'FRM_TOT')
       call mntr_tmr_reg(spng_tmr_id,lpmid,spng_id,
-     $      'SPNG_INI','Sponge calculation initialisation time')
+     $     'SPNG_INI','Sponge calculation initialisation time',.false.)
 
 !     register and set active section
       call rprm_sec_reg(spng_sec_id,spng_id,'_'//adjustl(spng_name),

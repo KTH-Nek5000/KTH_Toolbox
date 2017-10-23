@@ -18,6 +18,7 @@
       integer mntr_tmr_mod ! registering module id
       parameter (mntr_tmr_mod=2)
       integer mntr_tmr_id(mntr_tmr_nf,mntr_tmr_id_max)
+      logical mntr_tmr_sum(mntr_tmr_id_max)  ! add timer to parent
 
       integer mntr_tmr_count ! call counter mark
       parameter (mntr_tmr_count=1)
@@ -33,6 +34,8 @@
      $      mntr_tmr_mpos
        
       common /MNTRTMRR/ mntr_tmrv_timer
+      
+      common /MNTRTMRL/ mntr_tmr_sum
 
       common /MNTRTMRC/ mntr_tmr_name, mntr_tmr_dscr
  

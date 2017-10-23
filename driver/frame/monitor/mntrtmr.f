@@ -11,7 +11,8 @@
 !! @param[in]  modid    registerring module id
 !! @param[in]  mname    timer name
 !! @param[in]  mdscr    timer description
-      subroutine mntr_tmr_reg(mid,pmid,modid,mname,mdscr)
+!! @param[in]  ifsum    add timer to parent
+      subroutine mntr_tmr_reg(mid,pmid,modid,mname,mdscr,ifsum)
       implicit none
 
       include 'SIZE'
@@ -23,6 +24,7 @@
 !     argument list
       integer mid, pmid, modid
       character*(*) mname, mdscr
+      logical ifsum
 
 !     local variables
       character*10  lname
@@ -126,6 +128,7 @@
 
          mntr_tmr_name(ipos)=lname
          mntr_tmr_dscr(ipos)=ldscr
+         mntr_tmr_sum(ipos)=ifsum
          mntr_tmr_num = mntr_tmr_num + 1
          if (mntr_tmr_mpos.lt.ipos) mntr_tmr_mpos = ipos
          call mntr_log(mntr_id,lp_inf,
@@ -273,12 +276,13 @@
 !     local variables
       integer il, jl, maxlev, stride
       parameter (stride=2)
-      integer olist(2,mntr_tmr_id_max), ierr
+      integer olist(2,mntr_tmr_id_max), ierr, itmp
       real timmin(mntr_tmr_id_max),timmax(mntr_tmr_id_max)
       character*35 ftm
       character*3 str
 
 !     functions
+      integer iglmax
       real glmax, glmin, dnekclock
 !-----------------------------------------------------------------------
       call mntr_log(mntr_id,lp_prd,
@@ -287,6 +291,38 @@
 !     finalise framework timing
       mntr_frame_tmini = dnekclock() - mntr_frame_tmini
       call mntr_tmr_add(mntr_frame_tmr_id,1,mntr_frame_tmini)
+
+!     get ordered list
+      call mntr_tmr_get_olist(olist, ierr)
+      ierr = iglmax(ierr,1)
+      if (ierr.gt.0) then
+         call mntr_error(mntr_id,"Inconsistent timer tree.")
+         return
+      endif
+
+!     sum contributions from children if they are marked with mntr_tmr_sum
+!     find max level for this run
+      maxlev = 1
+      do il=1,mntr_tmr_num
+         maxlev = max(maxlev,olist(2,il))
+      enddo
+
+      do il=maxlev,1,-1
+         do jl=1,mntr_tmr_num
+            if (olist(2,jl).eq.il.and.mntr_tmr_sum(olist(1,jl))) then
+               itmp = mntr_tmr_id(mntr_tmr_mark,olist(1,jl))
+!     sum iteration count
+               mntr_tmrv_timer(mntr_tmr_count,itmp) =
+     $             mntr_tmrv_timer(mntr_tmr_count,itmp) +
+     $             mntr_tmrv_timer(mntr_tmr_count,olist(1,jl))
+!     sum timer
+               mntr_tmrv_timer(mntr_tmr_time,itmp) =
+     $             mntr_tmrv_timer(mntr_tmr_time,itmp) +
+     $             mntr_tmrv_timer(mntr_tmr_time,olist(1,jl))
+            endif
+         enddo
+      enddo
+
 
 !     get max, min timers
       do il=1,mntr_tmr_mpos
@@ -297,16 +333,10 @@
       enddo
 
       if (nid.eq.mntr_pid0) then
-!     get ordered list
-         call mntr_tmr_get_olist(olist, ierr)
 
          if(ierr.eq.0.and.mntr_lp_def.le.lp_prd) then
 
-!     find max level for this run
-            maxlev = 1
-            do il=1,mntr_tmr_num
-               maxlev = max(maxlev,olist(2,il))
-            enddo
+!     modify max level
             maxlev = maxlev + 1
 
 !     print description
@@ -356,9 +386,9 @@
       implicit none
 
       include 'SIZE'
+      include 'FRAMELP'
       include 'MNTRLOGD'
       include 'MNTRTMRD'
-      include 'FRAMELP'
 
 !     argument list
       integer olist(2,mntr_tmr_id_max), ierr

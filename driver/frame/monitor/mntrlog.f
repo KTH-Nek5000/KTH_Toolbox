@@ -26,6 +26,10 @@
       integer frame_get_master
       real dnekclock
 !-----------------------------------------------------------------------
+!     simple timing
+      mntr_frame_tmini = dnekclock()
+
+!     set master node
       mntr_pid0 = frame_get_master()
 
 !     first register framework
@@ -57,10 +61,10 @@
       call mntr_log(mntr_id,lp_inf,trim(lstring))
 
 !     register framework timer and get initiaisation time
-      call mntr_tmr_reg(mntr_frame_tmr_id,0,
-     $     mntr_frame_id,'FRM_TOT','Total elapsed framework time')
+      call mntr_tmr_reg(mntr_frame_tmr_id,0,mntr_frame_id,
+     $     'FRM_TOT','Total elapsed framework time',.false.)
 
-      mntr_frame_tmini = dnekclock()
+
 
       write(str,'(I2)') mntr_lp_def
       call mntr_log(mntr_id,lp_inf,
@@ -750,8 +754,8 @@
       enddo
       if(npos.ne.mntr_mod_num) then
          ierr = 1
-         call mntr_log(mntr_id,lp_inf,
-     $         'Inconsistent module number; return')
+         call mntr_log_local(mntr_id,lp_inf,
+     $         'Inconsistent module number; return',mntr_pid0)
          return
       endif
 
@@ -771,8 +775,8 @@
            endif
            in = jl - istart
            if (itest.eq.0.and.in.ne.1) then
-              call mntr_log(mntr_id,lp_inf,
-     $         'Must be single root of the graph; return')
+              call mntr_log_local(mntr_id,lp_inf,
+     $         'Must be single root of the graph; return',mntr_pid0)
               ierr = 2
               return
            endif
