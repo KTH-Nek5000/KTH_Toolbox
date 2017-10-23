@@ -108,10 +108,10 @@
 !=======================================================================
 !> @brief Initilise sponge_box module
 !! @ingroup sponge_box
-!! @ingroup sponge_box
 !! @param[in] lvx, lvy, lvz   velocity field to be stored as reference field
 !! @note This routine should be called in userchk during first step
 !!    after call to frame_rparam
+!! @remark This routine uses global scratch space \a SCRUZ
       subroutine spng_init(lvx,lvy,lvz)
       implicit none
 
@@ -138,6 +138,7 @@
 
       real xxmax, xxmax_c, xxmin, xxmin_c, arg
       real lcoord(LX1*LY1*LZ1*LELV)
+      common /SCRUZ/ lcoord
 
 !     functions
       real dnekclock, glmin, glmax, mth_stepf
@@ -215,7 +216,7 @@
 
 
       if(spng_str.gt.0.0) then
-         call mntr_log(spng_id,lp_inf,"SPONGE TURNED ON")
+         call mntr_log(spng_id,lp_inf,"Sponge turned on")
 
 !     save reference field
          call copy(spng_vr(1,1),lvx, ntot)
