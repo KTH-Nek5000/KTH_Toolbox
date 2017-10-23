@@ -27,16 +27,6 @@
 !     master node for runtime parameter reading
       integer rprm_pid0
 
-!     runtime parameter types
-      integer rprm_par_int ! integer vriable
-      parameter (rprm_par_int=1)
-      integer rprm_par_real ! real vriable
-      parameter (rprm_par_real=2)
-      integer rprm_par_log ! logical vriable
-      parameter (rprm_par_log=3)
-      integer rprm_par_str ! string vriable
-      parameter (rprm_par_str=4)
-
 !     string sizes and blank parameters (for rprm_block.f)
       integer rprm_lstl_mnm    ! length of section/parameter name and string
       parameter (rprm_lstl_mnm = 20)

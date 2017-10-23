@@ -11,9 +11,9 @@
       implicit none
 
       include 'SIZE'
+      include 'FRAMELP'
       include 'MNTRLOGD'
       include 'MNTRTMRD'
-      include 'FRAMELP'
 
 !     argument list
       integer log_thr
@@ -75,9 +75,8 @@
       implicit none
 
       include 'SIZE'
-      include 'RPRMD'
-      include 'MNTRLOGD'
       include 'FRAMELP'
+      include 'MNTRLOGD'
 
 !     local variables
       integer rpid,itmp
@@ -92,11 +91,11 @@
 
 !     register parameters
       call rprm_rp_reg(mntr_lp_def_id,mntr_sec_id,'LOGLEVEL',
-     $     'Logging threshold for toolboxes',rprm_par_int,mntr_lp_def,
+     $     'Logging threshold for toolboxes',rpar_int,mntr_lp_def,
      $      0.0,.false.,' ')
 
       call rprm_rp_reg(mntr_iftdsc_id,mntr_sec_id,'IFTIMDSCR',
-     $     'Write timer description in the summary',rprm_par_log,0,
+     $     'Write timer description in the summary',rpar_log,0,
      $      0.0,.false.,' ')
 
       return
@@ -108,9 +107,8 @@
       implicit none
 
       include 'SIZE'
-      include 'RPRMD'
-      include 'MNTRLOGD'
       include 'FRAMELP'
+      include 'MNTRLOGD'
 
 !     local variables
       integer itmp
@@ -119,10 +117,10 @@
       character*20 ctmp
       character*2 str
 !-----------------------------------------------------------------------
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,mntr_lp_def_id,rprm_par_int)
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,mntr_lp_def_id,rpar_int)
       mntr_lp_def = itmp
 
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,mntr_iftdsc_id,rprm_par_log)
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,mntr_iftdsc_id,rpar_log)
       mntr_iftdsc = ltmp
 
       write(str,'(I2)') mntr_lp_def
@@ -144,6 +142,7 @@
       implicit none
 
       include 'SIZE'
+      include 'FRAMELP'
       include 'MNTRLOGD'
 !-----------------------------------------------------------------------
       mntr_is_initialised = mntr_ifinit
@@ -157,6 +156,7 @@
       integer function mntr_lp_def_get()
 
       include 'SIZE'
+      include 'FRAMELP'
       include 'MNTRLOGD'
 !-----------------------------------------------------------------------
       mntr_lp_def_get = mntr_lp_def
@@ -175,8 +175,8 @@
 
       include 'SIZE'
       include 'PARALLEL'        ! ISIZE
-      include 'MNTRLOGD'
       include 'FRAMELP'
+      include 'MNTRLOGD'
 
 !     argument list
       integer mid, pmid
@@ -288,8 +288,8 @@
 
       include 'SIZE'
       include 'PARALLEL'        ! ISIZE
-      include 'MNTRLOGD'
       include 'FRAMELP'
+      include 'MNTRLOGD'
 
 !     argument list
       integer mid
@@ -356,8 +356,8 @@
 
       include 'SIZE'
       include 'PARALLEL'
-      include 'MNTRLOGD'
       include 'FRAMELP'
+      include 'MNTRLOGD'
 
 !     argument list
       integer mid
@@ -375,6 +375,7 @@
       implicit none
 
       include 'SIZE'
+      include 'FRAMELP'
       include 'MNTRLOGD'
 
 !     argument list
@@ -395,8 +396,8 @@
       implicit none
 
       include 'SIZE'
-      include 'MNTRLOGD'
       include 'FRAMELP'
+      include 'MNTRLOGD'
 
 !     argument list
       character*10 mname
@@ -427,8 +428,8 @@
       implicit none
 
       include 'SIZE'
-      include 'MNTRLOGD'
       include 'FRAMELP'
+      include 'MNTRLOGD'
 
 !     argument list
       integer mid,priority
@@ -482,8 +483,8 @@
       implicit none
 
       include 'SIZE'
-      include 'MNTRLOGD'
       include 'FRAMELP'
+      include 'MNTRLOGD'
 
 !     argument list
       integer mid,priority, prid
@@ -683,8 +684,8 @@
       implicit none
 
       include 'SIZE'
-      include 'MNTRLOGD'
       include 'FRAMELP'
+      include 'MNTRLOGD'
 
 !     local variables
       integer il, stride
@@ -722,8 +723,8 @@
       implicit none
 
       include 'SIZE'
-      include 'MNTRLOGD'
       include 'FRAMELP'
+      include 'MNTRLOGD'
 
 !     argument list
       integer olist(2,mntr_id_max), ierr

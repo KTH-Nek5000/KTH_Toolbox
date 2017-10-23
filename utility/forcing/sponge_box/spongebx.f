@@ -13,7 +13,6 @@
 
       include 'SIZE'
       include 'INPUT'
-      include 'RPRMD'
       include 'FRAMELP'
       include 'SPONGEBXD'
 
@@ -49,55 +48,55 @@
 
 !     register parameters
       call rprm_rp_reg(spng_str_id,spng_sec_id,'STRENGTH',
-     $     'Sponge strength',rprm_par_real,0,0.0,.false.,' ')
+     $     'Sponge strength',rpar_real,0,0.0,.false.,' ')
 
       call rprm_rp_reg(spng_wl_id(1),spng_sec_id,'WIDTHLX',
      $     'Sponge left section width; dimension X ',
-     $     rprm_par_real,0,0.0,.false.,' ')
+     $     rpar_real,0,0.0,.false.,' ')
 
       call rprm_rp_reg(spng_wl_id(2),spng_sec_id,'WIDTHLY',
      $     'Sponge left section width; dimension Y ',
-     $     rprm_par_real,0,0.0,.false.,' ')
+     $     rpar_real,0,0.0,.false.,' ')
 
       if (IF3D) call rprm_rp_reg(spng_wl_id(ndim),spng_sec_id,
      $     'WIDTHLZ','Sponge left section width; dimension Z ',
-     $     rprm_par_real,0,0.0,.false.,' ')
+     $     rpar_real,0,0.0,.false.,' ')
 
       call rprm_rp_reg(spng_wr_id(1),spng_sec_id,'WIDTHRX',
      $     'Sponge right section width; dimension X ',
-     $     rprm_par_real,0,0.0,.false.,' ')
+     $     rpar_real,0,0.0,.false.,' ')
 
       call rprm_rp_reg(spng_wr_id(2),spng_sec_id,'WIDTHRY',
      $     'Sponge right section width; dimension Y ',
-     $     rprm_par_real,0,0.0,.false.,' ')
+     $     rpar_real,0,0.0,.false.,' ')
 
       if (IF3D) call rprm_rp_reg(spng_wr_id(ndim),spng_sec_id,
      $     'WIDTHRZ','Sponge right section width; dimension Z ',
-     $     rprm_par_real,0,0.0,.false.,' ')
+     $     rpar_real,0,0.0,.false.,' ')
 
       call rprm_rp_reg(spng_dl_id(1),spng_sec_id,'DROPLX',
      $     'Sponge left drop/rise section width; dimension X ',
-     $     rprm_par_real,0,0.0,.false.,' ')
+     $     rpar_real,0,0.0,.false.,' ')
 
       call rprm_rp_reg(spng_dl_id(2),spng_sec_id,'DROPLY',
      $     'Sponge left drop/rise section width; dimension Y ',
-     $     rprm_par_real,0,0.0,.false.,' ')
+     $     rpar_real,0,0.0,.false.,' ')
 
       if (IF3D) call rprm_rp_reg(spng_dl_id(ndim),spng_sec_id,
      $    'DROPLZ','Sponge left drop/rise section width; dimension Z ',
-     $    rprm_par_real,0,0.0,.false.,' ')
+     $    rpar_real,0,0.0,.false.,' ')
 
       call rprm_rp_reg(spng_dr_id(1),spng_sec_id,'DROPRX',
      $     'Sponge right drop/rise section width; dimension X ',
-     $     rprm_par_real,0,0.0,.false.,' ')
+     $     rpar_real,0,0.0,.false.,' ')
 
       call rprm_rp_reg(spng_dr_id(2),spng_sec_id,'DROPRY',
      $     'Sponge right drop/rise section width; dimension Y ',
-     $     rprm_par_real,0,0.0,.false.,' ')
+     $     rpar_real,0,0.0,.false.,' ')
 
       if (IF3D) call rprm_rp_reg(spng_dr_id(ndim),spng_sec_id,
      $   'DROPRZ','Sponge right drop/rise section width; dimension Z ',
-     $    rprm_par_real,0,0.0,.false.,' ')
+     $    rpar_real,0,0.0,.false.,' ')
 
 !     timing
       ltim = dnekclock() - ltim
@@ -118,7 +117,6 @@
       include 'SIZE'
       include 'INPUT'
       include 'GEOM'
-      include 'RPRMD'
       include 'FRAMELP'
       include 'SPONGEBXD'
 
@@ -147,54 +145,54 @@
       ltim = dnekclock()
 
 !     get runtime parameters
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_str_id,rprm_par_real)
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_str_id,rpar_real)
       spng_str = rtmp
 
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_wl_id(1),rprm_par_real)
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_wl_id(1),rpar_real)
       spng_wl(1) = rtmp
 
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_wl_id(2),rprm_par_real)
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_wl_id(2),rpar_real)
       spng_wl(2) = rtmp
 
       if (IF3D) then
          call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_wl_id(ndim),
-     $        rprm_par_real)
+     $        rpar_real)
          spng_wl(ndim) = rtmp
       endif
 
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_wr_id(1),rprm_par_real)
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_wr_id(1),rpar_real)
       spng_wr(1) = rtmp
 
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_wr_id(2),rprm_par_real)
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_wr_id(2),rpar_real)
       spng_wr(2) = rtmp
 
       if (IF3D) then
          call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_wr_id(ndim),
-     $        rprm_par_real)
+     $        rpar_real)
          spng_wr(ndim) = rtmp
       endif
 
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_dl_id(1),rprm_par_real)
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_dl_id(1),rpar_real)
       spng_dl(1) = rtmp
 
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_dl_id(2),rprm_par_real)
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_dl_id(2),rpar_real)
       spng_dl(2) = rtmp
 
       if (IF3D) then
          call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_dl_id(ndim),
-     $        rprm_par_real)
+     $        rpar_real)
          spng_dl(ndim) = rtmp
       endif
 
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_dr_id(1),rprm_par_real)
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_dr_id(1),rpar_real)
       spng_dr(1) = rtmp
 
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_dr_id(2),rprm_par_real)
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_dr_id(2),rpar_real)
       spng_dr(2) = rtmp
 
       if (IF3D) then
          call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_dr_id(ndim),
-     $        rprm_par_real)
+     $        rpar_real)
          spng_dr(ndim) = rtmp
       endif
 

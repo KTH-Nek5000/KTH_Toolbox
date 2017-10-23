@@ -12,7 +12,6 @@
       implicit none
 
       include 'SIZE'
-      include 'RPRMD'
       include 'FRAMELP'
       include 'CHKPOINTD'
 
@@ -47,17 +46,17 @@
 
 !     register parameters
       call rprm_rp_reg(chpt_ifrst_id,chpt_sec_id,'READCHKPT',
-     $     'Restat from checkpoint',rprm_par_log,0,0.0,.false.,' ')
+     $     'Restat from checkpoint',rpar_log,0,0.0,.false.,' ')
 
       call rprm_rp_reg(chpt_fnum_id,chpt_sec_id,'CHKPFNUMBER',
-     $     'Restart file number',rprm_par_int,1,0.0,.false.,' ')
+     $     'Restart file number',rpar_int,1,0.0,.false.,' ')
 
       call rprm_rp_reg(chpt_step_id,chpt_sec_id,'CHKPINTERVAL',
      $     'Checkpiont saving frequency (number of time steps)',
-     $      rprm_par_int,500,0.0,.false.,' ')
+     $      rpar_int,500,0.0,.false.,' ')
 
       call rprm_rp_reg(chpt_wtime_id,chpt_sec_id,'WALLTIME',
-     $     'Simulation wall time',rprm_par_str,0,0.0,.false.,'00:00')
+     $     'Simulation wall time',rpar_str,0,0.0,.false.,'00:00')
 
 !     call submodule registration
       call chkpts_register
@@ -77,7 +76,6 @@
       implicit none
 
       include 'SIZE'
-      include 'RPRMD'
       include 'FRAMELP'
       include 'CHKPOINTD'
 
@@ -96,13 +94,13 @@
       ltim = dnekclock()
 
 !     get runtime parameters
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,chpt_ifrst_id,rprm_par_log)
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,chpt_ifrst_id,rpar_log)
       chpt_ifrst = ltmp
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,chpt_fnum_id,rprm_par_int)
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,chpt_fnum_id,rpar_int)
       chpt_fnum = itmp
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,chpt_step_id,rprm_par_int)
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,chpt_step_id,rpar_int)
       chpt_step = itmp
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,chpt_wtime_id,rprm_par_str)
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,chpt_wtime_id,rpar_str)
       chpt_wtimes = ctmp
 
 !     get wall clock

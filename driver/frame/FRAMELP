@@ -1,6 +1,6 @@
 !> @file FRAMELP
 !! @ingroup monitor
-!! @brief Include file for monitor module including log priorities 
+!! @brief Include file for monitor module including log priorities and parameter types
 !! @author Adam Peplinski
 !! @date Oct 4, 2017
 !=======================================================================
@@ -18,3 +18,13 @@
       parameter (lp_ess=7)  ! essential; this logs a few lines max per program
       parameter (lp_err=8)  ! error; this logs errors only
       parameter (lp_sln=9)  ! silent; this never logs anything
+      
+!     runtime parameter types
+      integer rpar_int ! integer vriable
+      parameter (rpar_int=1)
+      integer rpar_real ! real vriable
+      parameter (rpar_real=2)
+      integer rpar_log ! logical vriable
+      parameter (rpar_log=3)
+      integer rpar_str ! string vriable
+      parameter (rpar_str=4)

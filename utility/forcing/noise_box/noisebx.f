@@ -13,7 +13,6 @@
 
       include 'SIZE'
       include 'INPUT'
-      include 'RPRMD'
       include 'FRAMELP'
       include 'NOISEBXD'
 
@@ -49,34 +48,34 @@
 
 !     register parameters
       call rprm_rp_reg(nseb_tim_id,nseb_sec_id,'TIME',
-     $     'Time to add noise',rprm_par_real,0,0.0,.false.,' ')
+     $     'Time to add noise',rpar_real,0,0.0,.false.,' ')
 
       call rprm_rp_reg(nseb_amp_id,nseb_sec_id,'AMPLITUDE',
-     $     'Noise amplitude',rprm_par_real,0,0.0,.false.,' ')
+     $     'Noise amplitude',rpar_real,0,0.0,.false.,' ')
 
       call rprm_rp_reg(nseb_bmin_id(1),nseb_sec_id,'BOXMINX',
      $     'Position of lower left box corner; dimension X ',
-     $     rprm_par_real,0,0.0,.false.,' ')
+     $     rpar_real,0,0.0,.false.,' ')
 
       call rprm_rp_reg(nseb_bmin_id(2),nseb_sec_id,'BOXMINY',
      $     'Position of lower left box corner; dimension Y ',
-     $     rprm_par_real,0,0.0,.false.,' ')
+     $     rpar_real,0,0.0,.false.,' ')
 
       if (IF3D) call rprm_rp_reg(nseb_bmin_id(ndim),nseb_sec_id,
      $     'BOXMINZ','Position of lower left box corner; dimension Z ',
-     $     rprm_par_real,0,0.0,.false.,' ')
+     $     rpar_real,0,0.0,.false.,' ')
 
       call rprm_rp_reg(nseb_bmax_id(1),nseb_sec_id,'BOXMAXX',
      $     'Position of upper right box corner; dimension X ',
-     $     rprm_par_real,0,0.0,.false.,' ')
+     $     rpar_real,0,0.0,.false.,' ')
 
       call rprm_rp_reg(nseb_bmax_id(2),nseb_sec_id,'BOXMAXY',
      $     'Position of upper right box corner; dimension Y ',
-     $     rprm_par_real,0,0.0,.false.,' ')
+     $     rpar_real,0,0.0,.false.,' ')
 
       if (IF3D) call rprm_rp_reg(nseb_bmax_id(ndim),nseb_sec_id,
      $     'BOXMAXZ','Position of upper right box corner; dimension Z ',
-     $     rprm_par_real,0,0.0,.false.,' ')
+     $     rpar_real,0,0.0,.false.,' ')
 
 !     timing
       ltim = dnekclock() - ltim
@@ -95,7 +94,6 @@
 
       include 'SIZE'
       include 'INPUT'
-      include 'RPRMD'
       include 'FRAMELP'
       include 'NOISEBXD'
 
@@ -113,37 +111,37 @@
       ltim = dnekclock()
 
 !     get runtime parameters
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,nseb_tim_id,rprm_par_real)
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,nseb_tim_id,rpar_real)
       nseb_tim = rtmp
 
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,nseb_amp_id,rprm_par_real)
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,nseb_amp_id,rpar_real)
       nseb_amp = rtmp
 
       call rprm_rp_get(itmp,rtmp,ltmp,ctmp,nseb_bmin_id(1),
-     $     rprm_par_real)
+     $     rpar_real)
       nseb_bmin(1) = rtmp
 
       call rprm_rp_get(itmp,rtmp,ltmp,ctmp,nseb_bmin_id(2),
-     $     rprm_par_real)
+     $     rpar_real)
       nseb_bmin(2) = rtmp
 
       if (IF3D) then
          call rprm_rp_get(itmp,rtmp,ltmp,ctmp,nseb_bmin_id(ndim),
-     $     rprm_par_real)
+     $     rpar_real)
          nseb_bmin(ndim) = rtmp
       endif
 
       call rprm_rp_get(itmp,rtmp,ltmp,ctmp,nseb_bmax_id(1),
-     $     rprm_par_real)
+     $     rpar_real)
       nseb_bmax(1) = rtmp
 
       call rprm_rp_get(itmp,rtmp,ltmp,ctmp,nseb_bmax_id(2),
-     $     rprm_par_real)
+     $     rpar_real)
       nseb_bmax(2) = rtmp
 
       if (IF3D) then
          call rprm_rp_get(itmp,rtmp,ltmp,ctmp,nseb_bmax_id(ndim),
-     $     rprm_par_real)
+     $     rpar_real)
          nseb_bmax(ndim) = rtmp
       endif
 

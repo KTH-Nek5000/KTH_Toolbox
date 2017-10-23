@@ -38,12 +38,12 @@
 
 !     register parameters
       call rprm_rp_reg(rprm_ifparf_id,rprm_lsec_id,'PARFWRITE',
-     $     'Do we write runtime parameter file',rprm_par_log,0,
+     $     'Do we write runtime parameter file',rpar_log,0,
      $      0.0,.false.,' ')
 
       call rprm_rp_reg(rprm_parfnm_id,rprm_lsec_id,'PARFNAME',
      $   'Runtime parameter file name for output (without .par)',
-     $   rprm_par_str,0,0.0,.false.,'outparfile')
+     $   rpar_str,0,0.0,.false.,'outparfile')
 
       return
       end subroutine
@@ -54,8 +54,8 @@
       implicit none
 
       include 'SIZE'
-      include 'RPRMD'
       include 'FRAMELP'
+      include 'RPRMD'
 
 !     local variables
       integer itmp
@@ -66,9 +66,9 @@
       character*30 fname
 !-----------------------------------------------------------------------
 !     get runtime parameters
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,rprm_ifparf_id,rprm_par_log)
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,rprm_ifparf_id,rpar_log)
       rprm_ifparf = ltmp
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,rprm_parfnm_id,rprm_par_str)
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,rprm_parfnm_id,rpar_str)
       rprm_parfnm = ctmp
 
 !     write summary
@@ -106,6 +106,7 @@
       implicit none
 
       include 'SIZE'
+      include 'FRAMELP'
       include 'RPRMD'
 !-----------------------------------------------------------------------
       rprm_is_initialised = rprm_ifinit
@@ -124,8 +125,8 @@
 
       include 'SIZE'
       include 'PARALLEL'        ! ISIZE
-      include 'RPRMD'
       include 'FRAMELP'
+      include 'RPRMD'
 
 !     argument list
       integer rpid, mid
@@ -243,8 +244,8 @@
 
       include 'SIZE'
       include 'PARALLEL'        ! ISIZE
-      include 'RPRMD'
       include 'FRAMELP'
+      include 'RPRMD'
 
 !     argument list
       integer rpid, mid
@@ -320,8 +321,8 @@
       implicit none
 
       include 'SIZE'
-      include 'RPRMD'
       include 'FRAMELP'
+      include 'RPRMD'
 
 !     argument list
       integer rpid
@@ -341,8 +342,8 @@
       implicit none
 
       include 'SIZE'
-      include 'RPRMD'
       include 'FRAMELP'
+      include 'RPRMD'
 
 !     argument list
       integer rpid, mid
@@ -381,8 +382,8 @@
 
       include 'SIZE'
       include 'PARALLEL'
-      include 'RPRMD'
       include 'FRAMELP'
+      include 'RPRMD'
 
 !     argument list
       integer rpid
@@ -414,8 +415,8 @@
       implicit none
 
       include 'SIZE'
-      include 'RPRMD'
       include 'FRAMELP'
+      include 'RPRMD'
 
 !     argument list
       integer rpid
@@ -443,8 +444,9 @@
 
       include 'SIZE'
       include 'PARALLEL'        ! ISIZE
-      include 'RPRMD'
       include 'FRAMELP'
+      include 'RPRMD'
+
 
 !     argument list
       integer rpid, mid, ptype, ipval
@@ -549,19 +551,19 @@
          if (rprm_par_mpos.lt.ipos) rprm_par_mpos = ipos
 
 !     broadcast pval; to keep consistency
-         if (ptype.eq.rprm_par_int) then
+         if (ptype.eq.rpar_int) then
             ivall = ipval
             call bcast(ivall,isize)
             rprm_parv_int(ipos) = ivall
-         elseif (ptype.eq.rprm_par_real) then
+         elseif (ptype.eq.rpar_real) then
             rvall = rpval
             call bcast(rvall,wdsize)
             rprm_parv_real(ipos) = rvall
-         elseif (ptype.eq.rprm_par_log) then
+         elseif (ptype.eq.rpar_log) then
             lvall = lpval
             call bcast(lvall,lsize)
             rprm_parv_log(ipos) = lvall
-         elseif (ptype.eq.rprm_par_str) then
+         elseif (ptype.eq.rpar_str) then
 !     check value length
             slena = len_trim(adjustl(cpval))
 !     remove trailing blanks
@@ -586,16 +588,16 @@
          llog='Section '//trim(mname)//' registered parameter '
          llog=trim(llog)//' '//trim(lname)//': '//trim(ldscr)
          call mntr_log(rprm_id,lp_inf,trim(llog))
-         if (ptype.eq.rprm_par_int) then
+         if (ptype.eq.rpar_int) then
             call mntr_logi(rprm_id,lp_vrb,
      $       'Default value '//trim(lname)//' = ',ivall)
-         elseif (ptype.eq.rprm_par_real) then
+         elseif (ptype.eq.rpar_real) then
             call mntr_logr(rprm_id,lp_vrb,
      $       'Default value '//trim(lname)//' = ',rvall)
-         elseif (ptype.eq.rprm_par_log) then
+         elseif (ptype.eq.rpar_log) then
             call mntr_logl(rprm_id,lp_vrb,
      $       'Default value '//trim(lname)//' = ',lvall)
-         elseif (ptype.eq.rprm_par_str) then
+         elseif (ptype.eq.rpar_str) then
             call mntr_log(rprm_id,lp_vrb,
      $       'Default value '//trim(lname)//' = '//trim(cvall))
          endif
@@ -615,8 +617,8 @@
 
       include 'SIZE'
       include 'PARALLEL'        ! ISIZE
-      include 'RPRMD'
       include 'FRAMELP'
+      include 'RPRMD'
 
 !     argument list
       integer rpid, mid, ptype
@@ -699,8 +701,8 @@
       implicit none
 
       include 'SIZE'
-      include 'RPRMD'
       include 'FRAMELP'
+      include 'RPRMD'
 
 !     argument list
       integer rpid, ptype
@@ -721,8 +723,8 @@
       implicit none
 
       include 'SIZE'
-      include 'RPRMD'
       include 'FRAMELP'
+      include 'RPRMD'
 
 !     argument list
       integer rpid, mid, ptype
@@ -758,8 +760,8 @@
 
       include 'SIZE'
       include 'PARALLEL'
-      include 'RPRMD'
       include 'FRAMELP'
+      include 'RPRMD'
 
 !     argument list
       integer rpid, ptype
@@ -781,19 +783,19 @@
      $    rprm_par_id(rprm_par_type,rpid).eq.ptype) then
          if(rprm_sec_act(rprm_par_id(rprm_par_mark,rpid))) then
 !     broadcast pval; to keep consistency
-            if (ptype.eq.rprm_par_int) then
+            if (ptype.eq.rpar_int) then
                ivall = ipval
                call bcast(ivall,isize)
                rprm_parv_int(rpid) = ivall
-            elseif (ptype.eq.rprm_par_real) then
+            elseif (ptype.eq.rpar_real) then
                rvall = rpval
                call bcast(rvall,wdsize)
                rprm_parv_real(rpid) = rvall
-            elseif (ptype.eq.rprm_par_log) then
+            elseif (ptype.eq.rpar_log) then
                lvall = lpval
                call bcast(lvall,lsize)
                rprm_parv_log(rpid) = lvall
-            elseif (ptype.eq.rprm_par_str) then
+            elseif (ptype.eq.rpar_str) then
 !     check value length
                slena = len_trim(adjustl(cpval))
 !     remove trailing blanks
@@ -839,8 +841,8 @@
       implicit none
 
       include 'SIZE'
-      include 'RPRMD'
       include 'FRAMELP'
+      include 'RPRMD'
 
 !     argument list
       integer rpid, ptype
@@ -856,13 +858,13 @@
      $    rprm_par_id(rprm_par_type,rpid).eq.ptype) then
          if(rprm_sec_act(rprm_par_id(rprm_par_mark,rpid))) then
 
-            if (ptype.eq.rprm_par_int) then
+            if (ptype.eq.rpar_int) then
                ipval = rprm_parv_int(rpid)
-            elseif (ptype.eq.rprm_par_real) then
+            elseif (ptype.eq.rpar_real) then
                rpval = rprm_parv_real(rpid)
-            elseif (ptype.eq.rprm_par_log) then
+            elseif (ptype.eq.rpar_log) then
                lpval = rprm_parv_log(rpid)
-            elseif (ptype.eq.rprm_par_str) then
+            elseif (ptype.eq.rpar_str) then
                cpval = rprm_parv_str(rpid)
             else
                write(str,'(I3)') rpid
@@ -890,8 +892,8 @@
 
       include 'SIZE'
       include 'PARALLEL'
-      include 'RPRMD'
       include 'FRAMELP'
+      include 'RPRMD'
 
 !     local variables
       integer il, jl, kl
@@ -942,15 +944,15 @@
                         ifoundp=.true.
 !     read parameter value
                         if (rprm_par_id(rprm_par_type,kl).eq.
-     $                      rprm_par_int) then
+     $                      rpar_int) then
                           read(val,*) itmp
                           rprm_parv_int(kl) = itmp
                         elseif (rprm_par_id(rprm_par_type,kl).eq.
-     $                      rprm_par_real) then
+     $                      rpar_real) then
                           read(val,*) rtmp
                           rprm_parv_real(kl) = rtmp
                         elseif (rprm_par_id(rprm_par_type,kl).eq.
-     $                      rprm_par_log) then
+     $                      rpar_log) then
                           call finiparser_getBool(i_out,trim(lkey),ifnd)
                           if (ifnd.eq.1) then
                             if (i_out.eq.1) then
@@ -963,7 +965,7 @@
      $               'Boolean parameter reading error '//trim(key))
                           endif
                         elseif (rprm_par_id(rprm_par_type,kl).eq.
-     $                      rprm_par_str) then
+     $                      rpar_str) then
                           rprm_parv_str(kl) = trim(adjustl(val))
                         else
                           call mntr_warn(rprm_id,
@@ -1008,8 +1010,8 @@
       implicit none
 
       include 'SIZE'
-      include 'RPRMD'
       include 'FRAMELP'
+      include 'RPRMD'
 
 !     argument list
       integer unit
@@ -1104,20 +1106,20 @@
              do jl = 0, in-1
                key = slist(2,istart+jl)
                if (rprm_par_id(rprm_par_type,key).eq.
-     $             rprm_par_int) then
+     $             rpar_int) then
                  write(str,'(I8)') rprm_parv_int(key)
                elseif (rprm_par_id(rprm_par_type,key).eq.
-     $             rprm_par_real) then
+     $             rpar_real) then
                  write(str,'(E15.8)') rprm_parv_real(key)
                elseif (rprm_par_id(rprm_par_type,key).eq.
-     $             rprm_par_log) then
+     $             rpar_log) then
                  if (rprm_parv_log(key)) then
                    str = 'yes'
                  else
                    str = 'no'
                  endif
                elseif (rprm_par_id(rprm_par_type,key).eq.
-     $             rprm_par_str) then
+     $             rpar_str) then
                  str = rprm_parv_str(key)
                endif
                write(unit,'(A," = ",A,A)')
