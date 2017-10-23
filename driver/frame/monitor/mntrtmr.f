@@ -197,7 +197,7 @@
       else
          mid = ipos
          write(str,'(I3)') ipos
-         call mntr_log(mntr_id,lp_inf,
+         call mntr_log(mntr_id,lp_vrb,
      $        'timer ['//trim(lname)//'] registered with id='//str)
       endif
 

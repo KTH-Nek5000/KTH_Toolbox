@@ -7,7 +7,7 @@
 !> @brief Register checkpointing module
 !! @ingroup chkpoint
 !! @note This routine should be called in userchk during first step
-!!    after call to rprm_dict_get
+!!   between calls to frame_start and frame_rparam
       subroutine chkpt_register()
       implicit none
 
@@ -54,7 +54,7 @@
 !     find parent timers
       call mntr_tmr_is_name_reg(lpmid,'FRM_TOT')
       call mntr_tmr_reg(chpt_tmr_id,lpmid,chpt_id,
-     $      'CHP_TOT','Checkpointing total time')
+     $      'CHP_TOT','Checkpointing initialisation time')
 
 !     call submodule registration
       call chkpts_register
@@ -65,7 +65,7 @@
 !> @brief Initilise checkpointing module
 !! @ingroup chkpoint
 !! @note This routine should be called in userchk during first step
-!!    after call to rprm_dict_get
+!!    after call to frame_rparam
       subroutine chkpt_init()
       implicit none
 

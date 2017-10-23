@@ -299,7 +299,7 @@
       else
          rpid = ipos
          write(str,'(I3)') ipos
-         call mntr_log(rprm_id,lp_inf,
+         call mntr_log(rprm_id,lp_vrb,
      $   'Section '//trim(lname)//' registered with id = '//trim(str))
 !     check module
          if (mid.ne.rprm_sec_id(ipos)) then
@@ -587,16 +587,16 @@
          llog=trim(llog)//' '//trim(lname)//': '//trim(ldscr)
          call mntr_log(rprm_id,lp_inf,trim(llog))
          if (ptype.eq.rprm_par_int) then
-            call mntr_logi(rprm_id,lp_inf,
+            call mntr_logi(rprm_id,lp_vrb,
      $       'Default value '//trim(lname)//' = ',ivall)
          elseif (ptype.eq.rprm_par_real) then
-            call mntr_logr(rprm_id,lp_inf,
+            call mntr_logr(rprm_id,lp_vrb,
      $       'Default value '//trim(lname)//' = ',rvall)
          elseif (ptype.eq.rprm_par_log) then
-            call mntr_logl(rprm_id,lp_inf,
+            call mntr_logl(rprm_id,lp_vrb,
      $       'Default value '//trim(lname)//' = ',lvall)
          elseif (ptype.eq.rprm_par_str) then
-            call mntr_log(rprm_id,lp_inf,
+            call mntr_log(rprm_id,lp_vrb,
      $       'Default value '//trim(lname)//' = '//trim(cvall))
          endif
       endif
@@ -671,7 +671,7 @@
       else
          rpid = ipos
          write(str,'(I3)') ipos
-         call mntr_log(rprm_id,lp_inf,
+         call mntr_log(rprm_id,lp_vrb,
      $   'Parameter '//trim(lname)//' registered with id = '//trim(str))
 !     check module
          if (mid.ne.rprm_par_id(rprm_par_mark,ipos)) then
