@@ -9,12 +9,13 @@
 @details
 This set of routines adds a white noise in the rectangular box performing global face averaging at the end. 
 To keep the field independent on number of number of processors we use @ref mth_rand insted or @ref ran1 as
-a random number ganarator. At the end velocity field is smoted at the element faces.
+a random number ganarator. At the end velocity field is smoothed at the element faces.
 
 @mod_interface
 @interface_list Interface provided:
--# @ref nse_box_param_get
--# @ref nse_box_add
+-# @ref nseb_register
+-# @ref nseb_init
+-# @ref nseb_noise_add
 
 @mod_interface_example
 @code{.f}
@@ -22,13 +23,25 @@ a random number ganarator. At the end velocity field is smoted at the element fa
       include 'TSTEP'           ! ISTEP
       include 'SOLN'            ! V[XYZ]
       
+      
       if (ISTEP.eq.0) then
-!     initialise runtime parameters
-         call nse_box_param_get
+!     start framework
+         call frame_start
+!     register modules
+         call nseb_register
+!     get runtime parameters
+         call frame_rparam
+!     initialise modules
+         call nseb_init
       endif
 
 !     add noise
-      call nse_box_add
+      call nseb_noise_add
+
+!     finalise framework
+      if (ISTEP.ge.NSTEPS.or.LASTEP.eq.1) then
+         call frame_end
+      endif
 
       return
       end
@@ -36,16 +49,16 @@ a random number ganarator. At the end velocity field is smoted at the element fa
 
 @mod_param
 @param_list Parameters provided by sponge_box module (include file - \a SPONGRBD):
-|Varaible | Type |Runtime parameter | Description|
-|---------|------|------------------|------------|
-|nseb_tim | real | _noisebx:time | time to add noise |
-|nseb_amp | real | _noisebx:amplitude | noise amplitude |
-|nseb_bmin(1) | real | _noisebx:boxminx | position of lower left box corner; dimension X |
-|nseb_bmin(2) | real | _noisebx:boxminy | position of lower left box corner; dimension Y |
-|nseb_bmin(3) | real | _noisebx:boxminz | position of lower left box corner; dimension Z |
-|nseb_bmax(1) | real | _noisebx:boxmaxx | position of upper right box corner; dimension X |
-|nseb_bmax(2) | real | _noisebx:boxmaxy | position of upper right box corner; dimension Z |
-|nseb_bmax(3) | real | _noisebx:boxmaxz | position of upper right box corner; dimension Y |
+|Varaible | Type | Runtime parameter | Default value | Description |
+|---------|------|-------------------|---------------|-------------|
+|nseb_tim | real | _noisebx:time | 0.0 | time to add noise |
+|nseb_amp | real | _noisebx:amplitude | 0.0 | noise amplitude |
+|nseb_bmin(1) | real | _noisebx:boxminx | 0.0 | position of lower left box corner; dimension X |
+|nseb_bmin(2) | real | _noisebx:boxminy | 0.0 | position of lower left box corner; dimension Y |
+|nseb_bmin(3) | real | _noisebx:boxminz | 0.0 | position of lower left box corner; dimension Z |
+|nseb_bmax(1) | real | _noisebx:boxmaxx | 0.0 | position of upper right box corner; dimension X |
+|nseb_bmax(2) | real | _noisebx:boxmaxy | 0.0 | position of upper right box corner; dimension Z |
+|nseb_bmax(3) | real | _noisebx:boxmaxz | 0.0 | position of upper right box corner; dimension Y |
 
 @mod_param_example
 @code{.txt}
