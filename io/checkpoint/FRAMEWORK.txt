@@ -13,6 +13,7 @@
 -# @ref chkpt_register
 -# @ref chkpt_init
 -# @ref chkpt_main
+-# @ref chkpt_get_fset
 
 @par
 @interface_reqr Interface required:

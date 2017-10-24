@@ -36,10 +36,10 @@
 
 !     register timer
       call mntr_tmr_is_name_reg(lpmid,'FRM_TOT')
-      call mntr_tmr_reg(chpt_tmr_tot_id,lpmid,chpt_id,
+      call mntr_tmr_reg(chpt_ttot_id,lpmid,chpt_id,
      $      'CHP_TOT','Checkpointing total time',.false.)
 
-      call mntr_tmr_reg(chpt_tmr_ini_id,chpt_tmr_tot_id,chpt_id,
+      call mntr_tmr_reg(chpt_tini_id,chpt_ttot_id,chpt_id,
      $      'CHP_INI','Checkpointing initialisation time',.true.)
 
 !     register and set active section
@@ -58,15 +58,15 @@
      $     'Checkpiont saving frequency (number of time steps)',
      $      rpar_int,500,0.0,.false.,' ')
 
-      call rprm_rp_reg(chpt_wtime_id,chpt_sec_id,'WALLTIME',
-     $     'Simulation wall time',rpar_str,0,0.0,.false.,'00:00')
+!     set initial step delay
+      call mntr_set_step_delay(1)
 
 !     call submodule registration
       call chkpts_register
 
 !     timing
       ltim = dnekclock() - ltim
-      call mntr_tmr_add(chpt_tmr_ini_id,1,ltim)
+      call mntr_tmr_add(chpt_tini_id,1,ltim)
 
       return
       end subroutine
@@ -79,15 +79,17 @@
       implicit none
 
       include 'SIZE'
+      include 'TSTEP'
       include 'FRAMELP'
       include 'CHKPOINTD'
 
 !     local variables
-      integer ierr, nhour, nmin
-      integer itmp
+      integer itmp, lstdl
       real rtmp, ltim
       logical ltmp
       character*20 ctmp
+      character*2 str
+      character*200 lstring
 
 !     functions
       logical chkpts_is_initialised
@@ -103,26 +105,47 @@
       chpt_fnum = itmp
       call rprm_rp_get(itmp,rtmp,ltmp,ctmp,chpt_step_id,rpar_int)
       chpt_step = itmp
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,chpt_wtime_id,rpar_str)
-      chpt_wtimes = ctmp
 
-!     get wall clock
-      ctmp = trim(adjustl(chpt_wtimes))
-!     check string format
-      ierr = 0
-      if (ctmp(3:3).ne.':') ierr = 1
-      if (.not.(LGE(ctmp(1:1),'0').and.LLE(ctmp(1:1),'9'))) ierr = 1
-      if (.not.(LGE(ctmp(2:2),'0').and.LLE(ctmp(2:2),'9'))) ierr = 1
-      if (.not.(LGE(ctmp(4:4),'0').and.LLE(ctmp(4:4),'9'))) ierr = 1
-      if (.not.(LGE(ctmp(5:5),'0').and.LLE(ctmp(5:5),'9'))) ierr = 1
+      if (chpt_ifrst) then
+!     get input set number
+         chpt_set_i = chpt_fnum - 1
+         if (chpt_set_i.ge.chpt_nset) then
+            write(str,'(I2)') chpt_nset + 1
+            lstring = 'chpt_fnum must be in the range: 1-'//trim(str)
+            call mntr_abort(chpt_id,lstring)
+         endif
 
-      if (ierr.eq.0) then
-         read(ctmp(1:2),'(I2)') nhour
-         read(ctmp(4:5),'(I2)') nmin
-         chpt_wtime = 60.0*(nmin +60*nhour)
+         chpt_set_o = mod(chpt_set_i+1,chpt_nset)
       else
-         call mntr_log(chpt_id,lp_inf,'Wrong wall time format')
+         chpt_set_o = 0
       endif
+
+!     set reset flag
+      chpt_reset = -1
+
+!     check number of steps
+      call mntr_get_step_delay(lstdl)
+      if (NSTEPS.lt.3*lstdl) then
+         call mntr_abort(chpt_id,'too short run for multi-file restart')
+      endif
+
+!     check checkpoint frequency
+      if (chpt_step.lt.2*lstdl.or.chpt_step.gt.NSTEPS) then
+         chpt_step = NSTEPS
+         call mntr_warn(chpt_id,'wrong chpt_step; resetting to NSTEPS')
+      endif
+
+!     set min and max ISTEP for cyclic checkpoint writning
+!     timesteps outside this bouds require special treatment
+      chpt_istep = lstdl
+      chpt_nstep = NSTEPS - lstdl - 1
+!     check if chpt_nstep is in the middle of writing cycle
+      itmp = chpt_nstep + chpt_step -1
+      if (mod(itmp,chpt_step).ge.(chpt_step-lstdl)) then
+         itmp = lstdl + mod(itmp,chpt_step) + 1 - chpt_step
+         chpt_nstep = chpt_nstep - itmp
+      endif
+
 
 !     call submodule initialisation
       call chkpts_init
@@ -132,7 +155,7 @@
 
 !     timing
       ltim = dnekclock() - ltim
-      call mntr_tmr_add(chpt_tmr_ini_id,1,ltim)
+      call mntr_tmr_add(chpt_tini_id,1,ltim)
 
       return
       end
@@ -153,22 +176,77 @@
 !=======================================================================
 !> @brief Main checkpoint interface
 !! @ingroup chkpoint
-!! @note This routine should be called in userchk
+!! @note This routine should be called in userchk as a first framework call
+!     after frame_monitor
       subroutine chkpt_main
       implicit none
 
       include 'SIZE'
+      include 'TSTEP'
       include 'CHKPOINTD'
-      include 'FRAMELP'
 
+!     local variables
+      integer itmp, lstdl
 !-----------------------------------------------------------------------
-      if(chpt_ifrst) then
+      if(chpt_ifrst.and.ISTEP.le.chpt_istep) then
          call chkpts_read
-      endif
+      elseif (ISTEP.gt.chpt_istep) then
 
-      call chkpts_write
+!     adjust max ISTEP for cyclic checkpoint writning
+         call mntr_get_step_delay(lstdl)
+         chpt_nstep = NSTEPS - lstdl -1
+!     check if chpt_nstep is in the middle of writing cycle
+         itmp = chpt_nstep + chpt_step -1
+         if (mod(itmp,chpt_step).ge.(chpt_step-lstdl)) then
+            itmp = lstdl + mod(itmp,chpt_step) + 1 - chpt_step
+            chpt_nstep = chpt_nstep - itmp
+         else
+            itmp = -1
+         endif
+
+!     count steps to the end of wrting stage
+         itmp = ISTEP + chpt_step -1
+         if (ISTEP.gt.(NSTEPS-lstdl)) then
+            chpt_stepc = NSTEPS-ISTEP+1
+         elseif (ISTEP.lt.chpt_nstep.and.
+     $    mod(itmp,chpt_step).ge.(chpt_step-lstdl)) then
+            chpt_stepc = chpt_step - mod(itmp,chpt_step)
+         else
+            chpt_stepc = -1
+         endif
+
+!     get the checkpoint set number
+!     to avoid conflicts with dependent packages I reset chpt_set_o
+!     during the step after checkpointing
+         if (ISTEP.lt.chpt_nstep.and.mod(ISTEP,chpt_step).eq.0) then
+            chpt_reset = mod(chpt_set_o+1,chpt_nset)
+         elseif (chpt_reset.ge.0) then
+            chpt_set_o = chpt_reset
+            chpt_reset = -1
+         endif
+
+         call chkpts_write
+      endif
 
       return
       end
 !=======================================================================
+!> @brief Main checkpoint interface
+!! @ingroup chkpoint
+!! @param[out] step_cnt   decreasing step count in checkpoint writinh phase (otherwise -1)
+!! @param[out] set_out    set number
+      subroutine chkpt_get_fset(step_cnt, set_out)
+      implicit none
 
+      include 'SIZE'
+      include 'CHKPOINTD'
+
+!     argument list
+      integer step_cnt, set_out
+!-----------------------------------------------------------------------
+      step_cnt = chpt_stepc
+      set_out  = chpt_set_o
+
+      return
+      end
+!=======================================================================
