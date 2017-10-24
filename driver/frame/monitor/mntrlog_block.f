@@ -9,6 +9,8 @@
       include 'MNTRLOGD'
 
       data mntr_ifinit /.false./
+      data mntr_stdl /1/
+      data mntr_ifconv /.false./
       data mntr_pid0 /0/
       data mntr_mod_num /0/
       data mntr_mod_mpos /0/

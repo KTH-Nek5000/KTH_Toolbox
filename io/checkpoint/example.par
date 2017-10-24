@@ -2,4 +2,3 @@
 readchkpt = yes
 chkpFnumber = 1
 chkpInterval = 500
-WallTime = 02:05

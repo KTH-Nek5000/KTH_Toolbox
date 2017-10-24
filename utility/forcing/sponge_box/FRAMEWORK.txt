@@ -68,6 +68,9 @@ maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta
          call spng_init(vx,vy,vz) ! initial field used as a reference one
       endif
 
+!     monitor simulation
+      call frame_monitor
+
 !     finalise framework
       if (ISTEP.ge.NSTEPS.or.LASTEP.eq.1) then
          call frame_end

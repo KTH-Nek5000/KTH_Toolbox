@@ -11,11 +11,11 @@ Frame module provides backbone of the whole framework consisting of dynamical
 (as much as fortran 77 allows for it) databases for registered modules, runtime
 parameters and timers. This supposed to simplify interactions between different 
 modules, logging and operations on runtime parameters. It provides interfaces
-for intialisation and finalisation of framework. 
+for intialisation, monitoring and finalisation of framework. 
 
-This module provides as well include file FRAMELP defining log priorities. Using
-logging routines from [monitor] (@ref monitor) submodule one can easily specify verbosity of
-the code. The logging level can be set in two ways: by LOGLEVEL runtime parameter 
+This module provides as well include file FRAMELP defining log priorities and runtime parameter 
+types. Using logging routines from [monitor] (@ref monitor) submodule one can easily specify 
+verbosity of the code. The logging level can be set in two ways: by LOGLEVEL runtime parameter 
 in [_MONITOR] section of \a setup.par file (doeas not cover framework initialisation) 
 or by setting enviromental variable FRAMELOGL. The second way covers all stages of simulation.
 For bash shell this variable can be set by:
@@ -28,6 +28,7 @@ export FRAMELOGL
 @interface_list Interface provided:
 -# @ref frame_start
 -# @ref frame_rparam
+-# @ref frame_monitor
 -# @ref frame_end
 -# @ref frame_get_master
 
@@ -46,6 +47,11 @@ export FRAMELOGL
 !     initialise modules
 
       endif
+
+!     monitor simulation
+      call frame_monitor
+
+!     place for module action
 
 !     finalise framework
       if (ISTEP.ge.NSTEPS.or.LASTEP.eq.1) then

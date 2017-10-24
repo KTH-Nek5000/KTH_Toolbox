@@ -102,6 +102,9 @@
      $     'Write timer description in the summary',rpar_log,0,
      $      0.0,.false.,' ')
 
+      call rprm_rp_reg(mntr_wtime_id,mntr_sec_id,'WALLTIME',
+     $     'Simulation wall time',rpar_str,0,0.0,.false.,'00:00')
+
       return
       end subroutine
 !=======================================================================
@@ -115,6 +118,7 @@
       include 'MNTRLOGD'
 
 !     local variables
+      integer ierr, nhour, nmin
       integer itmp
       real rtmp
       logical ltmp
@@ -131,10 +135,189 @@
       call mntr_log(mntr_id,lp_inf,
      $     'Reseting log threshold to: '//trim(str))
 
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,mntr_wtime_id,rpar_str)
+      mntr_wtimes = ctmp
+
+!     get wall clock
+      ctmp = trim(adjustl(mntr_wtimes))
+!     check string format
+      ierr = 0
+      if (ctmp(3:3).ne.':') ierr = 1
+      if (.not.(LGE(ctmp(1:1),'0').and.LLE(ctmp(1:1),'9'))) ierr = 1
+      if (.not.(LGE(ctmp(2:2),'0').and.LLE(ctmp(2:2),'9'))) ierr = 1
+      if (.not.(LGE(ctmp(4:4),'0').and.LLE(ctmp(4:4),'9'))) ierr = 1
+      if (.not.(LGE(ctmp(5:5),'0').and.LLE(ctmp(5:5),'9'))) ierr = 1
+
+      if (ierr.eq.0) then
+         read(ctmp(1:2),'(I2)') nhour
+         read(ctmp(4:5),'(I2)') nmin
+         mntr_wtime = 60.0*(nmin +60*nhour)
+      else
+         call mntr_log(mntr_id,lp_inf,'Wrong wall time format')
+      endif
+
 !     write summary
       call mntr_mod_summary_print()
 
       mntr_ifinit = .true.
+
+      return
+      end subroutine
+!=======================================================================
+!> @brief Monitor simulation wall clock
+!! @ingroup monitor
+      subroutine mntr_wclock
+      implicit none
+
+      include 'SIZE'
+      include 'TSTEP'           ! ISTEP, NSTEPS
+      include 'INPUT'           ! IFMVBD, IFREGUO
+      include 'PARALLEL'        ! WDSIZE
+      include 'CTIMER'          ! ETIMES
+      include 'FRAMELP'
+      include 'MNTRLOGD'
+
+!     local variables
+      integer il, lstdl
+      real rtmp
+!-----------------------------------------------------------------------
+!     double delay step as monitoing routine does not know when checkpointing
+!     starts and wall clock can be reached in the middle of writnig process
+      lstdl = 2*mntr_stdl+1
+
+!     check simulation wall time
+      if (mntr_wtime.gt.0.0) then
+
+!     save wall time of the current step
+         do il=lstdl,2,-1
+            mntr_wtstep(il) = mntr_wtstep(il-1)
+         enddo
+         mntr_wtstep(1) = dnekclock() - ETIMES
+!     check if simulation is going to exceed wall time, but
+!     first let read all checkpointing files (necessary for multi file
+!     checkpointing)
+         if (ISTEP.gt.lstdl) then
+   !     it should be enough for the master to check condition
+            if (NID.eq.mntr_pid0) rtmp = 2.0*mntr_wtstep(1) -
+     $         mntr_wtstep(lstdl)
+!     broadcast predicted time
+            il = WDSIZE
+            call bcast(rtmp,il)
+
+            if (rtmp.gt.mntr_wtime.and.(NSTEPS-ISTEP).gt.lstdl) then
+               call mntr_log(mntr_id,lp_inf,
+     $                 'Wall clock reached; adjust NSTEPS')
+               NSTEPS = ISTEP+lstdl
+            endif
+         endif
+      endif
+
+!     check convergence flag
+      if (mntr_ifconv.and.(NSTEPS-ISTEP).gt.lstdl) then
+         call mntr_log(mntr_id,lp_inf,
+     $            'Simulation converged; adjust NSTEPS')
+         NSTEPS = ISTEP+lstdl
+      endif
+
+
+#if 0
+!     check if simulation is going to exceed wall time
+         if (ISTEP.gt.chpt_istep) then
+!     it should be enough for the master to check condition
+            if (NID.eq.0) rtmp = 2.0*chpm_wtstep(1) -
+     $         chpm_wtstep(chpm_nsnap)
+!     broadcast predicted time
+            il = WDSIZE
+            call bcast(rtmp,il)
+
+            if (rtmp.gt.mntr_wtime) then
+               call mntr_log(chpm_id,lp_inf,'Wall clock reached')
+
+!     should we shift checkpointing or shorten the run
+               if (ISTEP.lt.chpt_nstep) then
+                  il = ISTEP + chpt_step -1
+!     shift checkpointing
+                  if(mod(il,chpt_step).lt.(chpt_step-chpm_nsnap))then
+                     NSTEPS = ISTEP+chpm_nsnap
+                     chpt_step = NSTEPS
+                     chpt_nstep = ISTEP
+                     call mntr_log(chpm_id,lp_inf,'shift checkpointing')
+                  else
+!     shortent the run
+                     il = chpt_step - mod(il,chpt_step) - 1
+                     if (il.eq.0) then
+                        LASTEP = 1 ! it is a last step
+                     else
+                        NSTEPS = ISTEP+il
+                        chpt_nstep = ISTEP - chpm_nsnap
+                     endif
+                     call mntr_log(chpm_id,lp_inf,'shorten simulation')
+                  endif
+               endif
+            endif
+
+         endif
+#endif
+
+
+      return
+      end subroutine
+!=======================================================================
+!> @brief Set number of steps necessary to write proper checkpointing
+!! @ingroup monitor
+!! @param[in] dstep   step delay
+      subroutine mntr_set_step_delay(dstep)
+      implicit none
+
+      include 'SIZE'
+      include 'FRAMELP'
+      include 'MNTRLOGD'
+
+!     argument list
+      integer dstep
+
+!-----------------------------------------------------------------------
+      if (dstep.gt.mntr_stdl_max) then
+         call mntr_abort(mntr_id,"Step delay exceeds mntr_stdl_max")
+      else
+         mntr_stdl = dstep
+      endif
+
+      return
+      end subroutine
+!=======================================================================
+!> @brief Get step delay
+!! @ingroup monitor
+!! @param[out] dstep   step delay
+      subroutine mntr_get_step_delay(dstep)
+      implicit none
+
+      include 'SIZE'
+      include 'FRAMELP'
+      include 'MNTRLOGD'
+
+!     argument list
+      integer dstep
+!-----------------------------------------------------------------------
+      dstep = mntr_stdl
+
+      return
+      end subroutine
+!=======================================================================
+!> @brief Set convergence flag to shorten simulation
+!! @ingroup monitor
+      subroutine mntr_set_conv(ifconv)
+      implicit none
+
+      include 'SIZE'
+      include 'FRAMELP'
+      include 'MNTRLOGD'
+
+!     argument list
+      logical ifconv
+
+!-----------------------------------------------------------------------
+      mntr_ifconv = ifconv
 
       return
       end subroutine

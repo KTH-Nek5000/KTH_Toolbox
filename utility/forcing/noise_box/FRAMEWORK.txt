@@ -21,8 +21,6 @@ a random number ganarator. At the end velocity field is smoothed at the element 
 @code{.f}
       subroutine userchk
       include 'TSTEP'           ! ISTEP
-      include 'SOLN'            ! V[XYZ]
-      
       
       if (ISTEP.eq.0) then
 !     start framework
@@ -34,6 +32,9 @@ a random number ganarator. At the end velocity field is smoothed at the element 
 !     initialise modules
          call nseb_init
       endif
+
+!     monitor simulation
+      call frame_monitor
 
 !     add noise
       call nseb_noise_add

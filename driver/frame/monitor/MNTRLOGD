@@ -31,7 +31,24 @@
       integer mntr_iftdsc_id
       logical mntr_iftdsc
 
+!     simulation wall time + parameter id
+      real mntr_wtime
+      character*20 mntr_wtimes
+      integer mntr_wtime_id
+
 !     module variable section
+!     wall clock timing
+!     current and max delay in number of steps; 
+!     this is a number of steps simulation requires to write proper checkpoint for restarting
+      integer mntr_stdl, mntr_stdl_max
+      parameter (mntr_stdl_max=50)
+!     wall time of given step      
+      real mntr_wtstep(2*mntr_stdl_max+1)
+
+!     reached convergence flag
+      logical mntr_ifconv
+
+!     logging and module registration
 !     master node for logging
       integer mntr_pid0
 
@@ -60,16 +77,16 @@
 !     common blocks
 !     integer variables
       common /MNTRLOGI/ mntr_frame_id, mntr_id, mntr_frame_tmr_id, 
-     $      mntr_sec_id, mntr_pid0, 
-     $      mntr_lp_def, mntr_lp_def_id, mntr_mod_id, mntr_mod_num, 
-     $      mntr_mod_mpos, mntr_iftdsc_id
+     $      mntr_sec_id, mntr_lp_def, mntr_lp_def_id, mntr_iftdsc_id,  
+     $      mntr_wtime_id, mntr_stdl, mntr_pid0, mntr_mod_num, 
+     $      mntr_mod_mpos, mntr_mod_id
 
 !     real variables
-      common /MNTRLOGR/ mntr_frame_tmini
+      common /MNTRLOGR/ mntr_wtime, mntr_wtstep, mntr_frame_tmini
  
 !     logical variables
-      common /MNTRLOGL/ mntr_ifinit, mntr_iftdsc
+      common /MNTRLOGL/ mntr_ifinit, mntr_iftdsc, mntr_ifconv
       
 !     string variables
-      common /MNTRLOGC/ mntr_mod_name, mntr_mod_dscr
+      common /MNTRLOGC/ mntr_wtimes, mntr_mod_name, mntr_mod_dscr
  

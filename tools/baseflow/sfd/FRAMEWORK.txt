@@ -82,9 +82,9 @@ the number of the restart file set \a chkpt_main must be called before \a sfd_ma
    + chpt_step - checkpiont dump frequency (number of time steps)
    + chpt_ifrst - if restart
    + chpt_fnum - restart set number
+   + chpt_set_o
 -# [CHKPTMSTPD] (@ref chkpoint_mstep)
    + chpm_nsnap
-   + chpm_set_o
 
 
 @mod_param_example

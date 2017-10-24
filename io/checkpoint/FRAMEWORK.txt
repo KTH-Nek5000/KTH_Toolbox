@@ -26,20 +26,29 @@
       subroutine userchk
       include 'TSTEP'
       
-      if (ISTEP.eq.0) then
-!     register modules and parameters
-         call mntr_register_mod
-         call rprm_register
-         call mntr_register_par
+       if (ISTEP.eq.0) then
+!     start framework
+         call frame_start
+!     register modules
          call chkpt_register
-         call rprm_dict_get
-         call mntr_init
+!     get runtime parameters
+         call frame_rparam
+!     initialise modules
          call chkpt_init
+
       endif
+
+!     monitor simulation
+      call frame_monitor
 
 !     save/load files for full-restart
       call chkpt_main
 
+!     finalise framework
+      if (ISTEP.ge.NSTEPS.or.LASTEP.eq.1) then
+         call frame_end
+      endif
+ 
       return
       end
 @endcode
@@ -51,8 +60,6 @@
 | chpt_ifrst | logical | _chkpoint:readchkpt | start simulation form checkpoint |
 | chpt_fnum | integer | _chkpoint:chkpFnumber | restart file number |
 | chpt_step | integer | _chkpoint:chkpInterval | checkpiont dump frequency (number of time steps) |
-| chpt_wtimes | string | _chkpoint:WallTime | simulation wall time |
-
 
 @mod_param_example
 @code{.txt}
@@ -60,7 +67,6 @@
 chkpInterval = 10
 readchkpt = no
 chkpFnumber = 1
-WallTime = 02:05
 @endcode
 
 */

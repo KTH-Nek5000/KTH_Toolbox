@@ -13,6 +13,9 @@ dynamical databases.
 
 @mod_interface
 @interface_list Interface provided:
+-# @ref mntr_set_step_delay
+-# @ref mntr_get_step_delay
+-# @ref mntr_set_conv
 -# @ref mntr_is_initialised
 -# @ref mntr_lp_def_get
 -# @ref mntr_mod_reg
@@ -38,14 +41,16 @@ dynamical databases.
 @param_list Parameters provided by monitor module (include file - \a MNTRLOGD): 
 |Varaible | Type | Runtime parameter | Default value | Description |
 |---------|------|-------------------|---------------|-------------|
-| mntr_lp_def | integer | _monitor:loglevel | lp_inf | Logging threshold for toolboxes |
+| mntr_lp_def | integer | _monitor:loglevel  | lp_inf  | Logging threshold for toolboxes |
 | mntr_iftdsc | logical | _monitor:iftimdscr | .false. | Write timer description in the summary |
+| mntr_wtimes | string  | _monitor:WallTime  | 00:00   | simulation wall time |
 
 @mod_param_example
 @code{.txt}
 [_MONITOR]
-LOGLEVEL = 4
-IFTIMDSCR = no
+LogLevel = 4
+IfTimDscr = no
+WallTime = 02:05
 @endcode
 
 */

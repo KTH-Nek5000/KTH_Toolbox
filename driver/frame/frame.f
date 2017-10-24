@@ -1,6 +1,6 @@
 !> @file frame.f
 !! @ingroup frame
-!! @brief Set of routines for initialisation and finalisation of framework
+!! @brief Set of routines for framework operation
 !! @author Adam Peplinski
 !! @date 13 Oct 2017
 !=======================================================================
@@ -55,6 +55,23 @@
       return
       end subroutine
 !=======================================================================
+!> @brief Simulataion monitoring
+!! @ingroup frame
+      subroutine frame_monitor
+      implicit none
+
+      include 'SIZE'
+      include 'FRAMELP'
+
+!-----------------------------------------------------------------------
+!     monitor simulation wall clock
+      call mntr_wclock
+
+!     place for other monitoring operations
+
+      return
+      end subroutine
+!=======================================================================
 !> @brief Finalise framework
 !! @ingroup frame
       subroutine frame_end
@@ -80,7 +97,6 @@
       implicit none
 !-----------------------------------------------------------------------
       frame_get_master = 0
-
 
       return
       end function
