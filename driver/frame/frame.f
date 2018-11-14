@@ -6,6 +6,8 @@
 !=======================================================================
 !> @brief Start framework
 !! @ingroup frame
+!! @note This routine requires \a frame_usr_register and
+!!    \a frame_usr_init to be defined in \a setup.usr
       subroutine frame_start
       implicit none
 
@@ -36,21 +38,16 @@
       call rprm_register
       call mntr_register_par
 
-      return
-      end subroutine
-!=======================================================================
-!> @brief Read runtime parameters from Nek5000 dictionary
-!! @ingroup frame
-      subroutine frame_rparam
-      implicit none
+!     regisred user specified moduels
+      call frame_usr_register
 
-      include 'SIZE'
-      include 'FRAMELP'
-
-!-----------------------------------------------------------------------
+!     get runtime parameters from Nek5000 dictionary
       call rprm_dict_get
       call mntr_init
       call rprm_init
+
+!     initialise user specified modules
+      call frame_usr_init
 
       return
       end subroutine
@@ -81,6 +78,9 @@
       include 'FRAMELP'
 
 !-----------------------------------------------------------------------
+!     finalilse user specified modules
+      call frame_usr_end
+
 !     close all opened files
       call io_file_close
 
@@ -93,6 +93,8 @@
 !> @brief Specify master node id
 !! @ingroup frame
 !! @return frame_get_master
+!! @note This routine requires \a frame_usr_end to be defined in
+!!    \a setup.usr
       integer function frame_get_master()
       implicit none
 !-----------------------------------------------------------------------

@@ -13,8 +13,7 @@ to runtime parameters or global communication.
 */
 #List of existing submodules
 SUBMODULES comm \
-           monitor \
-           runparam
+           frame
 
 #List of conflicting submodules
 EXCLUSIVE

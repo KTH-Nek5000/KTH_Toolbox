@@ -21,15 +21,24 @@
 !-----------------------------------------------------------------------
       rprm_pid0 = frame_get_master()
 
-!     register runtime parameter module
+!     check if the current module was already registered
+      call mntr_mod_is_name_reg(itmp,rprm_name)
+      if (itmp.gt.0) then
+         call mntr_warn(itmp,
+     $        'module ['//trim(rprm_name)//'] already registered')
+         return
+      endif
+
 !     find parent module
       call mntr_mod_is_name_reg(itmp,'FRAME')
+      if (itmp.le.0) then
+         itmp = 1
+         call mntr_abort(itmp,
+     $        'parent module ['//'FRAME'//'] not registered')
+      endif
+
 !     register module
       call mntr_mod_reg(rprm_id,itmp,rprm_name,'Runtime parameters')
-      if (itmp.le.0) then
-         call mntr_log(rprm_id,lp_vrb,
-     $        'ERROR: parent module ['//'FRAME'//'] not registered')
-      endif
 
 !     register and set active section
       call rprm_sec_reg(rprm_lsec_id,rprm_id,'_'//adjustl(rprm_name),
@@ -65,6 +74,13 @@
       integer iunit, ierr
       character*30 fname
 !-----------------------------------------------------------------------
+!     check if the module was already initialised
+      if (rprm_ifinit) then
+         call mntr_warn(rprm_id,
+     $        'module ['//trim(rprm_name)//'] already initiaised.')
+         return
+      endif
+
 !     get runtime parameters
       call rprm_rp_get(itmp,rtmp,ltmp,ctmp,rprm_ifparf_id,rpar_log)
       rprm_ifparf = ltmp
@@ -94,6 +110,7 @@
          endif
       endif
 
+!     everything is initialised
       rprm_ifinit = .true.
 
       return

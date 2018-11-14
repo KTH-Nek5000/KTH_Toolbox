@@ -170,7 +170,7 @@
       implicit none
 
       include 'SIZE'
-      include 'TSTEP'           ! ISTEP, NSTEPS
+      include 'TSTEP'           ! ISTEP, NSTEPS, LASTEP
       include 'INPUT'           ! IFMVBD, IFREGUO
       include 'PARALLEL'        ! WDSIZE
       include 'CTIMER'          ! ETIMES
@@ -218,6 +218,10 @@
      $            'Simulation converged; adjust NSTEPS')
          NSTEPS = ISTEP+lstdl
       endif
+
+!     just to take into account there is istep and kstep,
+!     and kstep is just a local variable
+      if (ISTEP.ge.NSTEPS) LASTEP=1
 
       return
       end subroutine
