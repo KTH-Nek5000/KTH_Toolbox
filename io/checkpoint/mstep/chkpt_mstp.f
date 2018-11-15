@@ -18,13 +18,15 @@
 !-----------------------------------------------------------------------
 !     find parent module
       call mntr_mod_is_name_reg(lpmid,chpt_name)
+      if (lpmid.le.0) then
+        lpmid = 1
+        call mntr_abort(lpmid,
+     $   'Parent ['//trim(chpt_name)//'] module not registered')
+      endif
+
 !     register module
       call mntr_mod_reg(chpm_id,lpmid,chpm_name,
      $         'Multi-file checkpointing')
-      if (lpmid.le.0) then
-        call mntr_log(chpm_id,lp_vrb,
-     $   'ERROR: parent ['//trim(chpt_name)//'] module not registered')
-      endif
 
 !     register timers
       call mntr_tmr_is_name_reg(lpmid,'CHP_TOT')
@@ -906,12 +908,6 @@
      $            ,(rdcode1(i),i=1,10),p0th,ifsplit,if_full_pres
     1 format('#std',1x,i1,1x,i2,1x,i2,1x,i2,1x,i10,1x,i10,1x,e20.13,
      &       1x,i9,1x,i6,1x,i6,1x,10a,1pe15.7,1x,l1,1x,l1)
-
-      ! if we want to switch the bytes for output
-      ! switch it again because the hdr is in ASCII
-      call get_bytesw_write(ibsw_out)
-c      if (ibsw_out.ne.0) call set_bytesw_write(ibsw_out)
-      if (ibsw_out.ne.0) call set_bytesw_write(0)
 
       test_pattern = 6.54321           ! write test pattern for byte swap
 

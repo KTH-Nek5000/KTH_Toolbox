@@ -6,8 +6,7 @@
 !=======================================================================
 !> @brief Register checkpointing module
 !! @ingroup chkpoint
-!! @note This routine should be called in userchk during first step
-!!   between calls to frame_start and frame_rparam
+!! @note This routine should be called in frame_usr_register
       subroutine chkpt_register()
       implicit none
 
@@ -25,14 +24,24 @@
 !     timing
       ltim = dnekclock()
 
+!     check if the current module was already registered
+      call mntr_mod_is_name_reg(lpmid,chpt_name)
+      if (lpmid.gt.0) then
+         call mntr_warn(lpmid,
+     $        'module ['//trim(chpt_name)//'] already registered')
+         return
+      endif
+
 !     find parent module
       call mntr_mod_is_name_reg(lpmid,'FRAME')
+      if (lpmid.le.0) then
+         lpmid = 1
+         call mntr_abort(lpmid,
+     $        'Parent module ['//'FRAME'//'] not registered')
+      endif
+
 !     register module
       call mntr_mod_reg(chpt_id,lpmid,chpt_name,'Checkpointing I/O')
-      if (lpmid.le.0) then
-         call mntr_log(chpt_id,lp_vrb,
-     $        'ERROR: parent module ['//'FRAME'//'] not registered')
-      endif
 
 !     register timer
       call mntr_tmr_is_name_reg(lpmid,'FRM_TOT')
@@ -73,8 +82,7 @@
 !=======================================================================
 !> @brief Initilise checkpointing module
 !! @ingroup chkpoint
-!! @note This routine should be called in userchk during first step
-!!    after call to frame_rparam
+!! @note This routine should be called in frame_usr_init
       subroutine chkpt_init()
       implicit none
 
