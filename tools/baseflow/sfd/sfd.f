@@ -306,7 +306,7 @@
       include 'TSTEP'           ! ISTEP, TIME, NSTEPS, LASTEP
       INCLUDE 'INPUT'           ! IF3D
       include 'CHKPOINTD'       ! chpt_ifrst, chpt_step
-      include 'CHKPTMSTPD'      ! chpm_nsnap
+      include 'CHKPTMSTPD'
       include 'SFD'
 
 !     temporary storage
@@ -391,7 +391,7 @@
      $           VSYLAG (1,1,1,1,ILAG-1),VSZLAG (1,1,1,1,ILAG-1),ab0)
          enddo
 !     take into account restart option
-         if (chpt_ifrst.and.(ISTEP.lt.chpm_nsnap))
+         if (chpt_ifrst.and.(ISTEP.lt.chpt_istep))
      $        call opcopy (TA1,TA2,TA3,
      $        VSXLAG(1,1,1,1,chpm_nsnap-1),VSYLAG(1,1,1,1,chpm_nsnap-1),
      $        VSZLAG(1,1,1,1,chpm_nsnap-1))
@@ -408,7 +408,7 @@
 
 !     calculate new filtered velocity field
 !     take into account restart option
-         if (chpt_ifrst.and.(ISTEP.lt.chpm_nsnap)) then
+         if (chpt_ifrst.and.(ISTEP.lt.chpt_istep)) then
             call opcopy (VSX,VSY,VSZ,TA1,TA2,TA3)
          else
             ab0 = 1.0/BD(1)
@@ -439,20 +439,20 @@
          endif
 
 !     check stopping criteria
-         if (ISTEP.gt.chpm_nsnap) then ! to ensure restart
+         if (ISTEP.gt.chpt_istep) then ! to ensure restart
             ab0 = max(ab0,ab1)
             if (IF3D) ab0 = max(ab0,ab2)
             if (ab0.lt.SFDTOL) then
                if (NIO.eq.0) write(*,*) 'SFD: stopping criteria reached'
 
 !     should we shift checkpointing or shorten the run
-               if (ISTEP.lt.chpm_nstep) then
+               if (ISTEP.lt.chpt_nstep) then
                   ilag = ISTEP + chpt_step -1
 !     shift checkpointing
                   if(mod(ilag,chpt_step).lt.(chpt_step-chpm_nsnap))then
                      NSTEPS = ISTEP+chpm_nsnap
                      chpt_step = NSTEPS
-                     chpm_nstep = ISTEP
+                     chpt_nstep = ISTEP
                      if (NIO.eq.0) write(*,*) 'SFD: shift checkpointing'
                   else
 !     shortent the run
@@ -461,7 +461,7 @@
                         LASTEP = 1 ! it is a last step
                      else
                         NSTEPS = ISTEP+ilag
-                        chpm_nstep = ISTEP - chpm_nsnap
+                        chpt_nstep = ISTEP - chpm_nsnap
                      endif
                      if (NIO.eq.0) write(*,*) 'SFD: shorten simulation'
                   endif
@@ -497,11 +497,11 @@
       real dnekclock
 !-----------------------------------------------------------------------
 !     avoid writing for ISTEP.le.SFDNRSF
-      if (ISTEP.le.chpm_nsnap) return
+      if (ISTEP.le.chpt_istep) return
 
 !     save checkpoint
-      if (IFSFD.and.((ISTEP.eq.NSTEPS).or.(ISTEP.gt.chpm_nsnap.and.
-     $    ISTEP.lt.chpm_nstep.and.mod(ISTEP,chpt_step).eq.0))) then
+      if (IFSFD.and.((ISTEP.eq.NSTEPS).or.(ISTEP.gt.chpt_istep.and.
+     $    ISTEP.lt.chpt_nstep.and.mod(ISTEP,chpt_step).eq.0))) then
 
 !     timing
          SFDTIME1=dnekclock()
@@ -676,7 +676,7 @@
       include 'TSTEP'
       include 'PARALLEL'
       include 'INPUT'
-      include 'CHKPTMSTPD'        ! chpm_set_o
+      include 'CHKPOINTD'        ! chpt_set_o
       INCLUDE 'SFD'
 
 !     local variables
@@ -721,7 +721,7 @@
       bname = trim(adjustl(SESSION))
       call io_mfo_fname(fname,bname,prefix,ierr)
 
-      write(str,'(i5.5)') chpm_set_o+1
+      write(str,'(i5.5)') chpt_set_o+1
       fname=trim(fname)//trim(str(1:5))
 
 !     open file
@@ -795,7 +795,7 @@
       INCLUDE 'TSTEP'
       include 'PARALLEL'
       include 'RESTART'
-      include 'CHKPTMSTPD'        ! chpm_set_i
+      include 'CHKPOINTD'        ! chpt_set_i
       INCLUDE 'SFD'
 
 !     local variables
@@ -819,12 +819,12 @@
       prefix = 'SFD'
       bname = trim(adjustl(SESSION))
       call io_mfo_fname(fname,bname,prefix,ierr)
-      if (chpm_set_i.lt.0) then
+      if (chpt_set_i.lt.0) then
          if (NIO.eq.0) write(6,*)
      $        "ERROR; sfd_mfi file set not initialised"
          call exitt
       endif
-      write(str,'(i5.5)') chpm_set_i+1
+      write(str,'(i5.5)') chpt_set_i+1
       fname=trim(fname)//trim(str(1:5))
 
 !     open file, get header information and read mesh data
