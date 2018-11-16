@@ -1175,6 +1175,8 @@
 
       include 'SIZE'
       include 'INPUT'    ! IF3D
+      include 'FRAMELP'
+      include 'RPRMD'
 
 !     argument list
       integer mod_nkeys, mod_n3dkeys, mod_l3dkey(mod_n3dkeys)
@@ -1232,24 +1234,27 @@
                   enddo
  40               continue
                   if (if3dkey) then
-                     write(*,*) 'Module ',trim(mod_dictkey(1))
-                     write(*,*) '3D parameter specified for 2D run'
-                     write(*,*) trim(key)
+                     call mntr_log(rprm_id,lp_inf,
+     $                   'Module '//trim(mod_dictkey(1)))
+                     call mntr_log(rprm_id,lp_inf,
+     $              '3D parameter '//trim(key)//' specified for 2D run')
                   endif
                endif
             else
 !     variable not found
-               write(*,*) 'Module ',trim(mod_dictkey(1))
-               write(*,*) 'Unknown runtime parameter:'
-               write(*,*) trim(key)
+               call mntr_log(rprm_id,lp_inf,
+     $              'Module '//trim(mod_dictkey(1)))
+               call mntr_log(rprm_id,lp_inf,
+     $              'Unknown runtime parameter: '//trim(key))
             endif
          endif
       enddo
 
 !     no parameter section; give warning
       if (.not.ifsec) then
-         write(*,*) 'Module ',trim(mod_dictkey(1))
-         write(*,*) 'runtime parameter section not found.'
+         call mntr_log(rprm_id,lp_inf,'Module '//trim(mod_dictkey(1)))
+         call mntr_log(rprm_id,lp_inf,
+     $     'runtime parameter section not found.')
       endif
 
       return
