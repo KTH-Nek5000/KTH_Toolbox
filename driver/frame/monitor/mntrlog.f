@@ -15,24 +15,24 @@
       include 'MNTRLOGD'
       include 'MNTRTMRD'
 
-!     argument list
+      ! argument list
       integer log_thr
 
-!     local variables
+      ! local variables
       character*2 str
       character*200 lstring
 
-!     functions
+      ! functions
       integer frame_get_master
       real dnekclock
 !-----------------------------------------------------------------------
-!     simple timing
+      ! simple timing
       mntr_frame_tmini = dnekclock()
 
-!     set master node
+      ! set master node
       mntr_pid0 = frame_get_master()
 
-!     first register framework
+      ! first register framework
       mntr_frame_id = 1
       mntr_mod_id(mntr_frame_id) = 0
       mntr_mod_name(mntr_frame_id) = mntr_frame_name
@@ -40,7 +40,7 @@
       mntr_mod_num = mntr_mod_num + 1
       mntr_mod_mpos = mntr_mod_mpos + 1
 
-!     next monitor
+      ! next monitor
       mntr_id = 2
       mntr_mod_id(mntr_id) = mntr_frame_id
       mntr_mod_name(mntr_id) = mntr_name
@@ -48,10 +48,10 @@
       mntr_mod_num = mntr_mod_num + 1
       mntr_mod_mpos = mntr_mod_mpos + 1
 
-!     set log threshold
+      ! set log threshold
       mntr_lp_def = log_thr
 
-!     log changes
+      ! log changes
       lstring ='Registered module ['//trim(mntr_mod_name(mntr_frame_id))
       lstring= trim(lstring)//']: '//trim(mntr_mod_dscr(mntr_frame_id))
       call mntr_log(mntr_id,lp_inf,trim(lstring))
@@ -60,11 +60,9 @@
       lstring= trim(lstring)//']: '//trim(mntr_mod_dscr(mntr_id))
       call mntr_log(mntr_id,lp_inf,trim(lstring))
 
-!     register framework timer and get initiaisation time
+      ! register framework timer and get initiaisation time
       call mntr_tmr_reg(mntr_frame_tmr_id,0,mntr_frame_id,
      $     'FRM_TOT','Total elapsed framework time',.false.)
-
-
 
       write(str,'(I2)') mntr_lp_def
       call mntr_log(mntr_id,lp_inf,
@@ -82,18 +80,18 @@
       include 'FRAMELP'
       include 'MNTRLOGD'
 
-!     local variables
+      ! local variables
       integer rpid,itmp
       real rtmp
       logical ltmp
       character*20 ctmp
 !-----------------------------------------------------------------------
-!     register and set active section
+      ! register and set active section
       call rprm_sec_reg(mntr_sec_id,mntr_id,'_'//adjustl(mntr_name),
      $     'Runtime parameter section for monitor module')
       call rprm_sec_set_act(.true.,mntr_sec_id)
 
-!     register parameters
+      ! register parameters
       call rprm_rp_reg(mntr_lp_def_id,mntr_sec_id,'LOGLEVEL',
      $     'Logging threshold for toolboxes',rpar_int,mntr_lp_def,
      $      0.0,.false.,' ')
@@ -117,7 +115,7 @@
       include 'FRAMELP'
       include 'MNTRLOGD'
 
-!     local variables
+      ! local variables
       integer ierr, nhour, nmin
       integer itmp
       real rtmp
@@ -138,9 +136,9 @@
       call rprm_rp_get(itmp,rtmp,ltmp,ctmp,mntr_wtime_id,rpar_str)
       mntr_wtimes = ctmp
 
-!     get wall clock
+      ! get wall clock
       ctmp = trim(adjustl(mntr_wtimes))
-!     check string format
+      ! check string format
       ierr = 0
       if (ctmp(3:3).ne.':') ierr = 1
       if (.not.(LGE(ctmp(1:1),'0').and.LLE(ctmp(1:1),'9'))) ierr = 1
@@ -156,7 +154,7 @@
          call mntr_log(mntr_id,lp_inf,'Wrong wall time format')
       endif
 
-!     write summary
+      ! write summary
       call mntr_mod_summary_print()
 
       mntr_ifinit = .true.
@@ -177,30 +175,30 @@
       include 'FRAMELP'
       include 'MNTRLOGD'
 
-!     local variables
+      ! local variables
       integer il, lstdl
       real rtmp
 !-----------------------------------------------------------------------
-!     double delay step as monitoing routine does not know when checkpointing
-!     starts and wall clock can be reached in the middle of writnig process
+      ! double delay step as monitoing routine does not know when checkpointing
+      ! starts and wall clock can be reached in the middle of writnig process
       lstdl = 2*mntr_stdl+1
 
-!     check simulation wall time
+      ! check simulation wall time
       if (mntr_wtime.gt.0.0) then
 
-!     save wall time of the current step
+         ! save wall time of the current step
          do il=lstdl,2,-1
             mntr_wtstep(il) = mntr_wtstep(il-1)
          enddo
          mntr_wtstep(1) = dnekclock() - ETIMES
-!     check if simulation is going to exceed wall time, but
-!     first let read all checkpointing files (necessary for multi file
-!     checkpointing)
+         ! check if simulation is going to exceed wall time, but
+         ! first let read all checkpointing files (necessary for multi file
+         ! checkpointing)
          if (ISTEP.gt.lstdl) then
-!     it should be enough for the master to check condition
+            ! it should be enough for the master to check condition
             if (NID.eq.mntr_pid0) rtmp = 2.0*mntr_wtstep(1) -
      $         mntr_wtstep(lstdl)
-!     broadcast predicted time
+            ! broadcast predicted time
             il = WDSIZE
             call bcast(rtmp,il)
 
@@ -212,15 +210,15 @@
          endif
       endif
 
-!     check convergence flag
+      ! check convergence flag
       if (mntr_ifconv.and.(NSTEPS-ISTEP).gt.lstdl) then
          call mntr_log(mntr_id,lp_inf,
      $            'Simulation converged; adjust NSTEPS')
          NSTEPS = ISTEP+lstdl
       endif
 
-!     just to take into account there is istep and kstep,
-!     and kstep is just a local variable
+      ! just to take into account there is istep and kstep,
+      ! and kstep is just a local variable
       if (ISTEP.ge.NSTEPS) LASTEP=1
 
       return
@@ -236,7 +234,7 @@
       include 'FRAMELP'
       include 'MNTRLOGD'
 
-!     argument list
+      ! argument list
       integer dstep
 
 !-----------------------------------------------------------------------
@@ -259,7 +257,7 @@
       include 'FRAMELP'
       include 'MNTRLOGD'
 
-!     argument list
+      ! argument list
       integer dstep
 !-----------------------------------------------------------------------
       dstep = mntr_stdl
@@ -276,7 +274,7 @@
       include 'FRAMELP'
       include 'MNTRLOGD'
 
-!     argument list
+      ! argument list
       logical ifconv
 
 !-----------------------------------------------------------------------
@@ -328,20 +326,20 @@
       include 'FRAMELP'
       include 'MNTRLOGD'
 
-!     argument list
+      ! argument list
       integer mid, pmid
       character*(*) mname, mdscr
 
-!     local variables
+      ! local variables
       character*10  lname
       character*132 ldscr
       integer slen,slena
 
       integer il, ipos
 !-----------------------------------------------------------------------
-!     check name length
+      ! check name length
       slena = len_trim(adjustl(mname))
-!     remove trailing blanks
+      ! remove trailing blanks
       slen = len_trim(mname) - slena + 1
       if (slena.gt.mntr_lstl_mnm) then
          call mntr_log(mntr_id,lp_deb,
@@ -352,9 +350,9 @@
       lname= mname(slen:slen+slena- 1)
       call capit(lname,slena)
 
-!     check description length
+      ! check description length
       slena = len_trim(adjustl(mdscr))
-!     remove trailing blanks
+      ! remove trailing blanks
       slen = len_trim(mdscr) - slena + 1
       if (slena.ge.mntr_lstl_mds) then
          call mntr_log(mntr_id,lp_deb,
@@ -364,13 +362,13 @@
       call blank(ldscr,mntr_lstl_mds)
       ldscr= mdscr(slen:slen + slena - 1)
 
-!     find empty space
+      ! find empty space
       ipos = 0
 
-!     to ensure consistency I do it on master and broadcast result
+      ! to ensure consistency I do it on master and broadcast result
       if (nid.eq.mntr_pid0) then
 
-!     check if module is already registered
+         ! check if module is already registered
          do il=1,mntr_mod_mpos
             if (mntr_mod_id(il).ge.0.and.
      $         mntr_mod_name(il).eq.lname) then
@@ -379,7 +377,7 @@
             endif
          enddo
 
-!     find empty spot
+         ! find empty spot
          if (ipos.eq.0) then
             do il=1,mntr_id_max
                if (mntr_mod_id(il).eq.-1) then
@@ -390,23 +388,23 @@
          endif
       endif
 
-!     broadcast mid
+      ! broadcast mid
       call bcast(ipos,isize)
 
-!     error; no free space found
+      ! error; no free space found
       if (ipos.eq.0) then
          mid = ipos
          call mntr_abort(mntr_id,
      $        'module ['//trim(lname)//'] cannot be registered')
-!     module already registered
+      !  module already registered
       elseif (ipos.lt.0) then
          mid = abs(ipos)
          call mntr_abort(mntr_id,
      $    'Module ['//trim(lname)//'] is already registered')
-!     new module
+      ! new module
       else
          mid = ipos
-!        check if parent module is registered
+         ! check if parent module is registered
          if (pmid.gt.0) then
             if (mntr_mod_id(pmid).ge.0) then
                mntr_mod_id(ipos) = pmid
@@ -441,20 +439,20 @@
       include 'FRAMELP'
       include 'MNTRLOGD'
 
-!     argument list
+      ! argument list
       integer mid
       character*(*) mname
 
-!     local variables
+      ! local variables
       character*10  lname
       character*3 str
       integer slen,slena
 
       integer il, ipos
 !-----------------------------------------------------------------------
-!     check name length
+      ! check name length
       slena = len_trim(adjustl(mname))
-!     remove trailing blanks
+      ! remove trailing blanks
       slen = len_trim(mname) - slena + 1
       if (slena.gt.mntr_lstl_mnm) then
          call mntr_log(mntr_id,lp_deb,
@@ -465,12 +463,12 @@
       lname= mname(slen:slen+slena- 1)
       call capit(lname,slena)
 
-!     find module
+      ! find module
       ipos = 0
 
-!     to ensure consistency I do it on master and broadcast result
+      ! to ensure consistency I do it on master and broadcast result
       if (nid.eq.mntr_pid0) then
-!     check if module is already registered
+         ! check if module is already registered
          do il=1,mntr_mod_mpos
             if (mntr_mod_id(il).ge.0.and.
      $         mntr_mod_name(il).eq.lname) then
@@ -480,7 +478,7 @@
          enddo
       endif
 
-!     broadcast ipos
+      ! broadcast ipos
       call bcast(ipos,isize)
 
       if (ipos.eq.0) then
@@ -509,7 +507,7 @@
       include 'FRAMELP'
       include 'MNTRLOGD'
 
-!     argument list
+      ! argument list
       integer mid
 !-----------------------------------------------------------------------
       mntr_mod_is_id_reg = mntr_mod_id(mid).ge.0
@@ -528,7 +526,7 @@
       include 'FRAMELP'
       include 'MNTRLOGD'
 
-!     argument list
+      ! argument list
       integer nmod, mmod
 !-----------------------------------------------------------------------
       nmod = mntr_mod_num
@@ -549,11 +547,11 @@
       include 'FRAMELP'
       include 'MNTRLOGD'
 
-!     argument list
+      ! argument list
       character*10 mname
       integer mid, pmid
 
-!     local variables
+      ! local variables
       character*5 str
 !-----------------------------------------------------------------------
       if (mntr_mod_id(mid).ge.0) then
@@ -581,24 +579,24 @@
       include 'FRAMELP'
       include 'MNTRLOGD'
 
-!     argument list
+      ! argument list
       integer mid,priority
       character*(*) logs
 
-!     local variables
+      ! local variables
       character*200 llogs
       character*5 str
       integer slen, slena
 !-----------------------------------------------------------------------
-!     check log priority
+      ! check log priority
       if (priority.lt.mntr_lp_def) return
 
-!     done only by master
+      ! done only by master
       if (nid.eq.mntr_pid0) then
 
-!     check description length
+         ! check description length
          slena = len_trim(adjustl(logs))
-!     remove trailing blanks
+         ! remove trailing blanks
          slen = len_trim(logs) - slena + 1
          if (slena.ge.mntr_lstl_log) then
             if (mntr_lp_def.le.lp_deb) write(*,*)' ['//mntr_name//'] ',
@@ -608,9 +606,9 @@
          call blank(llogs,mntr_lstl_mds)
          llogs= logs(slen:slen + slena - 1)
 
-!     check module id
+         ! check module id
          if (mntr_mod_id(mid).ge.0) then
-!     add module name
+            ! add module name
             write(*,*) ' ['//trim(mntr_mod_name(mid))//'] '//trim(llogs)
          else
             write(str,'(I3)') mid
@@ -636,23 +634,23 @@
       include 'FRAMELP'
       include 'MNTRLOGD'
 
-!     argument list
+      ! argument list
       integer mid,priority, prid
       character*(*) logs
 
-!     local variables
+      ! local variables
       character*200 llogs
       character*5 str
       integer slen, slena
 !-----------------------------------------------------------------------
-!     check log priority
+      ! check log priority
       if (priority.lt.mntr_lp_def) return
 
-!     done only by given process
+      ! done only by given process
 
-!     check description length
+      ! check description length
       slena = len_trim(adjustl(logs))
-!     remove trailing blanks
+      ! remove trailing blanks
       slen = len_trim(logs) - slena + 1
       if (slena.ge.mntr_lstl_log) then
          if (mntr_lp_def.le.lp_deb) write(*,*)' ['//mntr_name//'] ',
@@ -662,9 +660,9 @@
       call blank(llogs,mntr_lstl_mds)
       llogs= logs(slen:slen + slena - 1)
 
-!     check module id
+      ! check module id
       if (mntr_mod_id(mid).ge.0) then
-!     add module name
+      ! add module name
        write(*,*) ' ['//trim(mntr_mod_name(mid))//'] nid= ',prid,
      $      ' '//trim(llogs)
       else
@@ -686,11 +684,11 @@
       subroutine mntr_logi(mid,priority,logs,ivar)
       implicit none
 
-!     argument list
+      ! argument list
       integer mid,priority,ivar
       character*(*) logs
 
-!     local variables
+      ! local variables
       character*10 str
 !-----------------------------------------------------------------------
       write(str,'(I8)') ivar
@@ -708,12 +706,12 @@
       subroutine mntr_logr(mid,priority,logs,rvar)
       implicit none
 
-!     argument list
+      ! argument list
       integer mid,priority
       character*(*) logs
       real rvar
 
-!     local variables
+      ! local variables
       character*20 str
 !-----------------------------------------------------------------------
       write(str,'(E15.8)') rvar
@@ -731,12 +729,12 @@
       subroutine mntr_logl(mid,priority,logs,lvar)
       implicit none
 
-!     argument list
+      ! argument list
       integer mid,priority
       character*(*) logs
       logical lvar
 
-!     local variables
+      ! local variables
       character*2 str
 !-----------------------------------------------------------------------
       write(str,'(L2)') lvar
@@ -754,7 +752,7 @@
 
       include 'FRAMELP'
 
-!     argument list
+      ! argument list
       integer mid,priority
       character*(*) logs
 !-----------------------------------------------------------------------
@@ -771,7 +769,7 @@
 
       include 'FRAMELP'
 
-!     argument list
+      ! argument list
       integer mid
       character*(*) logs
 !-----------------------------------------------------------------------
@@ -788,7 +786,7 @@
 
       include 'FRAMELP'
 
-!     argument list
+      ! argument list
       integer mid
       character*(*) logs
 !-----------------------------------------------------------------------
@@ -807,14 +805,14 @@
 
       include 'FRAMELP'
 
-!     argument list
+      ! argument list
       integer mid,ierr
       character*(*) logs
 
-!     local variables
+      ! local variables
       integer itest
       character*5 str
-!     functions
+      ! functions
       integer iglmax
 !-----------------------------------------------------------------------
       itest = iglmax(ierr,1)
@@ -837,7 +835,7 @@
       include 'FRAMELP'
       include 'MNTRLOGD'
 
-!     local variables
+      ! local variables
       integer il, stride
       parameter (stride=4)
       integer olist(2,mntr_id_max), ierr
@@ -848,7 +846,7 @@
      $         'Summary of registered modules')
 
       if (nid.eq.mntr_pid0) then
-!     get ordered list
+         ! get ordered list
          call mntr_mod_get_olist(olist, ierr)
 
 
@@ -876,10 +874,10 @@
       include 'FRAMELP'
       include 'MNTRLOGD'
 
-!     argument list
+      ! argument list
       integer olist(2,mntr_id_max), ierr
 
-!     local variables
+      ! local variables
       integer ind(mntr_id_max), level, parent, ipos
       integer slist(2,mntr_id_max), itmp1(2)
       integer npos, key
@@ -888,8 +886,8 @@
 !-----------------------------------------------------------------------
       ierr = 0
 
-!     sort module index array
-!     copy data removing possible empty slots
+      ! sort module index array
+      ! copy data removing possible empty slots
       npos=0
       do il=1,mntr_mod_mpos
          if (mntr_mod_id(il).ge.0) then
@@ -905,11 +903,11 @@
          return
       endif
 
-!     sort with respect to parent id
+      ! sort with respect to parent id
       key = 1
       call ituple_sort(slist,2,npos,key,1,ind,itmp1)
 
-!     sort within children of single parent with respect to children id
+      ! sort within children of single parent with respect to children id
       istart = 1
       itest = slist(1,istart)
       do il=1,npos
@@ -957,11 +955,11 @@
      $     parent,level)
       implicit none
 
-!     argument list
+      ! argument list
       integer nlist, npos, parent, level
       integer olist(2,nlist),slist(2,nlist)
 
-!     local variables
+      ! local variables
       integer il
       integer lparent, llevel
 !-----------------------------------------------------------------------

@@ -13,15 +13,15 @@
       include 'FRAMELP'
       include 'RPRMD'
 
-!     local variables
+      ! local variables
       integer itmp
 
-!     functions
+      ! functions
       integer frame_get_master
 !-----------------------------------------------------------------------
       rprm_pid0 = frame_get_master()
 
-!     check if the current module was already registered
+      ! check if the current module was already registered
       call mntr_mod_is_name_reg(itmp,rprm_name)
       if (itmp.gt.0) then
          call mntr_warn(itmp,
@@ -29,7 +29,7 @@
          return
       endif
 
-!     find parent module
+      ! find parent module
       call mntr_mod_is_name_reg(itmp,'FRAME')
       if (itmp.le.0) then
          itmp = 1
@@ -37,15 +37,15 @@
      $        'parent module ['//'FRAME'//'] not registered')
       endif
 
-!     register module
+      ! register module
       call mntr_mod_reg(rprm_id,itmp,rprm_name,'Runtime parameters')
 
-!     register and set active section
+      ! register and set active section
       call rprm_sec_reg(rprm_lsec_id,rprm_id,'_'//adjustl(rprm_name),
      $     'Runtime parameter section for rprm module')
       call rprm_sec_set_act(.true.,rprm_lsec_id)
 
-!     register parameters
+      ! register parameters
       call rprm_rp_reg(rprm_ifparf_id,rprm_lsec_id,'PARFWRITE',
      $     'Do we write runtime parameter file',rpar_log,0,
      $      0.0,.false.,' ')
@@ -66,7 +66,7 @@
       include 'FRAMELP'
       include 'RPRMD'
 
-!     local variables
+      ! local variables
       integer itmp
       real rtmp
       logical ltmp
@@ -74,24 +74,24 @@
       integer iunit, ierr
       character*30 fname
 !-----------------------------------------------------------------------
-!     check if the module was already initialised
+      ! check if the module was already initialised
       if (rprm_ifinit) then
          call mntr_warn(rprm_id,
      $        'module ['//trim(rprm_name)//'] already initiaised.')
          return
       endif
 
-!     get runtime parameters
+      ! get runtime parameters
       call rprm_rp_get(itmp,rtmp,ltmp,ctmp,rprm_ifparf_id,rpar_log)
       rprm_ifparf = ltmp
       call rprm_rp_get(itmp,rtmp,ltmp,ctmp,rprm_parfnm_id,rpar_str)
       rprm_parfnm = ctmp
 
-!     write summary
+      ! write summary
       iunit = 6
       call rprm_rp_summary_print(iunit)
 
-!     save .par file
+      ! save .par file
       if (rprm_ifparf) then
          call io_file_freeid(iunit, ierr)
          if (ierr.eq.0) then
@@ -110,7 +110,7 @@
          endif
       endif
 
-!     everything is initialised
+      ! everything is initialised
       rprm_ifinit = .true.
 
       return
@@ -145,11 +145,11 @@
       include 'FRAMELP'
       include 'RPRMD'
 
-!     argument list
+      ! argument list
       integer rpid, mid
       character*(*) pname, pdscr
 
-!     local variables
+      ! local variables
       character*10  mname
       character*20  lname
       character*132 ldscr
@@ -159,12 +159,12 @@
       integer il, ipos
       integer lval
 
-!     functions
+      ! functions
       logical mntr_mod_is_id_reg
 !-----------------------------------------------------------------------
-!     check name length
+      ! check name length
       slena = len_trim(adjustl(pname))
-!     remove trailing blanks
+      ! remove trailing blanks
       slen = len_trim(pname) - slena + 1
       if (slena.gt.rprm_lstl_mnm) then
          call mntr_log(rprm_id,lp_deb,
@@ -175,9 +175,9 @@
       lname= pname(slen:slen+slena- 1)
       call capit(lname,slena)
 
-!     check description length
+      ! check description length
       slena = len_trim(adjustl(pdscr))
-!     remove trailing blanks
+      ! remove trailing blanks
       slen = len_trim(pdscr) - slena + 1
       if (slena.ge.rprm_lstl_mds) then
          call mntr_log(rprm_id,lp_deb,
@@ -187,13 +187,13 @@
       call blank(ldscr,rprm_lstl_mds)
       ldscr= pdscr(slen:slen + slena - 1)
 
-!     find empty space
+      ! find empty space
       ipos = 0
 
-!     to ensure consistency I do it on master and broadcast result
+      ! to ensure consistency I do it on master and broadcast result
       if (nid.eq.rprm_pid0) then
 
-!     check if parameter name is already registered
+         ! check if parameter name is already registered
          do il=1,rprm_sec_mpos
             if (rprm_sec_id(il).gt.0.and.
      $          rprm_sec_name(il).eq.lname) then
@@ -202,7 +202,7 @@
             endif
          enddo
 
-!     find empty spot
+         ! find empty spot
          if (ipos.eq.0) then
             do il=1,rprm_sec_id_max
                if (rprm_sec_id(il).eq.-1) then
@@ -213,23 +213,23 @@
          endif
       endif
 
-!     broadcast ipos
+      ! broadcast ipos
       call bcast(ipos,isize)
 
-!     error; no free space found
+      ! error; no free space found
       if (ipos.eq.0) then
          rpid = ipos
          call mntr_abort(rprm_id,
      $        'Section '//trim(lname)//' cannot be registered')
-!     Section already registered
+      ! section already registered
       elseif (ipos.lt.0) then
          rpid = abs(ipos)
          call mntr_abort(rprm_id,
      $    'Section '//trim(lname)//' is already registered')
-!     new section
+      ! new section
       else
          rpid = ipos
-!        check if module is registered
+         ! check if module is registered
          if (mntr_mod_is_id_reg(mid)) then
             rprm_sec_id(ipos) = mid
          else
@@ -241,7 +241,7 @@
          rprm_sec_num = rprm_sec_num + 1
          if (rprm_sec_mpos.lt.ipos) rprm_sec_mpos = ipos
 
-!     logging
+         ! logging
          call mntr_mod_get_info(mname,ipos,mid)
          llog='Module ['//trim(mname)//'] registered section '
          llog=trim(llog)//' '//trim(lname)//': '//trim(ldscr)
@@ -264,11 +264,11 @@
       include 'FRAMELP'
       include 'RPRMD'
 
-!     argument list
+      ! argument list
       integer rpid, mid
       character*(*) pname
 
-!     local variables
+      ! local variables
       character*3 str
       character*10  mname
       character*20  lname
@@ -277,9 +277,9 @@
 
       integer il, ipos
 !-----------------------------------------------------------------------
-!     check name length
+      ! check name length
       slena = len_trim(adjustl(pname))
-!     remove trailing blanks
+      ! remove trailing blanks
       slen = len_trim(pname) - slena + 1
       if (slena.gt.rprm_lstl_mnm) then
          call mntr_log(rprm_id,lp_deb,
@@ -290,13 +290,13 @@
       lname= pname(slen:slen+slena- 1)
       call capit(lname,slena)
 
-!     find parameter
+      ! find parameter
       ipos = 0
 
-!     to ensure consistency I do it on master and broadcast result
+      ! to ensure consistency I do it on master and broadcast result
       if (nid.eq.rprm_pid0) then
 
-!     check if parameter name is already registered
+         ! check if parameter name is already registered
          do il=1,rprm_sec_mpos
             if (rprm_sec_id(il).gt.0.and.
      $          rprm_sec_name(il).eq.lname) then
@@ -307,7 +307,7 @@
 
       endif
 
-!     broadcast ipos
+      ! broadcast ipos
       call bcast(ipos,isize)
 
       if (ipos.eq.0) then
@@ -319,7 +319,7 @@
          write(str,'(I3)') ipos
          call mntr_log(rprm_id,lp_vrb,
      $   'Section '//trim(lname)//' registered with id = '//trim(str))
-!     check module
+         ! check module
          if (mid.ne.rprm_sec_id(ipos)) then
             call mntr_log(rprm_id,lp_inf,
      $      "Section's "//trim(lname)//" module inconsistent")
@@ -341,7 +341,7 @@
       include 'FRAMELP'
       include 'RPRMD'
 
-!     argument list
+      ! argument list
       integer rpid
 !-----------------------------------------------------------------------
       rprm_sec_is_id_reg = rprm_sec_id(rpid).gt.0
@@ -362,12 +362,12 @@
       include 'FRAMELP'
       include 'RPRMD'
 
-!     argument list
+      ! argument list
       integer rpid, mid
       character*20 pname
       logical ifact
 
-!     local variables
+      ! local variables
       character*5 str
 !-----------------------------------------------------------------------
       if (rprm_sec_id(rpid).gt.0) then
@@ -402,16 +402,16 @@
       include 'FRAMELP'
       include 'RPRMD'
 
-!     argument list
+      ! argument list
       integer rpid
       logical ifact
 
-!     local variables
+      ! local variables
       logical lval
       character*5 str
 !-----------------------------------------------------------------------
       if (rprm_sec_id(rpid).gt.0) then
-!     broadcast pval; to keep consistency
+         ! broadcast pval; to keep consistency
          lval = ifact
          call bcast(lval,lsize)
          rprm_sec_act(rpid) = lval
@@ -435,7 +435,7 @@
       include 'FRAMELP'
       include 'RPRMD'
 
-!     argument list
+      ! argument list
       integer rpid
 !-----------------------------------------------------------------------
       rprm_sec_is_id_act = rprm_sec_id(rpid).gt.0.and.
@@ -465,13 +465,13 @@
       include 'RPRMD'
 
 
-!     argument list
+      ! argument list
       integer rpid, mid, ptype, ipval
       real rpval
       logical lpval
       character*(*) pname, pdscr, cpval
 
-!     local variables
+      ! local variables
       character*10  mname
       character*20  lname
       character*132 ldscr
@@ -484,12 +484,12 @@
       logical lvall
       character*20 cvall
 
-!     functions
+      ! functions
       logical rprm_sec_is_id_reg
 !-----------------------------------------------------------------------
-!     check name length
+      ! check name length
       slena = len_trim(adjustl(pname))
-!     remove trailing blanks
+      ! remove trailing blanks
       slen = len_trim(pname) - slena + 1
       if (slena.gt.rprm_lstl_mnm) then
          call mntr_log(rprm_id,lp_deb,
@@ -500,9 +500,9 @@
       lname= pname(slen:slen+slena- 1)
       call capit(lname,slena)
 
-!     check description length
+      ! check description length
       slena = len_trim(adjustl(pdscr))
-!     remove trailing blanks
+      ! remove trailing blanks
       slen = len_trim(pdscr) - slena + 1
       if (slena.ge.rprm_lstl_mds) then
          call mntr_log(rprm_id,lp_deb,
@@ -512,13 +512,13 @@
       call blank(ldscr,rprm_lstl_mds)
       ldscr= pdscr(slen:slen + slena - 1)
 
-!     find empty space
+      ! find empty space
       ipos = 0
 
-!     to ensure consistency I do it on master and broadcast result
+      ! to ensure consistency I do it on master and broadcast result
       if (nid.eq.rprm_pid0) then
 
-!     check if parameter name is already registered
+         ! check if parameter name is already registered
          do il=1,rprm_par_mpos
             if (rprm_par_id(rprm_par_mark,il).gt.0.and.
      $          rprm_par_name(il).eq.lname) then
@@ -527,7 +527,7 @@
             endif
          enddo
 
-!     find empty spot
+         ! find empty spot
          if (ipos.eq.0) then
             do il=1,rprm_par_id_max
                if (rprm_par_id(rprm_par_mark,il).eq.-1) then
@@ -538,23 +538,23 @@
          endif
       endif
 
-!     broadcast ipos
+      ! broadcast ipos
       call bcast(ipos,isize)
 
-!     error; no free space found
+      ! error; no free space found
       if (ipos.eq.0) then
          rpid = ipos
          call mntr_abort(rprm_id,
      $        'Parameter '//trim(lname)//' cannot be registered')
-!     parameter already registered
+      ! parameter already registered
       elseif (ipos.lt.0) then
          rpid = abs(ipos)
          call mntr_abort(rprm_id,
      $    'Parameter '//trim(lname)//' is already registered')
-!     new parameter
+         ! new parameter
       else
          rpid = ipos
-!        check if section is registered
+         ! check if section is registered
          if (rprm_sec_is_id_reg(mid)) then
             rprm_par_id(rprm_par_mark,ipos) = mid
          else
@@ -567,7 +567,7 @@
          rprm_par_num = rprm_par_num + 1
          if (rprm_par_mpos.lt.ipos) rprm_par_mpos = ipos
 
-!     broadcast pval; to keep consistency
+         ! broadcast pval; to keep consistency
          if (ptype.eq.rpar_int) then
             ivall = ipval
             call bcast(ivall,isize)
@@ -581,9 +581,9 @@
             call bcast(lvall,lsize)
             rprm_parv_log(ipos) = lvall
          elseif (ptype.eq.rpar_str) then
-!     check value length
+            ! check value length
             slena = len_trim(adjustl(cpval))
-!     remove trailing blanks
+            ! remove trailing blanks
             slen = len_trim(cpval) - slena + 1
             if (slena.gt.rprm_lstl_mnm) then
                call mntr_log(rprm_id,lp_deb,
@@ -592,7 +592,7 @@
             endif
             call blank(cvall,rprm_lstl_mnm)
             cvall= cpval(slen:slen+slena- 1)
-!     broadcast pval; to keep consistency
+            ! broadcast pval; to keep consistency
             call bcast(cvall,rprm_lstl_mnm*csize)
             rprm_parv_str(ipos) = cvall
          else
@@ -600,7 +600,7 @@
      $      "Parameter's "//trim(lname)//" wrong type")
          endif
 
-!     logging
+         ! logging
          mname = trim(rprm_sec_name(mid))
          llog='Section '//trim(mname)//' registered parameter '
          llog=trim(llog)//' '//trim(lname)//': '//trim(ldscr)
@@ -637,11 +637,11 @@
       include 'FRAMELP'
       include 'RPRMD'
 
-!     argument list
+      ! argument list
       integer rpid, mid, ptype
       character*(*) pname
 
-!     local variables
+      ! local variables
       character*3 str
       character*10  mname
       character*20  lname
@@ -650,9 +650,9 @@
 
       integer il, ipos
 !-----------------------------------------------------------------------
-!     check name length
+      ! check name length
       slena = len_trim(adjustl(pname))
-!     remove trailing blanks
+      ! remove trailing blanks
       slen = len_trim(pname) - slena + 1
       if (slena.gt.rprm_lstl_mnm) then
          call mntr_log(rprm_id,lp_deb,
@@ -663,13 +663,13 @@
       lname= pname(slen:slen+slena- 1)
       call capit(lname,slena)
 
-!     find parameter
+      ! find parameter
       ipos = 0
 
-!     to ensure consistency I do it on master and broadcast result
+      ! to ensure consistency I do it on master and broadcast result
       if (nid.eq.rprm_pid0) then
 
-!     check if parameter name is already registered
+         ! check if parameter name is already registered
          do il=1,rprm_par_mpos
             if (rprm_par_id(rprm_par_mark,il).gt.0.and.
      $          rprm_par_name(il).eq.lname) then
@@ -680,7 +680,7 @@
 
       endif
 
-!     broadcast ipos
+      ! broadcast ipos
       call bcast(ipos,isize)
 
       if (ipos.eq.0) then
@@ -692,13 +692,13 @@
          write(str,'(I3)') ipos
          call mntr_log(rprm_id,lp_vrb,
      $   'Parameter '//trim(lname)//' registered with id = '//trim(str))
-!     check module
+         ! check module
          if (mid.ne.rprm_par_id(rprm_par_mark,ipos)) then
             call mntr_log(rprm_id,lp_inf,
      $      "Parameter's "//trim(lname)//" section inconsistent")
             rpid = -1
          endif
-!     check type
+         ! check type
          if (ptype.ne.rprm_par_id(rprm_par_type,ipos)) then
             call mntr_log(rprm_id,lp_inf,
      $      "Parameter's "//trim(lname)//" type inconsistent")
@@ -721,7 +721,7 @@
       include 'FRAMELP'
       include 'RPRMD'
 
-!     argument list
+      ! argument list
       integer rpid, ptype
 !-----------------------------------------------------------------------
       rprm_rp_is_id_reg = rprm_par_id(rprm_par_mark,rpid).gt.0.and.
@@ -743,11 +743,11 @@
       include 'FRAMELP'
       include 'RPRMD'
 
-!     argument list
+      ! argument list
       integer rpid, mid, ptype
       character*20 pname
 
-!     local variables
+      ! local variables
       character*5 str
 !-----------------------------------------------------------------------
       if (rprm_par_id(rprm_par_mark,rpid).gt.0) then
@@ -780,14 +780,14 @@
       include 'FRAMELP'
       include 'RPRMD'
 
-!     argument list
+      ! argument list
       integer rpid, ptype
       integer ipval
       real rpval
       logical lpval
       character*(*) cpval
 
-!     local variables
+      ! local variables
       integer ivall
       real rvall
       logical lvall
@@ -799,7 +799,7 @@
       if (rprm_par_id(rprm_par_mark,rpid).gt.0.and.
      $    rprm_par_id(rprm_par_type,rpid).eq.ptype) then
          if(rprm_sec_act(rprm_par_id(rprm_par_mark,rpid))) then
-!     broadcast pval; to keep consistency
+            ! broadcast pval; to keep consistency
             if (ptype.eq.rpar_int) then
                ivall = ipval
                call bcast(ivall,isize)
@@ -813,9 +813,9 @@
                call bcast(lvall,lsize)
                rprm_parv_log(rpid) = lvall
             elseif (ptype.eq.rpar_str) then
-!     check value length
+               ! check value length
                slena = len_trim(adjustl(cpval))
-!     remove trailing blanks
+               ! remove trailing blanks
                slen = len_trim(cpval) - slena + 1
                if (slena.gt.rprm_lstl_mnm) then
                   call mntr_log(rprm_id,lp_deb,
@@ -824,7 +824,7 @@
                endif
                call blank(cvall,rprm_lstl_mnm)
                cvall= cpval(slen:slen+slena- 1)
-!     broadcast pval; to keep consistency
+               ! broadcast pval; to keep consistency
                call bcast(cvall,rprm_lstl_mnm*csize)
                rprm_parv_str(rpid) = cvall
             else
@@ -861,14 +861,14 @@
       include 'FRAMELP'
       include 'RPRMD'
 
-!     argument list
+      ! argument list
       integer rpid, ptype
       integer ipval
       real rpval
       logical lpval
       character*20 cpval
 
-!     local variables
+      ! local variables
       character*5 str
 !-----------------------------------------------------------------------
       if (rprm_par_id(rprm_par_mark,rpid).gt.0.and.
@@ -912,7 +912,7 @@
       include 'FRAMELP'
       include 'RPRMD'
 
-!     local variables
+      ! local variables
       integer il, jl, kl
       integer nkey, ifnd, i_out
       integer nmod, pmid
@@ -928,38 +928,38 @@
       integer slen,slena
 
 !-----------------------------------------------------------------------
-!     dictionary exists on master node only
+      ! dictionary exists on master node only
       if (nid.eq.rprm_pid0) then
-!     key number in dictionary
+        ! key number in dictionary
         call finiparser_getdictentries(nkey)
 
         do il=1,nkey!rprm_par_mpos
 
-!     get a key
+          ! get a key
           call finiparser_getpair(key,val,il,ifnd)
           key = adjustl(key)
           call capit(key,132)
 
-!     find section key belongs to
+          ! find section key belongs to
           ifoundm=.false.
           do jl=1,rprm_sec_mpos
             if (rprm_sec_id(jl).gt.0) then
               lname=trim(adjustl(rprm_sec_name(jl)))
               ifnd = index(key,trim(lname))
               if (ifnd.eq.1) then
-!     set section to active
+                ! set section to active
                 rprm_sec_act(jl) = .true.
                 ifoundm=.true.
-!     looking for more than section name
+                ! looking for more than section name
                 if (trim(key).ne.trim(lname)) then
-!     add variable name
+                  ! add variable name
                   ifoundp =.false.
                   do kl=1,rprm_par_mpos
                     if (rprm_par_id(rprm_par_mark,kl).eq.jl) then
                       lkey = trim(lname)//':'//trim(rprm_par_name(kl))
                       if (trim(key).eq.trim(lkey)) then
                         ifoundp=.true.
-!     read parameter value
+                        ! read parameter value
                         if (rprm_par_id(rprm_par_type,kl).eq.
      $                      rpar_int) then
                           read(val,*) itmp
@@ -992,7 +992,7 @@
                       endif
                     endif
                   enddo
-!     is it unknown parameter
+                  ! is it unknown parameter
                   if (.not.ifoundp) then
                     call mntr_warn(rprm_id,
      $               'Unknown runtime parameter '//trim(key))
@@ -1008,13 +1008,13 @@
         enddo
       endif
 
-!     broadcast array data
+      ! broadcast array data
       call bcast(rprm_parv_int,rprm_par_id_max*isize)
       call bcast(rprm_parv_real,rprm_par_id_max*wdsize)
       call bcast(rprm_parv_log,rprm_par_id_max*lsize)
       call bcast(rprm_parv_str,rprm_par_id_max*rprm_lstl_mnm*csize)
 
-! broadcast activation lfag
+      ! broadcast activation lfag
       call bcast(rprm_sec_act,rprm_sec_id_max*lsize)
 
       return
@@ -1030,10 +1030,10 @@
       include 'FRAMELP'
       include 'RPRMD'
 
-!     argument list
+      ! argument list
       integer unit
 
-!     local variables
+      ! local variables
       integer ind(rprm_par_id_max)
       integer offset(2,rprm_par_id_max)
       integer slist(2,rprm_par_id_max), itmp1(2)
@@ -1045,7 +1045,7 @@
       character*(*) cmnt
       parameter (cmnt='#')
 
-!     functions
+      ! functions
       integer mntr_lp_def_get
 !-----------------------------------------------------------------------
       if (unit.eq.6) then
@@ -1058,8 +1058,8 @@
 
       if (nid.eq.rprm_pid0) then
 
-!     sort module index array
-!     copy data removing possible empty slots
+         ! sort module index array
+         ! copy data removing possible empty slots
          npos=0
          do il=1,rprm_par_mpos
             in = rprm_par_id(rprm_par_mark,il)
@@ -1070,11 +1070,11 @@
             endif
          enddo
 
-!     sort with respect to section id
+         ! sort with respect to section id
          key = 1
          call ituple_sort(slist,2,npos,key,1,ind,itmp1)
 
-!     sort parameters in single section with respect to parameter id
+         ! sort parameters in single section with respect to parameter id
          nset = 0
          istart = 1
          itest = slist(1,istart)
@@ -1178,36 +1178,35 @@
       include 'FRAMELP'
       include 'RPRMD'
 
-!     argument list
+      ! argument list
       integer mod_nkeys, mod_n3dkeys, mod_l3dkey(mod_n3dkeys)
       character*132 mod_dictkey(mod_nkeys)
       logical ifsec
 
-!     local variables
+      ! local variables
       integer il, jl, ip  ! loop index
-!     dictionary operations
+      ! dictionary operations
       integer nkey, ifnd, i_out
       real d_out
       character*132 key, lkey
       character*1024 val
       logical ifvar, if3dkey
 !-----------------------------------------------------------------------
-
-!     check consistency
-!     key number in dictionary
+      ! check consistency
+      ! key number in dictionary
       call finiparser_getdictentries(nkey)
 
-!     set marker for finding module's section
+      ! set marker for finding module's section
       ifsec = .FALSE.
       do il=1,nkey
-!     get a key
+         ! get a key
          call finiparser_getpair(key,val,il,ifnd)
          call capit(key,132)
 
-!     does it belong to current module's section
+         ! does it belong to current module's section
          ifnd = index(key,trim(mod_dictkey(1)))
          if (ifnd.eq.1) then
-!     section was found, check variable
+            ! section was found, check variable
             ifsec = .TRUE.
             ifvar = .FALSE.
             do ip = mod_nkeys,1,-1
@@ -1222,7 +1221,7 @@
             enddo
  20         continue
             if (ifvar) then
-!     check 2D versus 3D
+               ! check 2D versus 3D
                if (.not.IF3D) then
                   if3dkey = .FALSE.
                   do jl=1,mod_n3dkeys
@@ -1241,7 +1240,7 @@
                   endif
                endif
             else
-!     variable not found
+               ! variable not found
                call mntr_log(rprm_id,lp_inf,
      $              'Module '//trim(mod_dictkey(1)))
                call mntr_log(rprm_id,lp_inf,
@@ -1250,7 +1249,7 @@
          endif
       enddo
 
-!     no parameter section; give warning
+      ! no parameter section; give warning
       if (.not.ifsec) then
          call mntr_log(rprm_id,lp_inf,'Module '//trim(mod_dictkey(1)))
          call mntr_log(rprm_id,lp_inf,

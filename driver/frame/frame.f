@@ -15,11 +15,11 @@
       include 'PARALLEL'
       include 'FRAMELP'
 
-!     local variables
+      ! local variables
       integer log_thr, slen, ierr
       character*18 log_cval
 !-----------------------------------------------------------------------
-!     check logging threshold
+      ! check logging threshold
       if (nid.eq.0) then
          call getenv('FRAMELOGL',log_cval)
          slen = len_trim(log_cval)
@@ -33,20 +33,20 @@
 
       call bcast(log_thr,isize)
 
-!     register backbone modules na runtime parameters
+      ! register backbone modules na runtime parameters
       call mntr_register_mod(log_thr)
       call rprm_register
       call mntr_register_par
 
-!     regisred user specified moduels
+      ! regisred user specified moduels
       call frame_usr_register
 
-!     get runtime parameters from Nek5000 dictionary
+      ! get runtime parameters from Nek5000 dictionary
       call rprm_dict_get
       call mntr_init
       call rprm_init
 
-!     initialise user specified modules
+      ! initialise user specified modules
       call frame_usr_init
 
       return
@@ -61,10 +61,10 @@
       include 'FRAMELP'
 
 !-----------------------------------------------------------------------
-!     monitor simulation wall clock
+      ! monitor simulation wall clock
       call mntr_wclock
 
-!     place for other monitoring operations
+      ! place for other monitoring operations
 
       return
       end subroutine
@@ -78,13 +78,13 @@
       include 'FRAMELP'
 
 !-----------------------------------------------------------------------
-!     finalilse user specified modules
+      ! finalilse user specified modules
       call frame_usr_end
 
-!     close all opened files
+      ! close all opened files
       call io_file_close
 
-!     place for timers summary
+      ! place for timers summary
       call mntr_tmr_summary_print()
 
       return

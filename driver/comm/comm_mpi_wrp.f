@@ -21,17 +21,17 @@
       integer nid, np, nekcomm,nekgroup,nekreal
       common /nekmpi/ nid,np,nekcomm,nekgroup,nekreal
 
-!     argument list
+      ! argument list
       integer nl
       integer out(nl),in(nl)
 
-!     local varaibles
+      ! local varaibles
       integer ierr
 !-----------------------------------------------------------------------
       call mpi_scan(in,out,nl,mpi_integer,mpi_sum,nekcomm,ierr)
 
       return
-      end
+      end subroutine
 !=======================================================================
 !> @brief Broadcast integer array from specified process
 !! @details This routine is simillar to @ref lbcast and @ref bcast
@@ -49,15 +49,15 @@
       integer nid, np, nekcomm,nekgroup,nekreal
       common /nekmpi/ nid,np,nekcomm,nekgroup,nekreal
 
-!     argument list
+      ! argument list
       integer nl,sid
       integer buf(nl)
 
-!     local varaibles
+      ! local varaibles
       integer ierr
 !-----------------------------------------------------------------------
       call mpi_bcast (buf,nl,mpi_integer,sid,nekcomm,ierr)
 
       return
-      end
+      end subroutine
 !=======================================================================

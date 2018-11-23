@@ -10,7 +10,7 @@
       implicit none
 !-----------------------------------------------------------------------
       return
-      end
+      end subroutine
 !=======================================================================
 !> @brief Dummy replacement for checkpoint initialisation.
 !! @ingroup chkptdummy
@@ -18,7 +18,18 @@
       implicit none
 !-----------------------------------------------------------------------
       return
-      end
+      end subroutine
+!=======================================================================
+!> @brief Dummy replacement for check of module initialisation
+!! @ingroup chkptdummy
+!! @return chkpts_is_initialised
+      logical function chkpts_is_initialised()
+      implicit none
+!-----------------------------------------------------------------------
+      chkpts_is_initialised = .true.
+
+      return
+      end function
 !=======================================================================
 !> @brief Dummy replacement for checkpoint reader.
 !! @ingroup chkptdummy
@@ -26,7 +37,7 @@
       implicit none
 !-----------------------------------------------------------------------
       return
-      end
+      end subroutine
 !=======================================================================
 !> @brief Dummy replacement for checkpoint writer.
 !! @ingroup chkptdummy
@@ -34,5 +45,5 @@
       implicit none
 !-----------------------------------------------------------------------
       return
-      end
+      end subroutine
 !=======================================================================
