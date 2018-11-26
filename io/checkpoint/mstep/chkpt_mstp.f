@@ -1179,6 +1179,8 @@
      $     dnbyte/tio)
       call mntr_logi(chpm_id,lp_vrb,'io-nodes = ',nfileo)
 
+      if (ifaxis) call chkpt_axis_interp_ic()
+
       return
       end subroutine
 !=======================================================================
@@ -1326,7 +1328,7 @@
 !! @note This is version of @ref axis_interp_ic taking into account fact
 !! pressure does not have to be written on velocity mesh.
 !! @remark This routine uses global scratch space \a CTMP0.
-      subroutine chkpt_axis_interp_ic(pm1)
+      subroutine chkpt_axis_interp_ic()
       implicit none
 
       include 'SIZE'
@@ -1337,49 +1339,57 @@
       include 'GEOM'
       include 'IXYZ'
 
-      ! argument list
-      real pm1(lx1,ly1,lz1,lelv)
-
       ! scratch space
-      real axism1 (lx1,ly1)
-      common /ctmp0/ axism1
+      real axism1 (lx1,ly1), axism2 (lx2,ly2), ialj2 (ly2,ly2),
+     $     iatlj2(ly2,ly2), tmp(ly2,ly2)
+      common /ctmp0/ axism1, axism2, ialj2, iatlj2, tmp
 
       ! local variables
-      integer e, ips, is1
+      integer el, ips, is1
 !-----------------------------------------------------------------------
       if (.not.ifaxis) return
 
-      do e=1,nelv
-         if (ifrzer(e)) then
+      ! get interpolation operators between Gauss-Lobatto Jacobi
+      ! and and Gauss Legendre poits (this is missing in genwz)
+      !call invmt(iajl2 ,ialj2 ,tmp ,ly2)
+      call invmt(iatjl2,iatlj2,tmp,ly2)
+
+      do el=1,nelv
+         if (ifrzer(el)) then
            if (ifgetx) then
-             call mxm   (xm1(1,1,1,e),nx1,iatlj1,ny1,axism1,ny1)
-             call copy  (xm1(1,1,1,e),axism1,nx1*ny1)
-             call mxm   (ym1(1,1,1,e),nx1,iatlj1,ny1,axism1,ny1)
-             call copy  (ym1(1,1,1,e),axism1,nx1*ny1)
+             call mxm(xm1(1,1,1,el),nx1,iatlj1,ny1,axism1,ny1)
+             call copy(xm1(1,1,1,el),axism1,nx1*ny1)
+             call mxm(ym1(1,1,1,el),nx1,iatlj1,ny1,axism1,ny1)
+             call copy(ym1(1,1,1,el),axism1,nx1*ny1)
            endif
            if (ifgetu) then
-             call mxm    (vx(1,1,1,e),nx1,iatlj1,ny1,axism1,ny1)
-             call copy   (vx(1,1,1,e),axism1,nx1*ny1)
-             call mxm    (vy(1,1,1,e),nx1,iatlj1,ny1,axism1,ny1)
-             call copy   (vy(1,1,1,e),axism1,nx1*ny1)
+             call mxm(vx(1,1,1,el),nx1,iatlj1,ny1,axism1,ny1)
+             call copy(vx(1,1,1,el),axism1,nx1*ny1)
+             call mxm(vy(1,1,1,el),nx1,iatlj1,ny1,axism1,ny1)
+             call copy(vy(1,1,1,el),axism1,nx1*ny1)
            endif
            if (ifgetw) then
-             call mxm    (vz(1,1,1,e),nx1,iatlj1,ny1,axism1,ny1)
-             call copy   (vz(1,1,1,e),axism1,nx1*ny1)
+             call mxm(vz(1,1,1,el),nx1,iatlj1,ny1,axism1,ny1)
+             call copy(vz(1,1,1,el),axism1,nx1*ny1)
            endif
-           if (ifgetp.and.(ifsplit.or.(.not.(if_full_pres)))) then
-             call mxm    (pm1(1,1,1,e),nx1,iatlj1,ny1,axism1,ny1)
-             call copy   (pm1(1,1,1,e),axism1,nx1*ny1)
+           if (ifgetp) then
+             if (ifsplit) then
+                call mxm(pr(1,1,1,el),nx1,iatlj1,ny1,axism1,ny1)
+                call copy(pr(1,1,1,el),axism1,nx1*ny1)
+             else
+                call mxm(pr(1,1,1,el),nx2,iatlj2,ny2,axism2,ny2)
+                call copy(pr(1,1,1,el),axism2,nx2*ny2)
+             endif
            endif
            if (ifgett) then
-             call mxm  (t (1,1,1,e,1),nx1,iatlj1,ny1,axism1,ny1)
-             call copy (t (1,1,1,e,1),axism1,nx1*ny1)
+             call mxm(t(1,1,1,el,1),nx1,iatlj1,ny1,axism1,ny1)
+             call copy(t(1,1,1,el,1),axism1,nx1*ny1)
            endif
            do ips=1,npscal
             is1 = ips + 1
             if (ifgtps(ips)) then
-             call mxm (t(1,1,1,e,is1),nx1,iatlj1,ny1,axism1,ny1)
-             call copy(t(1,1,1,e,is1),axism1,nx1*ny1)
+             call mxm(t(1,1,1,el,is1),nx1,iatlj1,ny1,axism1,ny1)
+             call copy(t(1,1,1,el,is1),axism1,nx1*ny1)
             endif
            enddo
          endif
