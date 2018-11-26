@@ -103,6 +103,18 @@
       logical chkpts_is_initialised
       real dnekclock
 !-----------------------------------------------------------------------
+      ! check if the module was already initialised
+      if (chpt_ifinit) then
+         call mntr_warn(chpt_id,
+     $        'module ['//trim(chpt_name)//'] already initiaised.')
+         ! check submodule intialisation
+         if (.not.chkpts_is_initialised) then
+            call mntr_abort(chpt_id,
+     $        'required submodule module not initiaised.')
+         endif
+         return
+      endif
+
       ! timing
       ltim = dnekclock()
 
