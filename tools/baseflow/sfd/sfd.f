@@ -4,118 +4,225 @@
 !! @author Adam Peplinski
 !! @date Feb 6, 2017
 !=======================================================================
-!> @brief Set sfd parameters
+!> @brief Register SFD module
 !! @ingroup sfd
-      subroutine sfd_param_get()
+!! @note This routine should be called in frame_usr_register
+      subroutine sfd_register()
       implicit none
 
-      include 'SIZE'            !
-      include 'PARALLEL'        ! ISIZE, WDSIZE, LSIZE,CSIZE
-      include 'SFD'             ! IFSFD, SFDD, SFDCHI, SFDFCONV
+      include 'SIZE'
+      include 'FRAMELP'
+      include 'SFDD'
 
-!     argument list
-      integer fid               ! file id
+      ! local variables
+      integer lpmid
+      real ltim
+
+      ! functions
+      real dnekclock
+!-----------------------------------------------------------------------
+      ! timing
+      ltim = dnekclock()
+
+      ! check if the current module was already registered
+      call mntr_mod_is_name_reg(lpmid,sfd_name)
+      if (lpmid.gt.0) then
+         call mntr_warn(lpmid,
+     $        'module ['//trim(sfd_name)//'] already registered')
+         return
+      endif
+
+      ! find parent module
+      call mntr_mod_is_name_reg(lpmid,'FRAME')
+      if (lpmid.le.0) then
+         lpmid = 1
+         call mntr_abort(lpmid,
+     $        'Parent module ['//'FRAME'//'] not registered')
+      endif
+
+      ! register module
+      call mntr_mod_reg(sfd_id,lpmid,sfd_name,
+     $    'Selective Frequency Damping')
+
+      ! register timer
+      call mntr_tmr_is_name_reg(lpmid,'FRM_TOT')
+      call mntr_tmr_reg(sfd_ttot_id,lpmid,sfd_id,
+     $      'SFD_TOT','SFD total time',.false.)
+
+      call mntr_tmr_reg(sfd_tini_id,sfd_ttot_id,sfd_id,
+     $      'SFD_INI','SFD initialisation time',.true.)
+
+      call mntr_tmr_reg(sfd_evl_id,sfd_ttot_id,sfd_id,
+     $      'SFD_EVL','SFD evolution time',.true.)
+
+      call mntr_tmr_reg(sfd_chp_id,sfd_ttot_id,sfd_id,
+     $      'SFD_CHP','SFD checkpoint saving time',.true.)
+
+      ! register and set active section
+      call rprm_sec_reg(sfd_sec_id,sfd_id,'_'//adjustl(sfd_name),
+     $     'Runtime paramere section for SFD module')
+      call rprm_sec_set_act(.true.,sfd_sec_id)
+
+      ! register parameters
+      call rprm_rp_reg(sfd_dlt_id,sfd_sec_id,'FILTERWDTH',
+     $     'SFD filter width',rpar_real,0,1.0,.false.,' ')
+
+      call rprm_rp_reg(sfd_chi_id,sfd_sec_id,'CONTROLCFF',
+     $     'SFD control coefficient',rpar_real,0,1.0,.false.,' ')
+
+      call rprm_rp_reg(sfd_tol_id,sfd_sec_id,'RESIDUALTOL',
+     $     'SFD tolerance for residual',rpar_real,0,1.0,.false.,' ')
+
+      call rprm_rp_reg(sfd_cnv_id,sfd_sec_id,'LOGINTERVAL',
+     $     'SFD frequency for logging convegence data',
+     $      rpar_int,0,1.0,.false.,' ')
+
+      ! initialisation flag
+      sfd_ifinit = .false.
+
+      ! timing
+      ltim = dnekclock() - ltim
+      call mntr_tmr_add(sfd_tini_id,1,ltim)
+
+      return
+      end subroutine
+!=======================================================================
+!> @brief Initialise SFD module
+!! @ingroup sfd
+!! @note This routine should be called in frame_usr_init
+      subroutine sfd_init()
+      implicit none
+
+      include 'SIZE'
+      include 'TSTEP'
+      include 'FRAMELP'
+      include 'SFDD'
+!      include 'CHKPOINTD'
+
+      ! local variables
+      integer itmp, lstdl
+      real rtmp, ltim
+      logical ltmp
+      character*20 ctmp
+      character*2 str
+      character*200 lstring
+
+      ! functions
+!      logical chkpts_is_initialised
+      real dnekclock
+!-----------------------------------------------------------------------
+      ! check if the module was already initialised
+      if (sfd_ifinit) then
+         call mntr_warn(sfd_id,
+     $        'module ['//trim(sfd_name)//'] already initiaised.')
+!         ! check submodule intialisation
+!         if (.not.chkpts_is_initialised()) then
+!            call mntr_abort(sfd_id,
+!     $        'required submodule module not initiaised.')
+!         endif
+         return
+      endif
+
+      ! timing
+      ltim = dnekclock()
+
+
+
+
+
+
+
+
+      ! initialisation flag
+      sfd_ifinit = .false.
+
+      ! timing
+      ltim = dnekclock() - ltim
+      call mntr_tmr_add(sfd_tini_id,1,ltim)
+
+      return
+      end subroutine
+!=======================================================================
+!> @brief Check if module was initialised
+!! @ingroup sfd
+!! @return sfd_is_initialised
+      logical function sfd_is_initialised()
+      implicit none
+
+      include 'SIZE'
+      include 'SFDD'
+!-----------------------------------------------------------------------
+      sfd_is_initialised = sfd_ifinit
+
+      return
+      end function
+!=======================================================================
+!> @brief Finalise SFD
+!! @ingroup sfd
+!! @note This routine should be called in frame_usr_end
+      subroutine sfd_end
+      implicit none
+
+      INCLUDE 'SIZE'            ! NID, NDIM, NPERT
+      INCLUDE 'INPUT'           ! IF3D
+      include 'RESTART'
+      INCLUDE 'SOLN'
+      include 'FRAMELP'
+      INCLUDE 'SFDD'
 
 !     local variables
-      integer il, ip  ! loop index
-!     dictionary operations
-      integer ifnd, i_out
-      real d_out
-      character*132 lkey
-      logical ifsec
-!     for broadcasting
-      integer llen
-      real rtmp(3)
+      integer ntot1, i
+      real ab0, ab1, ab2
+
+      logical lifxyo, lifpo, lifvo, lifto, lifreguo, lifpso(LDIMT1)
+
+!     functions
+      integer frame_get_master
+      real gl2norm
 !-----------------------------------------------------------------------
-!     default values
-      IFSFD = .FALSE.
-      SFDD = 1.05000
-      SFDCHI = 0.5
-      SFDTOL = 1.0e-6
-      SFDFCONV = 50
 
+!     final convergence
+      ntot1 = nx1*ny1*nz1*nelv
 
-!     dictionary
-      if (NID.eq.0) then
-!     check consistency
-         call rprm_check(sfd_nkeys, sfd_dictkey, sfd_n3dkeys,
-     $           sfd_l3dkey, ifsec)
+!     calculate L2 norms
+      ab0 = gl2norm(sfd_bfx,ntot1)
+      ab1 = gl2norm(sfd_bfy,ntot1)
+      if (if3d) ab2 = gl2norm(sfd_bfz,ntot1)
 
-!     if section present read parameters
-         if (ifsec) then
-!     do we run SFD
-            lkey = trim(adjustl(sfd_dictkey(1)))//':'//
-     $             trim(adjustl(sfd_dictkey(2)))
-            call finiparser_getBool(i_out,trim(lkey),ifnd)
-            if (ifnd.eq.1.and.i_out.eq.1) then
-               ifsfd = .TRUE.
-            endif
+      ! stamp the log
+      call mntr_log(sfd_id,lp_prd,
+     $              'Convergence (L2 norm per grid point):')
+      call mntr_logr(sfd_id,lp_prd,'DVX = ',ab0)
+      call mntr_logr(sfd_id,lp_prd,'DVY = ',ab1)
+      if (if3d) call mntr_logr(sfd_id,lp_prd,'DVZ = ',ab2)
+      call mntr_log(sfd_id,lp_prd,'Saving velocity difference')
 
-!     filter width
-            lkey = trim(adjustl(sfd_dictkey(1)))//':'//
-     $             trim(adjustl(sfd_dictkey(3)))
-            call finiparser_getDbl(d_out,trim(lkey),ifnd)
-            if (ifnd.eq.1) then
-               sfdd = abs(d_out)
-            endif
+!     save the velocity difference for inspection
+      lifxyo= ifxyo
+      ifxyo = .true.
+      lifpo= ifpo
+      ifpo = .false.
+      lifvo= ifvo
+      ifvo = .true.
+      lifto= ifto
+      ifto = .false.
+      do i=1,ldimt1
+         lifpso(i)= ifpso(i)
+         ifpso(i) = .false.
+      enddo
 
-!     control coefficient
-            lkey = trim(adjustl(sfd_dictkey(1)))//':'//
-     $             trim(adjustl(sfd_dictkey(4)))
-            call finiparser_getDbl(d_out,trim(lkey),ifnd)
-            if (ifnd.eq.1) then
-               sfdchi = abs(d_out)
-            endif
+      call outpost2(sfd_bfx,sfd_bfy,sfd_bfz,pr,t,0,'vdf')
 
-!     tolerance
-            lkey = trim(adjustl(sfd_dictkey(1)))//':'//
-     $             trim(adjustl(sfd_dictkey(5)))
-            call finiparser_getDbl(d_out,trim(lkey),ifnd)
-            if (ifnd.eq.1) then
-               sfdtol = abs(d_out)
-            endif
+      ifxyo = lifxyo
+      ifpo = lifpo
+      ifvo = lifvo
+      ifto = lifto
+      do i=1,ldimt1
+         ifpso(i) = lifpso(i)
+      enddo
 
-!     log frequency
-            lkey = trim(adjustl(sfd_dictkey(1)))//':'//
-     $             trim(adjustl(sfd_dictkey(6)))
-            call finiparser_getDbl(d_out,trim(lkey),ifnd)
-            if (ifnd.eq.1) then
-               sfdfconv = int(d_out)
-            endif
-
-         endif
-
-!     print prarameters values
-         write(*,*) '[',trim(sfd_dictkey(1)),']'
-         if (ifsfd) then
-            lkey = 'yes'
-         else
-            lkey = 'no'
-         endif
-         write(*,*) trim(sfd_dictkey(2)),' = ',trim(lkey)
-         write(*,*) trim(sfd_dictkey(3)),' = ',sfdd
-         write(*,*) trim(sfd_dictkey(4)),' = ',sfdchi
-         write(*,*) trim(sfd_dictkey(5)),' = ',sfdtol
-         write(*,*) trim(sfd_dictkey(6)),' = ',sfdfconv
-
-      endif ! NID
-
-!     broadcast data
-      if (NID.eq.0) then
-         rtmp(1) = SFDD
-         rtmp(2) = SFDCHI
-         rtmp(3) = SFDTOL
-      endif
-      llen = 3*WDSIZE
-      call bcast(rtmp,llen)
-      if (NID.ne.0) then
-         SFDD = rtmp(1)
-         SFDCHI = rtmp(2)
-         SFDTOL = rtmp(3)
-      endif
-
-      call bcast(SFDFCONV,ISIZE)
-      call bcast(IFSFD,LSIZE)
+!     close file with convergence history
+      if (nid.eq.frame_get_master()) close(sfd_fid)
 
       return
       end
@@ -125,25 +232,13 @@
       subroutine sfd_main
       implicit none
 
-
       include 'SIZE'
-      include 'TSTEP'           ! ISTEP
-      include 'SFD'
 !-----------------------------------------------------------------------
-      if (ISTEP.eq.0) then      ! before first step
-!     initialisation of SFD
-         call sfd_init
-      else
-!     SFD evolution
-         if (IFSFD) then
-            call sfd_solve
-            call sfd_rst_write
-            call sfd_end
-         endif
-      endif
+      call sfd_solve
+      call sfd_rst_write
 
       return
-      end
+      end subroutine
 !=======================================================================
 !> @brief Calcualte SFD forcing
 !! @ingroup sfd
@@ -156,7 +251,7 @@
       include 'SIZE'            !
       include 'INPUT'           ! IF3D
       include 'PARALLEL'        ! GLLEL
-      include 'SFD'
+      include 'SFDD'
 
 !     argument list
       real ffx, ffy, ffz
@@ -167,13 +262,13 @@
 !-----------------------------------------------------------------------
       if (IFSFD) then
          iel=GLLEL(ieg)
-         ffx = ffx - SFDCHI*BFSX(ix,iy,iz,iel)
-         ffy = ffy - SFDCHI*BFSY(ix,iy,iz,iel)
-         if (IF3D) ffz = ffz - SFDCHI*BFSZ(ix,iy,iz,iel)
+         ffx = ffx - sfd_chi*sfd_bfx(ix,iy,iz,iel)
+         ffy = ffy - sfd_chi*sfd_bfy(ix,iy,iz,iel)
+         if (if3d) ffz = ffz - sfd_chi*sfd_bfz(ix,iy,iz,iel)
       endif
 
       return
-      end
+      end subroutine
 !=======================================================================
 !> @brief Initialise all SFD variables
 !! @ingroup sfd
@@ -590,78 +685,6 @@
       return
       end
 !=======================================================================
-!> @brief Finalise SFD
-!! @ingroup sfd
-      subroutine sfd_end
-      implicit none
-
-      INCLUDE 'SIZE'            ! NID, NDIM, NPERT
-      INCLUDE 'TSTEP'           ! ISTEP, NSTEPS, LASTEP
-      INCLUDE 'INPUT'           ! IF3D
-      include 'RESTART'
-      INCLUDE 'SOLN'
-      INCLUDE 'SFD'             ! BFS?
-
-!     local variables
-      integer ntot1, i
-      real ab0, ab1, ab2
-
-      logical lifxyo, lifpo, lifvo, lifto, lifreguo, lifpso(LDIMT1)
-!     functions
-      real gl2norm
-!-----------------------------------------------------------------------
-      if (IFSFD.and.(ISTEP.eq.NSTEPS.or.LASTEP.eq.1)) then
-
-!     final convergence
-         ntot1 = NX1*NY1*NZ1*NELV
-!     calculate L2 norms
-         ab0 = gl2norm(BFSX,ntot1)
-         ab1 = gl2norm(BFSY,ntot1)
-         if (IF3D) ab2 = gl2norm(BFSZ,ntot1)
-
-         if (NIO.eq.0) then
-            write(6,*) ''
-            write(6,*) 'SFD: finalize'
-            write(6,*) '   Time spent in SFD  ',SFDTIME
-            write(6,*) '   Convergence (L2 norm per grid point):'
-            write(6,'(A15,G13.5)') 'DVX = ',ab0
-            write(6,'(A15,G13.5)') 'DVY = ',ab1
-            if (IF3D) write(6,'(A15,G13.5)') 'DVZ = ',ab2
-            write(6,*) ''
-            write(6,*) 'SFD: saving velocity difference'
-         endif
-
-!     save the velocity difference for checking
-         lifxyo= IFXYO
-         IFXYO = .TRUE.
-         lifpo= IFPO
-         IFPO = .FALSE.
-         lifvo= IFVO
-         IFVO = .TRUE.
-         lifto= IFTO
-         IFTO = .FALSE.
-         do i=1,LDIMT1
-            lifpso(i)= IFPSO(i)
-            IFPSO(i) = .FALSE.
-         enddo
-
-         call outpost2(BFSX,BFSY,BFSZ,PR,T,0,'VDF')
-
-         IFXYO = lifxyo
-         IFPO = lifpo
-         IFVO = lifvo
-         IFTO = lifto
-         do i=1,LDIMT1
-            IFPSO(i) = lifpso(i)
-         enddo
-
-!     close file with convergence history
-         if (NID.eq.0) close(SFDFIDCNV)
-      endif
-
-      return
-      end
-!=======================================================================
 !> @brief Store SFD restart file
 !! @ingroup sfd
 !! @details This rouotine is version of @ref mfo_outfld adjusted for SFD restart.
@@ -738,12 +761,12 @@
 
 !     write fields
 !     current filtered velocity field
-      call io_mfo_outv(offs,vsx,vsy,vsz,nx1,ny1,nz1,nelt,nelgt,ndim)
+      call io_mfov(offs,vsx,vsy,vsz,nx1,ny1,nz1,nelt,nelgt,ndim)
       ioflds = ioflds + NDIM
 
 !     history
       do il=1,3
-         call io_mfo_outv(offs,vsxlag(1,1,1,1,il),vsylag(1,1,1,1,il),
+         call io_mfov(offs,vsxlag(1,1,1,1,il),vsylag(1,1,1,1,il),
      $           vszlag(1,1,1,1,il),nx1,ny1,nz1,nelt,nelgt,ndim)
          ioflds = ioflds + NDIM
       enddo
@@ -837,12 +860,12 @@
 
 !     read arrays
 !     filtered velocity
-      call io_mfi_getv(offs,vsx,vsy,vsz,ifskip)
+      call io_mfiv(offs,vsx,vsy,vsz,ifskip)
       ioflds = ioflds + ndim
 
 !     history
       do il=1,3
-         call io_mfi_getv(offs,vsxlag(1,1,1,1,il),vsylag(1,1,1,1,il),
+         call io_mfiv(offs,vsxlag(1,1,1,1,il),vsylag(1,1,1,1,il),
      $           vszlag(1,1,1,1,il),ifskip)
          ioflds = ioflds + ndim
       enddo
