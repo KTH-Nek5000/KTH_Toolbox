@@ -9,8 +9,9 @@
       character*(*) sfd_name
       parameter(sfd_name='SFD')
 
-!     timers id: total, initialisation, evolution, checkpoint save
-      integer sfd_ttot_id, sfd_tini_id, sfd_evl_id, sfd_chp_id
+!     timers id: total, initialisation, evolution, checkpoint save, finalisation
+      integer sfd_ttot_id, sfd_tini_id, sfd_tevl_id, sfd_tchp_id,
+     $        sfd_tend_id
 
 !     initialisation flag
       logical sfd_ifinit
@@ -34,10 +35,20 @@
 !     frequency for saving convegence data
       integer sfd_cnv
       integer sfd_cnv_id
+      
+!     SFD restart flag
+      logical sfd_ifrst
+      integer sfd_ifrst_id
 
 !     file units for convergence output
       integer sfd_fid
+      
+!     restart flag and restart file set number
+      logical sfd_chifrst
+      integer sfd_fnum
 
+!     current number of snapshots in a single restart set (like chpm_nsnap)
+      integer sfd_nsnap
 
 !     variables
 !     filtered velocity field
@@ -52,16 +63,23 @@
 !     right hand sides
       real sfd_bfx(lx1,ly1,lz1,lelv), sfd_bfy(lx1,ly1,lz1,lelv),
      $     sfd_bfz(lx1,ly1,lz1,lelv)
+
+      ! storage of rhs
+      real sfd_abx1(LX1,LY1,LZ1,LELV),sfd_abx2(LX1,LY1,LZ1,LELV),
+     $     sfd_aby1(LX1,LY1,LZ1,LELV),sfd_aby2(LX1,LY1,LZ1,LELV),
+     $     sfd_abz1(LX1,LY1,LZ1,LELV),sfd_abz2(LX1,LY1,LZ1,LELV)
       
 !     common block section
-      common /SFDI/ sfd_id, sfd_ttot_id, sfd_tini_id, sfd_evl_id, 
-     $     sfd_chp_id, sfd_sec_id, sfd_dlt_id, sfd_chi_id, 
-     $     sfd_tol_id, sfd_cnv, sfd_cnv_id, sfd_fid
+      common /SFDI/ sfd_id, sfd_ttot_id, sfd_tini_id, sfd_tevl_id, 
+     $     sfd_tchp_id, sfd_tend_id, sfd_sec_id, sfd_dlt_id,  
+     $     sfd_chi_id, sfd_tol_id, sfd_cnv, sfd_cnv_id, sfd_ifrst_id, 
+     $     sfd_fid, sfd_fnum, sfd_nsnap
 
       common /SFDR/ sfd_dlt, sfd_chi, sfd_tol
 
       common /SFDRV/ sfd_vx, sfd_vy, sfd_vz, sfd_bfx, sfd_bfy, 
-     $     sfd_bfz, sfd_vxlag, sfd_vylag, sfd_vzlag
+     $     sfd_bfz, sfd_vxlag, sfd_vylag, sfd_vzlag, sfd_abx1, 
+     $     sfd_abx2, sfd_aby1, sfd_aby2, sfd_abz1, sfd_abz2
      
-      common /SFDL/ sfd_ifinit
+      common /SFDL/ sfd_ifinit, sfd_ifrst, sfd_chifrst
 

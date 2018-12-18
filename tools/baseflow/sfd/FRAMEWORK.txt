@@ -21,12 +21,14 @@ Description of the implementation and performed tests can be found in @cite Pepl
 
 @mod_interface
 @interface_list Interface provided:
--# @ref sfd_param_get
+-# @ref sfd_register
+-# @ref sfd_init
 -# @ref sfd_forcing
 -# @ref sfd_main
 
 @mod_interface_example
 @code{.f}
+!======================================================================
       subroutine userf  (ix,iy,iz,ieg)
       include 'SIZE'
       include 'NEKUSE'          ! FF[XYZ]
@@ -41,40 +43,87 @@ Description of the implementation and performed tests can be found in @cite Pepl
 
       return
       end
-!-----------------------------------------------------------------------
+!======================================================================
       subroutine userchk
-      include 'TSTEP'           ! ISTEP
-      include 'SOLN'            ! V[XYZ]
+      include 'TSTEP'
       
-      if (ISTEP.eq.0) then
-!     initialise runtime parameters
-         call chkpt_param_get
-         call sfd_param_get
-!     initialise module
+       if (ISTEP.eq.0) then
+!     start framework
+         call frame_start
       endif
+
+!     monitor simulation
+      call frame_monitor
 
 !     save/load files for full-restart
       call chkpt_main
 
-!     SFD evolution
-      call sfd_main
+!     SFD evolution      
+      call sdf_main
 
+!     finalise framework
+      if (ISTEP.eq.NSTEPS.or.LASTEP.eq.1) then
+         call frame_end
+      endif
+ 
       return
       end
+!======================================================================
+!> @brief Register user specified modules
+      subroutine frame_usr_register
+      implicit none
+
+      include 'SIZE'
+      include 'FRAMELP'
+!-----------------------------------------------------------------------
+      ! register modules
+      call chkpt_register
+      call sfd_register
+
+      return
+      end subroutine
+!======================================================================
+!> @brief Initialise user specified modules
+      subroutine frame_usr_init
+      implicit none
+
+      include 'SIZE'
+      include 'FRAMELP'
+!-----------------------------------------------------------------------
+      ! initialise modules
+      call chkpt_init
+      call sfd_init
+
+      return
+      end subroutine
+!======================================================================
+!> @brief Finalise user specified modules
+      subroutine frame_usr_end
+      implicit none
+
+      include 'SIZE'
+      include 'FRAMELP'
+!-----------------------------------------------------------------------
+      ! finlise modules
+      call sfd_end
+      
+      return
+      end subroutine
+!======================================================================
 @endcode
 
 @warning This module's restart prosedure depends on multistep checkpointing. As multisetep checpointeing sets
 the number of the restart file set \a chkpt_main must be called before \a sfd_main.
 
 @mod_param
-@param_list Parameters provided by sfd module (include file - \a SFD):
+@param_list Parameters provided by sfd module (include file - \a SFDD):
 |Varaible | Type |Runtime parameter | Description|
 |---------|------|------------------|------------|
-| ifsfd | logical | _sfd:runsfd | do we prform SFD |
-| sfdd | real | _sfd:filtwdth | filter width |
-| sfdchi | real | _sfd:controlcff | control coefficient |
-| sfdtol | real | _sfd:residualtol | tolerance for residual |
-| sfdfconv | integer | _sfd:loginterval | frequency for saving convegence data |
+| sfd_dlt | real | _sfd:FilterWdth | filter width |
+| sfd_chi | real | _sfd:ControlCff | control coefficient |
+| sfd_tol | real | _sfd:ResidualTol | tolerance for residual |
+| sfd_cnv | integer | _sfd:LogInterval | frequency for logging convegence data |
+| sfd_ifrst | logical | _sfd:SFDReadChkpt | SFD; restat from checkpoint |
 
 @mod_param
 @param_reqr Parameters required by sfd module:
@@ -83,18 +132,16 @@ the number of the restart file set \a chkpt_main must be called before \a sfd_ma
    + chpt_ifrst - if restart
    + chpt_fnum - restart set number
    + chpt_set_o
--# [CHKPTMSTPD] (@ref chkpoint_mstep)
-   + chpm_nsnap
 
 
 @mod_param_example
 @code{.txt}
 [_SFD]
-runsfd = yes
-filtwdth = 1.05
+filterwdth = 1.05
 controlcff = 0.5
 residualtol = 0.1E-06
 loginterval = 50
+sfdreadchkpt = no
 @endcode
 
 */
@@ -118,4 +165,4 @@ REQUIRED driver/runparam \
 OBJECT sfd.o
 
 #List of include files
-INCLUDE SFD
+INCLUDE SFDD
