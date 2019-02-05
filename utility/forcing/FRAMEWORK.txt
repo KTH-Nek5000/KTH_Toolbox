@@ -12,7 +12,8 @@ Set of forcing related routines covering e.g. sponges, fringes and purturbing so
 */
 #List of existing submodules
 SUBMODULES sponge_box \
-           noise_box
+           noise_box  \
+           trip_line
 
 #List of conflicting submodules
 EXCLUSIVE
