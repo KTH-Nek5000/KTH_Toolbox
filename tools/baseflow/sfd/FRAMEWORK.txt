@@ -59,7 +59,7 @@ Description of the implementation and performed tests can be found in @cite Pepl
       call chkpt_main
 
 !     SFD evolution      
-      call sdf_main
+      call sfd_main
 
 !     finalise framework
       if (ISTEP.eq.NSTEPS.or.LASTEP.eq.1) then
@@ -77,6 +77,7 @@ Description of the implementation and performed tests can be found in @cite Pepl
       include 'FRAMELP'
 !-----------------------------------------------------------------------
       ! register modules
+      call io_register
       call chkpt_register
       call sfd_register
 
@@ -159,6 +160,7 @@ CONFLICTS
 
 #List of required modules
 REQUIRED driver/runparam \
+         io/io_tools
          io/checkpoint/chkpt_mstep
 
 #List of object files
