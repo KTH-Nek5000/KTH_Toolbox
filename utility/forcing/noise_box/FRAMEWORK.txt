@@ -22,16 +22,8 @@ a random number ganarator. At the end velocity field is smoothed at the element 
       subroutine userchk
       include 'TSTEP'           ! ISTEP
       
-      if (ISTEP.eq.0) then
 !     start framework
-         call frame_start
-!     register modules
-         call nseb_register
-!     get runtime parameters
-         call frame_rparam
-!     initialise modules
-         call nseb_init
-      endif
+      if (ISTEP.eq.0) call frame_start
 
 !     monitor simulation
       call frame_monitor
@@ -46,6 +38,45 @@ a random number ganarator. At the end velocity field is smoothed at the element 
 
       return
       end
+!======================================================================
+!> @brief Register user specified modules
+      subroutine frame_usr_register
+      implicit none
+
+      include 'SIZE'
+      include 'FRAMELP'
+!-----------------------------------------------------------------------
+!     register modules
+      call nseb_register
+
+      return
+      end subroutine
+!======================================================================
+!> @brief Initialise user specified modules
+      subroutine frame_usr_init
+      implicit none
+
+      include 'SIZE'
+      include 'FRAMELP'
+!-----------------------------------------------------------------------
+!     initialise modules
+      call nseb_init
+
+      return
+      end subroutine
+!======================================================================
+!> @brief Finalise user specified modules
+      subroutine frame_usr_end
+      implicit none
+
+      include 'SIZE'
+      include 'FRAMELP'
+!-----------------------------------------------------------------------
+
+      
+      return
+      end subroutine
+!======================================================================
 @endcode
 
 @mod_param
