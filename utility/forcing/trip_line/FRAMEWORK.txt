@@ -7,30 +7,65 @@
 @brief Random volume force along the line
 
 @details
-Set of routines to generate random volume force along the line to mimic "sand paper". 
+Set of routines to generate random volume force along the line running in the spanwise direction of the doman to 
+mimic sand paper effect. Its aim is to introduce to the flow low amplitude random noise, that can be used to 
+study e.g. a stability of a boundary layer. This focing is applied only in the eliptical region along the line 
+defined by the smoothing lengths SMTHX and SMTHY and rotated counterclockwise by ROTA angle. This angel is used 
+as well to rotate the force (x- and y-components), so the forcing can be normal to the wall. 
+The smoothing function is defined in the following way:
+\f{eqnarray*}{
+    f_{smth}(r) = \left\{ \begin{array}{ll}
+     exp\left(-r^2\right)*\left(1-r^2\right)^2  &\mbox{ if $r \leq 1.0$} \\
+     0 &\mbox{ if $x >  1.0$}
+     \end{array} \right.
+\f}
+where
+\f[ r^2 = \left( {x_{rot} \over SMTHX} \right)^2 + \left( {y_{rot} \over SMTHY} \right)^2 \f],
+and
+\f{eqnarray*}{ 
+x_{rot} &=&  x_{tr}*cos(ROTA)+y_{tr}*sin(ROTA), \\
+y_{rot} &=& -x_{tr}*sin(ROTA)+y_{tr}*cos(ROTA). 
+\f}
+\f$x_{tr}\f$ and \f$y_{tr}\f$ are here the GLL point coordinates relative to the tripping line.
+However, the function with limitted support can be easily replaced with simple Gauss profile
+(see commented lines in @ref trip_1dprj and notice factor 4.0 in the Gauss function necessary to 
+make smoothing lenghts consistent with the original function).
+The tripping has both steady and unsteeady parts with amplitudes TIAMP and TDAMP respectively,
+and the forcing is given by:
+ \f{eqnarray*}{ 
+f_x &=& -f_{smth}(r)*f(z,t)*sin(ROTA), \\
+f_y &=&  f_{smth}(r)*f(z,t)cos(ROTA), 
+\f}
+where
+\f[ f(z,t) = TIAMP*g(z) + TDAMP*\left[ \left(1-b(t)\right)h^i(z) +  b(t)h^{i+1}(z) \right] \f],
+and 
+\f{eqnarray*}{
+i &=& int(t/TDT), \\
+b(t) &=& 3p^2-2p^3, \\
+p &=& t/TDT -i.
+\f}
+Here \f$g(z)\f$ and \f$h(z)\f$ are Fourier series of unit amplitude with NMODE random coefficients.
+The trip forcing generates noise with a uniform distribution over all frequencies lower than the 
+cutoff frequency corresponding to \f$2\pi/TDT\f$, where TDT is a time interval between change of 
+the time dependent part of the trip.
 
-apply sponge (fringe in periodic domains) for simple box mesh. It calculates a volume forcing
-\f[ \vec F = \lambda(x) \left( \vec U - \vec u\right),\f]
-with \f$ \lambda(x), \vec U\f$ and \f$ \vec u\f$ beeing non-negative sponge/fringe function, constant in time
-reference velocity field and current velocity field respectively. 1-dimensional sponge funcion is definde as
-\f[ \lambda(x) = \lambda_{max} *\left[S\left((x_{min} + \Delta_{wl} - x)/\Delta_{dl} \right) + 
-S\left((x - x_{max} + \Delta_{wr})/\Delta_{dr} \right) \right],\f]
-where:
-- \f$ \lambda_{max} \f$ - sponge strenght,
-- \f$ S(x) \f$ - step function @ref mth_stepf,
-- \f$ x_{min}, x_{max} \f$ - left and right box boundaries,
-- \f$ \Delta_{wl}, \Delta_{wr} \f$ - left and right sponge section width,
-- \f$ \Delta_{dl}, \Delta_{dr} \f$ - left and right sponge section drop/rise width.
+This forcing has one continuous time derivative and is independent of the time discretisation.
+It should be independent as well on the simulation details (e.g. number of mpi ranks or 
+restart flag).
 
-In our implementation each dimension is treated separately and the final 3-dimensional function takes a 
-maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta_{wr} \f$ can be set to zero.
+This tool can simulate number of lines with different set of parameters for each line. The maximal
+number of lines is given by trip_nline_max in TRIPD include file. In the same way maximal number of 
+Fouries modes per line is given by trip_nmode_max parameter.
+
 
 @mod_interface
 @interface_list Interface provided:
--# @ref spng_register
--# @ref spng_init
--# @ref spng_forcing
--# @ref spng_is_initialised
+-# @ref trip_register
+-# @ref trip_init
+-# @ref trip_is_initialised
+-# @ref trip_update
+-# @ref trip_forcing
+-# @ref trip_reset
 
 @mod_interface_example
 @code{.f}
@@ -40,82 +75,138 @@ maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta
       include 'PARALLEL'        ! GLLEL
       include 'SOLN'            ! V[XYZ]
 
-      integer iel
-
-      iel=GLLEL(ieg)
+      integer ix,iy,iz,ieg
 
       FFX = 0.0
       FFY = 0.0
       FFZ = 0.0
 
-!     add sponge
-      call spng_forcing(FFX,FFY,FFZ,ix,iy,iz,iel)
+!     add tripping
+      call trip_forcing(FFX,FFY,FFZ,ix,iy,iz,ieg)
 
       return
       end
 !-----------------------------------------------------------------------
       subroutine userchk
-      include 'TSTEP'           ! ISTEP
-      include 'SOLN'            ! V[XYZ]
+      implicit none
+      include 'SIZE'            !
+      include 'TSTEP'           ! ISTEP, lastep, time
+      include 'INPUT'           ! IF3D, PARAM
       
-
-      if (ISTEP.eq.0) then
 !     start framework
-         call frame_start
-!     register modules
-         call spng_register
-!     get runtime parameters
-         call frame_rparam
-!     initialise modules
-         call spng_init(vx,vy,vz) ! initial field used as a reference one
-      endif
+      if (ISTEP.eq.0) call frame_start
 
 !     monitor simulation
       call frame_monitor
 
+!     save/load files for full-restart
+      call chkpt_main
+
+!     for tripping
+      call trip_update
+
 !     finalise framework
-      if (ISTEP.ge.NSTEPS.or.LASTEP.eq.1) then
+      if (ISTEP.eq.NSTEPS.or.LASTEP.eq.1) then
          call frame_end
       endif
-
+     
       return
       end
+!======================================================================
+!> @brief Register user specified modules
+      subroutine frame_usr_register
+      implicit none
+
+      include 'SIZE'
+      include 'FRAMELP'
+!-----------------------------------------------------------------------
+!     register modules
+      call io_register
+      call chkpt_register
+      call trip_register
+
+      return
+      end subroutine
+!======================================================================
+!> @brief Initialise user specified modules
+      subroutine frame_usr_init
+      implicit none
+
+      include 'SIZE'
+      include 'FRAMELP'
+      include 'SOLN'
+!-----------------------------------------------------------------------
+!     initialise modules
+      call chkpt_init
+      call trip_init
+
+      return
+      end subroutine
+!======================================================================
+!> @brief Finalise user specified modules
+      subroutine frame_usr_end
+      implicit none
+
+      include 'SIZE'
+      include 'FRAMELP'
+!-----------------------------------------------------------------------
+!     finalise modules
+      
+      return
+      end subroutine
+!======================================================================
 @endcode
 
 @mod_param
 @param_list Parameters provided by sponge_box module (include file - \a SPONGRBD):
 |Varaible | Type | Runtime parameter | Default value | Description |
 |---------|------|-------------------|---------------|-------------|
-|spng_str | real | _spongebx:strenght | 0.0 | sponge strength |
-|spng_wl(1) | real | _spongebx:widthlx | 0.0 | sponge left section width; dimension X |
-|spng_wl(2) | real | _spongebx:widthly | 0.0 | sponge left section width; dimension Y |
-|spng_wl(3) | real | _spongebx:widthlz | 0.0 | sponge left section width; dimension Z |
-|spng_wr(1) | real | _spongebx:widthrx | 0.0 | sponge right section width; dimension X |
-|spng_wr(2) | real | _spongebx:widthry | 0.0 | sponge right section width; dimension Y |
-|spng_wr(3) | real | _spongebx:widthrz | 0.0 | sponge right section width; dimension Z |
-|spng_dl(1) | real | _spongebx:droplx | 0.0 | sponge left drop/rise section width; dimension X |
-|spng_dl(2) | real | _spongebx:droply | 0.0 | sponge left drop/rise section width; dimension Y |
-|spng_dl(3) | real | _spongebx:droplz | 0.0 | sponge left drop/rise section width; dimension Z |
-|spng_dr(1) | real | _spongebx:droprx | 0.0 | sponge right drop/rise section width; dimension X |
-|spng_dr(2) | real | _spongebx:dropry | 0.0 | sponge right drop/rise section width; dimension Y |
-|spng_dr(3) | real | _spongebx:droprz | 0.0 | sponge right drop/rise section width; dimension Z |
+|trip_nline      | integer | _tripping:nline | 0  | Number of tripping lines |
+|trip_tiamp      | real | _tripping:tiamp   | 0.0 | Time independent amplitude |
+|trip_tdamp      | real | _tripping:tdamp   | 0.0 | Time dependent amplitude   |
+|trip_spos(1,il) | real | _tripping:sposx'il' | 0.0 | Starting point X of 'il' line |
+|trip_spos(2,il) | real | _tripping:sposy'il' | 0.0 | Starting point Y of 'il' line |
+|trip_spos(3,il) | real | _tripping:sposz'il' | 0.0 | Starting point Z of 'il' line |
+|trip_epos(1,il) | real | _tripping:eposx'il' | 0.0 | Ending point X of 'il' line |
+|trip_epos(2,il) | real | _tripping:eposy'il' | 0.0 | Ending point Y of 'il' line |
+|trip_epos(3,il) | real | _tripping:eposz'il' | 0.0 | Ending point Z of 'il' line |
+|trip_smth(1,il) | real | _tripping:smthx'il' | 0.0 | Smoothing length X of 'il' line |
+|trip_smth(2,il) | real | _tripping:smthy'il' | 0.0 | Smoothing length Y of 'il' line |
+|trip_smth(3,il) | real | _tripping:smthz'il' | 0.0 | Smoothing length Z of 'il' line (not used)|
+|trip_rota(il)   | real | _tripping:rota'il'  | 0.0 | Rotation angle of 'il' line |
+|trip_nmode(il)  | integer | _tripping:nmode'il' | 0  | Number of Fourier modes of 'il' line |
+|trip_tdt(il)   | real | _tripping:tdt'il'  | 0.0 | Time step for tripping of 'il' line |
 
 @mod_param_example
 @code{.txt}
-[_SPONGEBX]
-strength = 1.0
-widthlx = 4.0
-widthly = 0.0
-widthlz = 0.0
-widthrx = 4.0
-widthry = 0.0
-widthrz = 0.0
-droplx = 2.0
-droply = 0.0
-droplz = 0.0
-droprx = 2.0
-dropry = 0.0
-droprz = 0.0
+[_TRIPPING]             # Runtime paramere section for tripping module
+NLINE                = 2                      # Number of tripping lines
+TIAMP                = 0.00000000E+00         # Time independent amplitude
+TDAMP                = 1.00000000E+01         # Time dependent amplitude
+SPOSX01              = 8.30000000E+00         # Starting pont X
+SPOSY01              = 3.03500000E+00         # Starting pont Y
+SPOSZ01              = 0.00000000E+00         # Starting pont Z
+EPOSX01              = 8.30000000E+00         # Ending pont X
+EPOSY01              = 3.03500000E+00         # Ending pont Y
+EPOSZ01              = 4.50000000E+00         # Ending pont Z
+SMTHX01              = 1.36000000E+00         # Smoothing length X
+SMTHY01              = 0.34000000E+00         # Smoothing length Y
+SMTHZ01              = 0.00000000E+00         # Smoothing length Z
+ROTA01               = 0.00000000E+00         # Rotation angle in radians
+NMODE01              = 16                     # Number of Fourier modes
+TDT01                = 0.14000000E+00         # Time step for tripping
+SPOSX02              = 8.80000000E+00         # Starting pont X
+SPOSY02              = 0.99430000E+00         # Starting pont Y
+SPOSZ02              = 0.00000000E+00         # Starting pont Z
+EPOSX02              = 8.80000000E+00         # Ending pont X
+EPOSY02              = 0.99430000E+00         # Ending pont Y
+EPOSZ02              = 4.50000000E+00         # Ending pont Z
+SMTHX02              = 0.28000000E+00         # Smoothing length X
+SMTHY02              = 0.07000000E+00         # Smoothing length Y
+SMTHZ02              = 0.00000000E+00         # Smoothing length Z
+ROTA02               = 0.12300000E+00         # Rotation angle in radians
+NMODE02              = 76                     # Number of Fourier modes
+TDT02                = 0.14000000E+00         # Time step for tripping
 @endcode
 
 
@@ -133,12 +224,11 @@ DEFAULT
 CONFLICTS
 
 #List of required modules
-REQUIRED utility/math \
-         driver/frame
+REQUIRED driver/frame
 
 #List of object files
-OBJECT spongebx.o
+OBJECT trip.o
 
 #List of include files
-INCLUDE SPONGEBXD
+INCLUDE TRIPD
  
