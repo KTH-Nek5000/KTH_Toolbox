@@ -54,6 +54,7 @@
       include 'FRAMELP'
 !-----------------------------------------------------------------------
 !     register modules
+      call io_register
       call chkpt_register
 
       return
@@ -121,7 +122,8 @@ CONFLICTS
 
 #List of required modules
 REQUIRED driver/monitor  \
-         driver/runparam
+         driver/runparam \
+         io/io_tools
 
 #List of object files
 OBJECT chkpoint.o
