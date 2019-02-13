@@ -51,7 +51,8 @@ the time dependent part of the trip.
 
 This forcing has one continuous time derivative and is independent of the time discretisation.
 It should be independent as well on the simulation details (e.g. number of mpi ranks or 
-restart flag).
+restart flag). It is based on a similar implementation in the SIMSON code @cite Chevalier2007, 
+and is described in detail in @cite Schlatter2012.
 
 This tool can simulate number of lines with different set of parameters for each line. The maximal
 number of lines is given by trip_nline_max in TRIPD include file. In the same way maximal number of 
