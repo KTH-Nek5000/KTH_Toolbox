@@ -159,7 +159,7 @@ Fouries modes per line is given by trip_nmode_max parameter.
 @endcode
 
 @mod_param
-@param_list Parameters provided by sponge_box module (include file - \a SPONGRBD):
+@param_list Parameters provided by trip_line module (include file - \a TRIPD):
 |Varaible | Type | Runtime parameter | Default value | Description |
 |---------|------|-------------------|---------------|-------------|
 |trip_nline      | integer | _tripping:nline | 0  | Number of tripping lines |
