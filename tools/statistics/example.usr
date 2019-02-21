@@ -1,0 +1,52 @@
+!=======================================================================
+!> @brief Provide velocity, deriv. and vort. in required coordinates
+!! @param[out]  lvel             velocity
+!! @param[out]  dudx,dvdx,dwdx   velocity derivatives
+!! @param[out]  vort             vorticity
+      subroutine user_stat_trnsv(lvel,dudx,dvdx,dwdx,vort)
+      implicit none
+
+      include 'SIZE'
+      include 'SOLN'
+      include 'INPUT'               ! if3d
+
+!     argument list
+      real lvel(LX1,LY1,LZ1,LELT,3) ! velocity array
+      real dudx(LX1,LY1,LZ1,LELT,3) ! velocity derivatives; U
+      real dvdx(LX1,LY1,LZ1,LELT,3) ! V
+      real dwdx(LX1,LY1,LZ1,LELT,3) ! W
+      real vort(LX1,LY1,LZ1,LELT,3) ! vorticity
+
+!     local variables
+      integer itmp              ! dummy variable
+!-----------------------------------------------------------------------
+!     Velocity transformation; simple copy
+      itmp = NX1*NY1*NZ1*NELV
+      call copy(lvel(1,1,1,1,1),VX,itmp)
+      call copy(lvel(1,1,1,1,2),VY,itmp)
+      call copy(lvel(1,1,1,1,3),VZ,itmp)
+
+!     Derivative transformation
+!     No transformation
+      call gradm1(dudx(1,1,1,1,1),dudx(1,1,1,1,2),dudx(1,1,1,1,3),
+     $      lvel(1,1,1,1,1))
+      call gradm1(dvdx(1,1,1,1,1),dvdx(1,1,1,1,2),dvdx(1,1,1,1,3),
+     $      lvel(1,1,1,1,2))
+      call gradm1(dwdx(1,1,1,1,1),dwdx(1,1,1,1,2),dwdx(1,1,1,1,3),
+     $      lvel(1,1,1,1,3))
+
+!     get vorticity
+      if (IF3D) then
+!     curlx
+         call sub3(vort(1,1,1,1,1),dwdx(1,1,1,1,2),
+     $        dvdx(1,1,1,1,3),itmp)
+!     curly
+         call sub3(vort(1,1,1,1,2),dudx(1,1,1,1,3),
+     $        dwdx(1,1,1,1,1),itmp)
+      endif
+!     curlz
+      call sub3(vort(1,1,1,1,3),dvdx(1,1,1,1,1),dudx(1,1,1,1,2),itmp)
+
+      return
+      end subroutine
+!======================================================================

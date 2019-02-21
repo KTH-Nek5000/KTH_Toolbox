@@ -1,0 +1,5 @@
+[_STAT]             # Runtime paramere section for statistics module
+AVSTEP               = 10
+IOSTEP               = 50
+
+
