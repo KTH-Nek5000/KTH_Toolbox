@@ -1,21 +1,19 @@
 #Configuration file for Nek5000 framework developed at KTH
 # Place for short description; doxygen style
 /**
-@defgroup utility  Utility module
-@ingroup toolbox
+@defgroup grid  Grid module
+@ingroup utility
 
-@brief Diverse utilities for toolboxes
+@brief Diverse tools for manipulation of the grid
 
 @details 
-This directory contains number of different utilities used by toolboxes. It covers number of different simulation 
-aspects like mathematical functions, fluid forcing or initial conditions.
+This directory contains number of different mesh related tools. It covers number of different simulation 
+aspects like 3D to 2D mesh mappinfg for 2D-extruded meshes.
 
 
 */
 #List of existing submodules
-SUBMODULES math \
-           forcing \
-           grid
+SUBMODULES map2D
 
 #List of conflicting submodules
 EXCLUSIVE

@@ -12,11 +12,13 @@ This directory contains number of tools developed at KTH.
 */
 #List of existing submodules
 SUBMODULES tstepper \
-           baseflow
+           baseflow \
+           statistics
 
 #List of conflicting submodules
 EXCLUSIVE  tstepper \
-           baseflow
+           baseflow \
+           statistics
 
 #Default submodules
 DEFAULT
