@@ -1,1 +1,1 @@
-$(OBJDIR)/time_stepper.o         :time_stepper.f;                     $(F77) -c $(FL2) -I./src $< -o $@
+$(OBJDIR)/tstepper.o        :tstepper.f TSTEPPERD;                   $(F77) -c $(FL2) -I./ $< -o $@
