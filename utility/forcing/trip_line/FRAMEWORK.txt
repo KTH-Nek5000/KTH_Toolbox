@@ -56,7 +56,8 @@ and is described in detail in @cite Schlatter2012.
 
 This tool can simulate number of lines with different set of parameters for each line. The maximal
 number of lines is given by trip_nline_max in TRIPD include file. In the same way maximal number of 
-Fouries modes per line is given by trip_nmode_max parameter.
+Fouries modes per line is given by trip_nmode_max parameter. User havs to adjust values of these variables
+before compilation of the code.
 
 
 @mod_interface
