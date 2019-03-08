@@ -4,30 +4,43 @@
 !! @author Adam Peplinski
 !! @date Mar 7, 2016
 !=======================================================================
-!     module parameters
-!     initial L2 norm of the vector
-      real PWIL2NORM
-!     module parameters end
+!     module id and name
+      integer pwi_id
+      character*(*) pwi_name
+      parameter(pwi_name='POWERIT')
 
-!     growthrate
-      real PWIGRWTH
+!     timer id
+      integer pwi_tmr_ini_id   ! initialisation itme
+      integer pwi_tmr_evl_id   ! evolution time
 
-!     timing power iteration
-!     PWITIMET - total time spent within 
-!     PWITIME1 - temporary storage
-      real PWITIMET,PWITIME1
+!     initialisation flag
+      logical pwi_ifinit
 
-!     file units
-!     convergence
-      integer PWIFIDCNV
+!     runtime parameter part
+!     section id
+      integer pwi_sec_id
+
+!     parameter section
+      real pwi_l2n                  !< initial L2 norm of the vector
+      integer pwi_l2n_id
+
+      ! restart options; restart flag and file number
+      logical pwi_ifrst
+      integer pwi_fnum
+      
+      ! growth rate
+      real pwi_grw
 
 !     reference vector
-      real PWIVX(LPX1*LPY1*LPZ1*LPELV),PWIVY(LPX1*LPY1*LPZ1*LPELV),
-     $     PWIVZ(LPX1*LPY1*LPZ1*LPELV),PWIT(LPX1*LPY1*LPZ1*LPELT)
+      real pwi_vx(LPX1*LPY1*LPZ1*LPELV),pwi_vy(LPX1*LPY1*LPZ1*LPELV),
+     $     pwi_vz(LPX1*LPY1*LPZ1*LPELV),pwi_t(LPX1*LPY1*LPZ1*LPELT)
 
-!     common blocks
-      common /PWITI/ PWIFIDCNV
-
-      common /PWITR/ PWIL2NORM,PWIGRWTH,PWITIMET,PWITIME1
-
-      common /PWITRV/ PWIVX, PWIVY, PWIVZ, PWIT
+!     common block section
+      common /powiti/ pwi_id, pwi_tmr_ini_id, pwi_tmr_evl_id, 
+     $     pwi_sec_id, pwi_l2n_id, pwi_fnum
+      
+      common /powitr/ pwi_l2n, pwi_grw
+      
+      common /powitrv/ pwi_vx, pwi_vy, pwi_vz, pwi_t
+      
+      common /powitl/ pwi_ifinit, pwi_ifrst

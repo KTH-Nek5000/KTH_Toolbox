@@ -1,158 +1,174 @@
 !> @file powerit.f
 !! @ingroup powerit
-!! @brief Set of subroutines to perform power iterations
-!!
+!! @brief Set of subroutines to perform power iterations within time stepper
 !! @author Adam Peplinski
 !! @date Mar 7, 2016
 !=======================================================================
-!> @brief Read parameters for power iterations.
+!> @brief Register power iteration module
 !! @ingroup powerit
-!! @param[in]  fid    file unit
-!! @note This interface is defined in @ref tstpr_param_in
-!! @todo Check iostat value for missing namelist in the file
-!! @see @ref readers_writers_page
-      subroutine stepper_param_in(fid)
+!! @note This interface is called by @ref tst_register
+      subroutine stepper_register()
       implicit none
 
-      include 'SIZE_DEF'
-      include 'SIZE'            !
-      include 'PARALLEL_DEF' 
-      include 'PARALLEL'        ! ISIZE, WDSIZE, LSIZE,CSIZE
+      include 'SIZE'
+      include 'INPUT'
+      include 'FRAMELP'
+      include 'TSTEPPERD'
       include 'POWERITD'
 
-!     argument list
-      integer fid               ! file id
+      ! local variables
+      integer lpmid, il
+      real ltim
+      character*2 str
 
-!     local variables
-      integer ierr, len
-
-!     namelists
-      namelist /POWERIT/ PWIL2NORM
+      ! functions
+      real dnekclock
 !-----------------------------------------------------------------------
-!     default values
-      PWIL2NORM = 1.0
-!     read the file
-      ierr=0
-      if (NID.eq.0) then
-        rewind(fid)
-        read(unit=fid,nml=POWERIT,iostat=ierr)
-      endif
-      call err_chk(ierr,'Error reading POWERIT parameters.$')
+      ! timing
+      ltim = dnekclock()
 
-!     broadcast data
-      len = WDSIZE
-      call bcast(PWIL2NORM,len)
+      ! check if the current module was already registered
+      call mntr_mod_is_name_reg(lpmid,pwi_name)
+      if (lpmid.gt.0) then
+         call mntr_warn(lpmid,
+     $        'module ['//trim(pwi_name)//'] already registered')
+         return
+      endif
+
+      ! find parent module
+      call mntr_mod_is_name_reg(lpmid,tst_name)
+      if (lpmid.le.0) then
+         lpmid = 1
+         call mntr_abort(lpmid,
+     $        'parent module ['//trim(tst_name)//'] not registered')
+      endif
+
+      ! register module
+      call mntr_mod_reg(pwi_id,lpmid,pwi_name,
+     $      'Power iterations for time stepper')
+
+      ! register timers
+      ! initialisation
+      call mntr_tmr_reg(pwi_tmr_ini_id,tst_tmr_ini_id,pwi_id,
+     $     'PWI_INI','Power iteration initialisation time',.true.)
+      ! submodule operation
+      call mntr_tmr_reg(pwi_tmr_evl_id,tst_tmr_evl_id,pwi_id,
+     $     'PWI_EVL','Power iteration evolution time',.true.)
+
+      ! register and set active section
+      call rprm_sec_reg(pwi_sec_id,pwi_id,'_'//adjustl(pwi_name),
+     $     'Runtime paramere section for power iteration module')
+      call rprm_sec_set_act(.true.,pwi_sec_id)
+
+      ! register parameters
+      call rprm_rp_reg(pwi_l2n_id,pwi_sec_id,'L2N',
+     $     'Vector initial norm',rpar_real,0,1.0,.false.,' ')
+
+      ! set initialisation flag
+      pwi_ifinit=.false.
+
+      ! timing
+      ltim = dnekclock() - ltim
+      call mntr_tmr_add(pwi_tmr_ini_id,1,ltim)
 
       return
-      end
+      end subroutine
 !=======================================================================
-!> @brief Write parameters for power iterations.
+!> @brief Initilise power iteration module
 !! @ingroup powerit
-!! @param[in]  fid    file unit
-!! @note This interface is defined in @ref tstpr_param_out
-!! @see @ref readers_writers_page
-      subroutine stepper_param_out(fid)
+!! @note This interface is called by @ref tst_init
+      subroutine stepper_init()
       implicit none
 
-      include 'SIZE_DEF'
-      include 'SIZE'      
-      include 'POWERITD'         
-
-!     argument list
-      integer fid               ! file id
-
-!     local variables
-      integer ierr
-
-!     namelists
-      namelist /POWERIT/ PWIL2NORM
-!-----------------------------------------------------------------------
-      ierr=0
-      if (NID.eq.0) then
-         write(unit=fid,nml=POWERIT,iostat=ierr)
-      endif
-      call err_chk(ierr,'Error writing POWERIT parameters.$')
-
-      return
-      end
-!=======================================================================
-!> @brief Initialise power iterations.
-!! @ingroup powerit
-!! @note This interface is defined in @ref tstpr_init
-      subroutine stepper_vinit
-      implicit none
-
-      include 'SIZE_DEF'
-      include 'SIZE'            ! NIO
-      include 'MASS_DEF'
-      include 'MASS'            ! BM1
-      include 'SOLN_DEF'
+      include 'SIZE'
       include 'SOLN'            ! V[XYZ]P, TP
-      include 'CHKPOINTD'       ! IFCHKPTRST
-      include 'TIME_STEPPERD'
-      include 'POWERITD'        !
+      include 'MASS'            ! BM1
+      include 'FRAMELP'
+      include 'CHKPOINTD'
+      include 'TSTEPPERD'
+      include 'POWERITD'
 
-!     local variables
-      integer ierr
-      real lnorm
+      ! local variables
+      integer itmp, il, set_in
+      real rtmp, ltim, lnorm
+      logical ltmp
+      character*20 ctmp
 
-!     functions
+      ! functions
       real dnekclock, cht_glsc2_wt
+      logical chkpts_is_initialised
 !-----------------------------------------------------------------------
-!     timing
-      PWITIME1=dnekclock()
+      ! check if the module was already initialised
+      if (pwi_ifinit) then
+         call mntr_warn(pwi_id,
+     $        'module ['//trim(pwi_name)//'] already initiaised.')
+         return
+      endif
 
-!     check nek5000 parameters
+      ! timing
+      ltim = dnekclock()
 
-!     for timing
-      PWITIMET=0.0
+      ! get runtime parameters
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,pwi_l2n_id,rpar_real)
+      pwi_l2n = rtmp
 
-!     initial growth rate
-      PWIGRWTH = 0.0
+      ! get restart options
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,chpt_ifrst_id,rpar_log)
+      pwi_ifrst = ltmp
 
-!     place to read checkpoint file
-!     as for power iterations standard restart is sufficient I simply
-!     use checkpoint call. Notice it does require .restart file, which 
-!     supposed to be generated by the code, but there can be exceptions.
-      if (IFCHKPTRST) call chkpt_main
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,chpt_fnum_id,rpar_int)
+      pwi_fnum = itmp
+      set_in = pwi_fnum -1
 
-!     normalise vector
+      ! initial growth rate
+      pwi_grw = 0.0
+
+      ! place to read checkpoint file
+      if (pwi_ifrst) then
+         if(.not.chkpts_is_initialised()) call mntr_abort(pwi_id,
+     $        'Checkpointing module not initialised')
+         call stepper_read(set_in)
+      endif
+
+      ! normalise vector
       lnorm = cht_glsc2_wt(VXP,VYP,VZP,TP,VXP,VYP,VZP,TP,BM1)
-      lnorm = sqrt(PWIL2NORM/lnorm)
+      lnorm = sqrt(pwi_l2n/lnorm)
       call cht_opcmult (VXP,VYP,VZP,TP,lnorm)
 
-!     make sure the velocity and temperature fields are continuous at 
-!     element faces and edges
-      call tstpr_dssum
+      ! make sure the velocity and temperature fields are continuous at
+      ! element faces and edges
+      call tst_dssum
 
-!     save intial vector
-      call cht_opcopy (PWIVX,PWIVY,PWIVZ,PWIT,VXP,VYP,VZP,TP)
+      ! save intial vector
+      call cht_opcopy (pwi_vx,pwi_vy,pwi_vz,pwi_t,VXP,VYP,VZP,TP)
 
-!     open file for saving convergence history
-      ierr=0
-      if (NID.eq.0) then
-!     find free unit
-         call IO_file_freeid(PWIFIDCNV, ierr)
-!     get file name and open file
-         if(ierr.eq.0) then
-            open (unit=PWIFIDCNV,file='PWIconv.out',status='new',
-     $           action='write',iostat=ierr)
-         endif
-      endif
-      call err_chk(ierr,'ERROR opening PWIconv.out file.$')
+      ! stamp log file
+      call mntr_log(pwi_id,lp_prd,'POWER ITERATIONS initialised')
+      call mntr_logr(pwi_id,lp_prd,'L2NORM = ',pwi_l2n)
 
-!     print info
-      if (NIO.eq.0) then
-         write(*,*)
-         write(*,*) 'POWER ITERATIONS initialised'
-         write(*,'(A15,G13.5)') 'L2NORM = ',PWIL2NORM
-      endif
+      ! everything is initialised
+      pwi_ifinit=.true.
 
-!     timing
-      PWITIMET=dnekclock()-PWITIME1
+      ! timing
+      ltim = dnekclock() - ltim
+      call mntr_tmr_add(pwi_tmr_ini_id,1,ltim)
 
       return
-      end
+      end subroutine
+!=======================================================================
+!> @brief Check if module was initialised
+!! @ingroup powerit
+!! @return stepper_is_initialised
+      logical function stepper_is_initialised()
+      implicit none
+
+      include 'SIZE'
+      include 'POWERITD'
+!-----------------------------------------------------------------------
+      stepper_is_initialised = pwi_ifinit
+
+      return
+      end function
 !=======================================================================
 !> @brief Renormalise vector and check convergence.
 !! @ingroup powerit
@@ -161,114 +177,182 @@
       subroutine stepper_vsolve
       implicit none
 
-      include 'SIZE_DEF'
       include 'SIZE'            ! NIO
-      include 'TSTEP_DEF'
       include 'TSTEP'           ! TIME, LASTEP, NSTEPS
-      include 'INPUT_DEF'
       include 'INPUT'           ! IFHEAT
-      include 'MASS_DEF'
       include 'MASS'            ! BM1
-      include 'SOLN_DEF'
       include 'SOLN'            ! V[XYZ]P, TP
-      include 'CHKPOINTD'       ! CHKPTSTEP
-      include 'TIME_STEPPERD'   ! TSTTOL, TSTVSTEP
-      include 'POWERITD'        !
+      include 'FRAMELP'
+      include 'CHKPOINTD'
+      include 'TSTEPPERD'
+      include 'POWERITD'
 
-!     scratch space
+      ! scratch space
       real  TA1 (LPX1*LPY1*LPZ1*LELV), TA2 (LPX1*LPY1*LPZ1*LELV),
      $     TA3 (LPX1*LPY1*LPZ1*LELV), TAT (LPX1*LPY1*LPZ1*LELT)
       COMMON /SCRUZ/ TA1, TA2, TA3, TAT
 
-!     local variables
+      ! local variables
       integer itmp
-      real lnorm, grth_old
+      real lnorm, grth_old, ltim
 
-!     functions
+      ! functions
       real dnekclock, cht_glsc2_wt
 !-----------------------------------------------------------------------
-!     timing
-      PWITIME1=dnekclock()
+      ! timing
+      ltim=dnekclock()
 
-!     normalise vector
+      ! normalise vector
       lnorm = cht_glsc2_wt(VXP,VYP,VZP,TP,VXP,VYP,VZP,TP,BM1)
-      lnorm = sqrt(PWIL2NORM/lnorm)
+      lnorm = sqrt(pwi_l2n/lnorm)
       call cht_opcmult (VXP,VYP,VZP,TP,lnorm)
 
-!     make sure the velocity and temperature fields are continuous at 
-!     element faces and edges
-      call tstpr_dssum
+      ! make sure the velocity and temperature fields are continuous at
+      ! element faces and edges
+      call tst_dssum
 
-!     compare current and prevoius growth rate
-      grth_old = PWIGRWTH
-      PWIGRWTH = 1.0/lnorm
-      grth_old = PWIGRWTH - grth_old
+      ! compare current and prevoius growth rate
+      grth_old = pwi_grw
+      pwi_grw = 1.0/lnorm
+      grth_old = pwi_grw - grth_old
 
-!     get L2 norm of the update
-      call cht_opsub3 (TA1,TA2,TA3,TAT,PWIVX,PWIVY,PWIVZ,PWIT,
+      ! get L2 norm of the update
+      call cht_opsub3 (TA1,TA2,TA3,TAT,pwi_vx,pwi_vy,pwi_vz,pwi_t,
      $     VXP,VYP,VZP,TP)
       lnorm = cht_glsc2_wt(TA1,TA2,TA3,TAT,TA1,TA2,TA3,TAT,BM1)
       lnorm = sqrt(lnorm)
 
-!     stamp the file
-      if (NIO.eq.0) then
-         write(*,*) 'PWIT: Convergence:'
-         write(*,'(A15,G13.5)') '||V-V_old|| ',lnorm
-         write(*,'(A15,2G13.5)') 'GrowthRate ',PWIGRWTH, grth_old
-      endif
-      if (NID.eq.0) write(PWIFIDCNV,'(I13,3E13.5)') TSTVSTEP, lnorm,
-     $     PWIGRWTH, grth_old
-
+      ! log stamp
+      call mntr_log(pwi_id,lp_prd,'POWER ITERATIONS: convergence')
+      call mntr_logr(pwi_id,lp_prd,'||V-V_old|| = ',lnorm)
+      call mntr_logr(pwi_id,lp_prd,'Growth ',pwi_grw)
 
       itmp = 0
       if (IFHEAT) itmp = 1
-!     write down current field
+
+      !write down current field
       call outpost2(VXP,VYP,VZP,PRP,TP,itmp,'PWI')
 
-!     write down field difference
+      ! write down field difference
       call outpost2(TA1,TA2,TA3,PRP,TAT,itmp,'VDF')
 
-!     check convergence
-      if(lnorm.lt.TSTTOL.and.grth_old.lt.TSTTOL) then
-         if (NIO.eq.0) write(*,*) 'PWIT: reached stopping criteria'
-!     mark the last step
+      ! check convergence
+      if(lnorm.lt.tst_tol.and.grth_old.lt.tst_tol) then
+         call mntr_log(pwi_id,lp_prd,'Reached stopping criteria')
+         ! mark the last step
          LASTEP = 1
       else
-!     save current vector and restart stepper
-         call cht_opcopy (PWIVX,PWIVY,PWIVZ,PWIT,VXP,VYP,VZP,TP)
+         ! save current vector and restart stepper
+         call cht_opcopy (pwi_vx,pwi_vy,pwi_vz,pwi_t,VXP,VYP,VZP,TP)
       endif
 
-!     save checkpoint
-      if (LASTEP.eq.1.or.TSTCMAX.eq.TSTVSTEP) then
-!     force checkpoint to write the file
-         if (NIO.eq.0) write(*,*) 'PWIT: saving restart files'
-         NSTEPS = ISTEP
-         CHKPTSTEP = NSTEPS-CHKPTNRSF+1
-         call chkpt_main
+      ! save checkpoint
+      if (LASTEP.eq.1.or.tst_cmax.eq.tst_vstep) then
+         call stepper_write()
 
-!     close convergence file
-         if (NID.eq.0) close(PWIFIDCNV)
-
-!     mark the last step
+         ! mark the last step
          LASTEP = 1
       endif
 
-!     timing
-      PWITIMET=PWITIMET+dnekclock()-PWITIME1
+      ! timing
+      ltim = dnekclock() - ltim
+      call mntr_tmr_add(pwi_tmr_evl_id,1,ltim)
 
       if (LASTEP.eq.1) then
-!     final log stamp
-         if (NIO.eq.0) then
-            write(*,*) ''
-            write(*,*) 'PWIT: finalize'
-            write(*,*) '   Time spent in PWIT  ',PWITIMET
-            write(*,*) '   Final convergence:'
-            write(*,'(A15,G13.5)') '||V-V_old|| ',lnorm
-            write(*,'(A15,2G13.5)') 'GrowthRate ',PWIGRWTH, grth_old
-            write(*,*) ''
-         endif
+         ! final log stamp
+         call mntr_log(pwi_id,lp_prd,'POWER ITERATIONS finalised')
+         call mntr_logr(pwi_id,lp_prd,'||V-V_old|| = ',lnorm)
+         call mntr_logr(pwi_id,lp_prd,'Growth ',pwi_grw)
       endif
 
       return
-      end
+      end subroutine
 !=======================================================================
+!> @brief Read restart files
+!! @ingroup powerit
+!! @param[in]  set_in  restart set number
+      subroutine stepper_read(set_in)
+      implicit none
+
+      include 'SIZE'            ! NIO
+      include 'TSTEP'           ! TIME, LASTEP, NSTEPS
+      include 'INPUT'           ! IFMVBD, IFREGUO
+      include 'FRAMELP'
+      include 'CHKPOINTD'
+      include 'CHKPTMSTPD'
+      include 'POWERITD'
+
+      ! argument list
+      integer set_in
+
+      ! local variables
+      integer ifile, step_cnt, fnum
+      character*132 fname(CHKPTNFMAX)
+      logical ifreguol
+!-----------------------------------------------------------------------
+      ! no regular mesh
+      ifreguol= IFREGUO
+      IFREGUO = .false.
+
+      call mntr_log(pwi_id,lp_inf,'Reading checkpoint snapshot')
+
+      ! initialise I/O data
+      call io_init
+
+      ! get set of file names in the snapshot
+      ifile = 1
+      call chkpt_set_name(fname, fnum, set_in, ifile)
+
+      ! read files
+      call chkpt_restart_read(fname, fnum)
+
+      ! put parameters back
+      IFREGUO = ifreguol
+
+      return
+      end subroutine
+!=======================================================================
+!> @brief Write restart files
+!! @ingroup powerit
+      subroutine stepper_write
+      implicit none
+
+      include 'SIZE'            ! NIO
+      include 'TSTEP'           ! TIME, LASTEP, NSTEPS
+      include 'INPUT'           ! IFMVBD, IFREGUO
+      include 'FRAMELP'
+      include 'CHKPOINTD'
+      include 'CHKPTMSTPD'
+      include 'POWERITD'
+
+      ! local variables
+      integer ifile, step_cnt, set_out, fnum
+      character*132 fname(CHKPTNFMAX)
+      logical ifcoord
+      logical ifreguol
+!-----------------------------------------------------------------------
+      ! no regular mesh
+      ifreguol= IFREGUO
+      IFREGUO = .false.
+
+      call mntr_log(pwi_id,lp_inf,'Writing checkpoint snapshot')
+
+      ! initialise I/O data
+      call io_init
+
+      ! get set of file names in the snapshot
+      ifile = 1
+      call chkpt_get_fset(step_cnt, set_out)
+      call chkpt_set_name(fname, fnum, set_out, ifile)
+
+      ifcoord = .true.
+      ! write down files
+      call chkpt_restart_write(fname, fnum, ifcoord)
+
+      ! put parameters back
+      IFREGUO = ifreguol
+
+      return
+      end subroutine
+!=======================================================================
+
