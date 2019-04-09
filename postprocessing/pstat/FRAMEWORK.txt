@@ -1,0 +1,32 @@
+#Configuration file for Nek5000 framework developed at KTH
+# Place for short description; doxygen style
+/**
+@defgroup pstat  Post-processing for statistics tool
+@ingroup postpr
+
+@brief Set of post-processing routines for statistics tool.
+
+@details 
+This directory contains number of tools developed at KTH. 
+
+*/
+#List of existing submodules
+SUBMODULES
+
+#List of conflicting submodules
+EXCLUSIVE
+
+#Default submodules
+DEFAULT
+
+#List of conflicting modules
+CONFLICTS
+
+#List of required modules
+REQUIRED
+
+#List of object files
+OBJECT
+
+#List of include files
+INCLUDE
