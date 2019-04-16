@@ -283,7 +283,7 @@
 !-----------------------------------------------------------------------
 #ifdef NEKP4EST
       ! reset amr level falg
-      do il = 1, nseg
+      do il = 1, lelt
          pstat_refl(il) = 0
       enddo
 

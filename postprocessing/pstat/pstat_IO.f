@@ -218,11 +218,13 @@
       if (nid.eq.0) then
          ! there is a problem with reading points in rank sections, so
          ! I have to open the files using direct access
+         ! Find record length; this is fortran 90 feature
+         inquire(iolength=jl) rtmp1
          call io_file_freeid(uidx, ierr)
-         open(unit=uidx,form='unformatted',access='direct',recl=8,
+         open(unit=uidx,form='unformatted',access='direct',recl=jl,
      $        file='ZSTAT/x.fort')
          call io_file_freeid(uidy, ierr)
-         open(unit=uidy,form='unformatted',access='direct',recl=8,
+         open(unit=uidy,form='unformatted',access='direct',recl=jl,
      $        file='ZSTAT/y.fort')
          read(uidx,rec=1) il,npx
          read(uidy,rec=1) il,npy
