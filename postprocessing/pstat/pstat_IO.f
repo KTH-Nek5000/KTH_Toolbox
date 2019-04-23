@@ -268,9 +268,8 @@
             ! redistribute rest of points
             npass = min(mp,pstat_nptot)
             do il = 1,npass-1
-               if (il.lt.pstat_npt1) then
-                  npy = pstat_npt
-               else
+               npy = pstat_npt
+               if (pstat_npt1.gt.0.and.il.ge.pstat_npt1) then
                   npy = pstat_npt -1
                endif
                do jl = 1,npy
@@ -381,9 +380,8 @@
             ! geather data from slaves
             npass = min(mp,pstat_nptot)
             do jl = 1,npass-1
-               if (jl.lt.pstat_npt1) then
-                  npts = pstat_npt
-               else
+               npts = pstat_npt
+               if (pstat_npt1.gt.0.and.jl.ge.pstat_npt1) then
                   npts = pstat_npt -1
                endif
                call csend(jl,itmp,isize,jl,kl) ! hand shaiking
@@ -411,9 +409,8 @@
             ! geather data from slaves
             npass = min(mp,pstat_nptot)
             do jl = 1,npass-1
-               if (jl.lt.pstat_npt1) then
-                  npts = pstat_npt
-               else
+               npts = pstat_npt
+               if (pstat_npt1.gt.0.and.jl.ge.pstat_npt1) then
                   npts = pstat_npt -1
                endif
                call csend(jl,itmp,isize,jl,kl) ! hand shaiking
