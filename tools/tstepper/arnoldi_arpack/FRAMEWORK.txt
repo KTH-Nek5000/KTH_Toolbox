@@ -1,7 +1,7 @@
 #Configuration file for Nek5000 modules developped at KTH
 # Place for short description; doxygen style
 /**
-@defgroup arnoldi_arpack Arnoldi algorithm using parpack
+@defgroup arn_arp Arnoldi algorithm using parpack
 @ingroup tstepper
 
 @brief Arnoldi algorithm with PARPACK
@@ -19,26 +19,26 @@ Description of the method can be found in @cite Peplinski2014 @cite Peplinski201
    + stepper_solve
 
 @mod_param
-@param_list Parameters provided by arnoldi_arpack submodule (include file - \a ARNOLDI_ARPACKD):
+@param_list Parameters provided by arn_arp submodule (include file - \a ARN_ARPD):
 + ARNKRYLOV : (integer) size of Krylov space
 + ARNEGV : (integer) number of calculated eigenvalues
 + ARNISTART : (integer) checkpoint file number for restart (reading)
 + ARNISTOP : (integer) checkpoint file number for saving data
 
 @par
-@param_reqr Parameters required by arnoldi_arpack submodule:
+@param_reqr Parameters required by arn_arp submodule:
 -# [CHKPOINTD] (@ref chkpoint):
    + IFCHKPTRST : if restart
    + CHKPTSTEP - checkpiont dump frequency (number of time steps)
 -# [TIME_STEPPERD] (@ref tstepper):
-   + TSTMODE :
+   + tst_mode :
      - 0 : no arnoldi
      - 1 : direct mode
      - 2 : adjoint mode
      - 3 : initial optimal condition
-   + TSTSTEP : frequency of calling arn_vsolve (number of time steps)
-   + TSTCMAX : maximal number of arnoldi cycles
-   + TSTTOL : PARPACK tolerance for Ritz values
+   + tst_step : frequency of calling arn_vsolve (number of time steps)
+   + tst_cmax : maximal number of arnoldi cycles
+   + tst_tol : PARPACK tolerance for Ritz values
 -# CONHT (for conjugated heat transfer):
    + CHCST_SC, CHCFF_V, CHCFF_T : velocity and temperature scaling factors
    + CHGRX, CHGRY, CHGRZ : gravitational acceleration
@@ -91,8 +91,8 @@ REQUIRED io/io_tools \
          io/checkpoint/dummy
 
 #List of object files
-OBJECT arnoldi_arpack.o \
-       arnoldi_arpack_io.o
+OBJECT arn_arp.o \
+       arn_arp_io.o
 
 #List of include files
-INCLUDE ARNOLDI_ARPACKD
+INCLUDE ARN_ARPD
