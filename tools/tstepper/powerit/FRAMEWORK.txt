@@ -49,7 +49,7 @@ EXCLUSIVE
 DEFAULT
 
 #List of conflicting modules
-CONFLICTS tools/tstepper/arnoldi_arpack
+CONFLICTS tools/tstepper/arn_arp
 
 #List of required modules
 REQUIRED io/io_tools \

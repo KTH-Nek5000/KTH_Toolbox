@@ -50,7 +50,8 @@ Dependences between modules are described in FRAMEWORK.txt (present in almost ev
 SUBMODULES driver \
            io \
            utility \
-           tools
+           tools \
+           popstprocessing
 
 #List of conflicting submodules
 EXCLUSIVE
