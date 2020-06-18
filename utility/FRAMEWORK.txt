@@ -13,7 +13,8 @@ aspects like mathematical functions, fluid forcing or initial conditions.
 
 */
 #List of existing submodules
-SUBMODULES conht \
+SUBMODULES bcnd \
+           conht \
            forcing \
            grid \
            math
