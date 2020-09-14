@@ -65,7 +65,7 @@
       pmeanl = 0.0  ! initialise pressure mean
       itmp = LX1*LZ1
       do il=1,nelv   ! element loop
-         do jl=1,2*ldim
+         do jl=1,2*ldim   ! face loop
             if (cbc(jl,il,ifll).eq.'W  ') then
                vrtmp2(1) = vrtmp2(1) + vlsum(area(1,1,jl,il),itmp)
                call ftovec(vrtmp,pres,il,jl,lx1,ly1,lz1)
@@ -75,9 +75,9 @@
       enddo
       ! global communication
       call gop(vrtmp2,vrtmp,'+  ',2)
-      ! missing error chack vrtmp2(1) == 0
+      ! missing error check vrtmp2(1) == 0
       vrtmp2(2) = -vrtmp2(2)/vrtmp2(1)
-      ! subtract mean pressure
+      ! remove mean pressure
       itmp = NX1*NY1*NZ1*NELV
       call cadd(pres,vrtmp2(2),itmp)
       
