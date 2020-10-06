@@ -268,6 +268,8 @@
       integer ninseg(lelt)    ! elements in segment
       logical ifseg(lelt)     ! segment borders
 
+      integer ibuf(2)
+
       ! functions
       integer iglsum
 
@@ -281,7 +283,7 @@
       data icalld /0/
 #endif
 !-----------------------------------------------------------------------
-#ifdef NEKP4EST
+#ifdef AMR
       ! reset amr level falg
       do il = 1, lelt
          pstat_refl(il) = 0
@@ -289,7 +291,7 @@
 
       ! initial refinement
       do il=1,pstat_amr_irnr
-         call nekp4est_refinement
+         call amr_refinement()
       enddo
 #endif
 
@@ -345,8 +347,8 @@
 
          write(iunit,*) pstat_nelg, pstat_nel, nfail
          do il=1,pstat_nel
-            write(iunit,*) il, pstat_gnel(il), proc(il), elid(il),
-     &       rcode(il), dist(il)
+            write(iunit,*) il, pstat_gnel(il), proc(il), elid(il)+1,
+     &       rcode(il), dist(il), (rst(jl+(il-1)*ldim),jl=1,ldim)
          enddo
 
          close(iunit)
@@ -493,14 +495,14 @@
          call mntr_check_abort(pstat_id,ierr,
      $     'Inconsistent segment number in pstat_mesh_manipulate')
 
-#ifdef NEKP4EST
+#ifdef AMR
          ! transfer data for refinement mark
          do il = 1, nseg
             pstat_refl(isort(2,il)) = isort(3,il)
          enddo
 
          ! perform refinement
-         call nekp4est_refinement
+         call amr_refinement()
 
          inf_cnt = inf_cnt + 1
          if (inf_cnt.gt.99) call mntr_abort(pstat_id,
@@ -522,31 +524,166 @@
          pstat_gnel(isort(2,il)) = isort(4,il)
       enddo
 
-      ! recalculate new local to glpbal mappings from PARALLEL include file
-      ! zero arrays
-      call izero(lglel,lelt)
-      call izero(gllel,lelg)
-      call izero(gllnid,lelg)
-      ! fill in array parts
+      ! notify element owners
       do il = 1, nelt
-         lglel(il) = pstat_gnel(il)
-         gllel(pstat_gnel(il)) = il
-         gllnid(pstat_gnel(il)) = nid
-      enddo
-      ! perform global operations
-      npass = 1 + nelgt/lelt
-      kl=1
-      do il=1,npass
-         jl = nelgt - kl + 1
-         jl = min(jl,lelt)
-         if (jl.gt.0) then
-            call igop(gllel(kl),rcode,'+  ',jl)
-            call igop(gllnid(kl),rcode,'+  ',jl)
-         endif
-         kl = kl + jl
+         isort(1,il) = gllnid(pstat_gnel(il))
+         isort(2,il) = gllel(pstat_gnel(il))
+         isort(3,il) = il
+         isort(4,il) = lglel(il)
       enddo
 
+      ! transfer and sort data
+      iseg = nelt
+      call fgslib_crystal_ituple_transfer(cr_h,isort,idim,iseg,isdim,1)
+      ! sanity check
+      ierr = 0
+      if (iseg.ne.nelt) ierr = 1
+      call mntr_check_abort(pstat_id,ierr,
+     $     'Inconsistent element number in pstat_mesh_manipulate')
+      il = 2
+      call fgslib_crystal_ituple_sort(cr_h,isort,idim,iseg,il,1)
+
+#ifdef DEBUG
+      ! sanity check
+      ierr = 0
+      do il=1,iseg
+         if (isort(3,il).ne.gllel(isort(4,il))) ierr = 1
+      enddo
+      call mntr_check_abort(pstat_id,ierr,
+     $  'Inconsistent element transfer number in pstat_mesh_manipulat')
+      ierr = 0
+      do il=1,iseg
+         if (isort(1,il).ne.gllnid(isort(4,il))) ierr = 1
+      enddo
+      call mntr_check_abort(pstat_id,ierr,
+     $  'Inconsistent process transfer number in pstat_mesh_manipulat')
+#endif
+
+      ! save transfer data
+      do il=1,nelt
+         pstat_gnel(il) = isort(4,il)
+      enddo
+
+#ifdef DEBUG
+      ! for testing
+      ! to output refinement
+      call io_file_freeid(iunit, ierr)
+      write(str1,'(i3.3)') NID
+      write(str2,'(i3.3)') icalld
+      open(unit=iunit,file='CRDmap.txt'//str1//'i'//str2)
+
+      write(iunit,*) nelgt,nelt
+      do il=1,nelt
+         write(iunit,*) il, pstat_gnel(il)
+      enddo
+
+      close(iunit)
+#endif
+
 #undef DEBUG
+      return
+      end subroutine
+!=======================================================================
+!> @brief Reshuffle elements between sts and current ordering
+!! @ingroup pstat
+      subroutine pstat_transfer()
+      implicit none
+
+      include 'SIZE'
+      include 'GEOM'
+      include 'SOLN'
+      include 'PARALLEL'
+      include 'FRAMELP'
+      include 'PSTATD'
+
+      ! local variables
+      integer il, jl
+      integer lnelt, itmp
+      integer isw
+      parameter (isw=2)
+
+      ! transfer arrays
+      integer vi(isw,LELT)
+      integer*8 vl(1)           ! required by crystal rauter
+
+      integer key(1)            ! required by crystal rauter; for sorting
+!-----------------------------------------------------------------------
+      ! element size
+      itmp = lx1*ly1*lz1
+
+      ! coordinates
+      ! number of local elements
+      lnelt = nelt
+
+      ! pack transfer data
+      do il=1,lnelt
+         vi(1,il) = gllel(pstat_gnel(il))
+         vi(2,il) = gllnid(pstat_gnel(il))
+      enddo
+
+      ! transfer arrays
+      call fgslib_crystal_tuple_transfer
+     $     (cr_h,lnelt,LELT,vi,isw,vl,0,xm1,itmp,2)
+
+      ! test local element number
+      if (lnelt.ne.NELT) then
+         call mntr_abort('Error: pstat_transfer; lnelt /= nelt')
+      endif
+
+      ! sort elements acording to their global number
+      key(1) = 1
+      call fgslib_crystal_tuple_sort
+     $     (cr_h,lnelt,vi,isw,vl,0,xm1,itmp,key,1)
+
+      ! number of local elements
+      lnelt = nelt
+
+      ! pack transfer data
+      do il=1,lnelt
+         vi(1,il) = gllel(pstat_gnel(il))
+         vi(2,il) = gllnid(pstat_gnel(il))
+      enddo
+
+      ! transfer arrays
+      call fgslib_crystal_tuple_transfer
+     $     (cr_h,lnelt,LELT,vi,isw,vl,0,ym1,itmp,2)
+
+      ! test local element number
+      if (lnelt.ne.NELT) then
+         call mntr_abort('Error: pstat_transfer; lnelt /= nelt')
+      endif
+
+      ! sort elements acording to their global number
+      key(1) = 1
+      call fgslib_crystal_tuple_sort
+     $     (cr_h,lnelt,vi,isw,vl,0,ym1,itmp,key,1)
+
+      ! for each variable
+      do il=1, pstat_svar
+         ! number of local elements
+         lnelt = nelt
+
+         ! pack transfer data
+         do jl=1,lnelt
+            vi(1,jl) = gllel(pstat_gnel(jl))
+            vi(2,jl) = gllnid(pstat_gnel(jl))
+         enddo
+
+         ! transfer array
+         call fgslib_crystal_tuple_transfer
+     $        (cr_h,lnelt,LELT,vi,isw,vl,0,t(1,1,1,1,il+1),itmp,2)
+
+         ! test local element number
+         if (lnelt.ne.NELT) then
+            call mntr_abort('Error: pstat_transfer; lnelt /= nelt')
+         endif
+
+         ! sort elements acording to their global number
+         key(1) = 1
+         call fgslib_crystal_tuple_sort
+     $        (cr_h,lnelt,vi,isw,vl,0,t(1,1,1,1,il+1),itmp,key,1)
+      enddo
+
       return
       end subroutine
 !=======================================================================
@@ -618,7 +755,7 @@
          call addfid(fname,fid0)
 
          ! add directory name
-         fname = 'ZSTAT/'//trim(fname)
+         fname = 'DATA/'//trim(fname)
 
          !call load_fld(fname)
          call mfi(fname,il)
@@ -641,6 +778,9 @@
          ! sum number of time steps
          istepr = istepr + istpr
 
+         ! reshuffle lelements
+         call pstat_transfer()
+
          ! accumulate fileds
          do jl = 1,pstat_svar
             call add2s2(pstat_ruavg(1,1,pstat_swfield(jl)),
@@ -660,22 +800,13 @@
          rtmp = 1.0
       endif
 
-      rtmp = 1.0
       do il = 1,pstat_svar
          call cmult(pstat_ruavg(1,1,il),rtmp,nvec)
       enddo
 
-      ! save fields to the disc for visualisation
-      ! vx, vy
-      ifpo = .false.
-      call outpost2(pstat_ruavg(1,1,1),pstat_ruavg(1,1,2),vz,pr,t,0,
-     $     'UV_')
-      ! vz, pr
-      call outpost2(pstat_ruavg(1,1,3),pstat_ruavg(1,1,4),vz,pr,t,0,
-     $     'WP_')
-
       ! save all averaged fields
       ifvo = .false.
+      ifpo = .false.
       ifto = .false.
       do il=1,pstat_svar
           ifpsco(il)=.TRUE.
@@ -705,6 +836,9 @@
       integer nvec                  ! single field length
       real dudx(lx1*ly1*lz1,lelt,3) ! field derivatives
 !-----------------------------------------------------------------------
+      ! update derivative arrays
+      call geom_reset(1)
+
       ! initilise vectors
       call rzero(pstat_ruder,lx1**ldim*lelt*pstat_dvar)
       nvec = lx1*ly1*nelt
@@ -999,6 +1133,16 @@
 
       ! functions
       integer iglsum
+
+!#define DEBUG
+#ifdef DEBUG
+      character*3 str1, str2
+      integer iunit, ierr, jl
+      ! call number
+      integer icalld
+      save icalld
+      data icalld /0/
+#endif
 !-----------------------------------------------------------------------
       ! read point position
       call pstat_mfi_interp
@@ -1033,6 +1177,24 @@
       enddo
       nfail = iglsum(nfail,1)
 
+#ifdef DEBUG
+         ! for testing
+         ! to output refinement
+         icalld = icalld+1
+         call io_file_freeid(iunit, ierr)
+         write(str1,'(i3.3)') NID
+         write(str2,'(i3.3)') icalld
+         open(unit=iunit,file='INTfpts.txt'//str1//'i'//str2)
+
+         write(iunit,*) pstat_nptot, pstat_npt, nfail
+         do il=1,pstat_npt
+            write(iunit,*) il, proc(il), elid(il), rcode(il), dist(il),
+     $       (rst(jl+(il-1)*ldim),jl=1,ldim)
+         enddo
+
+         close(iunit)
+#endif
+
       if (nfail.gt.0) call mntr_abort(pstat_id,
      $     'pstat_interp: Points not mapped')
 
@@ -1043,6 +1205,22 @@
      &        pstat_ruavg(1,1,il))
       enddo
 
+#ifdef DEBUG
+         ! for testing
+         ! to output refinement
+         call io_file_freeid(iunit, ierr)
+         write(str1,'(i3.3)') NID
+         write(str2,'(i3.3)') icalld
+         open(unit=iunit,file='INTavg.txt'//str1//'i'//str2)
+
+         write(iunit,*) pstat_nptot, pstat_npt
+         do il=1,pstat_npt
+            write(iunit,*) il, (pstat_int_avg(il,jl),jl=1,4)
+         enddo
+
+         close(iunit)
+#endif
+
       ! Interpolate fields derivatives
       do il=1,pstat_dvar
          call fgslib_findpts_eval(ifpts,pstat_int_der (1,il),1,
@@ -1050,12 +1228,29 @@
      &        pstat_ruder(1,1,il))
       enddo
 
+#ifdef DEBUG
+         ! for testing
+         ! to output refinement
+         call io_file_freeid(iunit, ierr)
+         write(str1,'(i3.3)') NID
+         write(str2,'(i3.3)') icalld
+         open(unit=iunit,file='INTder.txt'//str1//'i'//str2)
+
+         write(iunit,*) pstat_nptot, pstat_npt
+         do il=1,pstat_npt
+            write(iunit,*) il, (pstat_int_der(il,jl),jl=1,4)
+         enddo
+
+         close(iunit)
+#endif
+
       ! finalise interpolation tool
       call fgslib_findpts_free(ifpts)
 
       ! write down interpolated values
       call pstat_mfo_interp
 
+#undef DEBUG
       return
       end subroutine
 !=======================================================================
