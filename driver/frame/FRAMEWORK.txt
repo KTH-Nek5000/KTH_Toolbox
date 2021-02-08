@@ -7,21 +7,21 @@
 @brief Backbone for toolboxes
 
 @details 
-Frame module provides backbone of the whole framework consisting of dynamical 
+The frame module provides backbone of the whole framework consisting of dynamical 
 (as much as fortran 77 allows for it) databases for registered modules, runtime
-parameters and timers. This supposed to simplify interactions between different 
+parameters and timers. This is supposed to simplify interactions between different 
 modules, logging and operations on runtime parameters. It provides interfaces
-for intialisation, monitoring and finalisation of framework. It requires as well
+for intialisation, monitoring and finalisation of the framework. It requires as well
 three subroutines defined in \a setup.usr and providing modules registration 
 (\a frame_usr_register), initialisation (\a frame_usr_init) and finalisation 
 (\a frame_usr_end).
 
-This module provides as well include file FRAMELP defining log priorities and runtime parameter 
-types. Using logging routines from [monitor] (@ref monitor) submodule one can easily specify 
-verbosity of the code. The logging level can be set in two ways: by LOGLEVEL runtime parameter 
+This module also provides an include file FRAMELP defining log priorities and runtime parameter 
+types. Using logging routines from the [monitor] (@ref monitor) submodule, one can easily specify 
+the verbosity of the code. The logging level can be set in two ways: by LOGLEVEL runtime parameter 
 in [_MONITOR] section of \a setup.par file (doeas not cover framework initialisation) 
-or by setting enviromental variable FRAMELOGL. The second way covers all stages of simulation.
-For bash shell this variable can be set by:
+or by setting the enviromental variable FRAMELOGL. The second way covers all stages of the simulation.
+For the bash shell this variable can be set by:
 @code{.sh}
 FRAMELOGL = 5
 export FRAMELOGL

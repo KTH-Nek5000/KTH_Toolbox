@@ -4,9 +4,9 @@
 @defgroup chkpoint  Checkpointing routines
 @ingroup io
 
-@brief Checkopinting routines for toolbox
+@brief Checkpointing routines for toolbox
 
-@details This is the main interface to I/O checkpinting.
+@details This is the main interface to I/O checkpointing.
 
 @mod_interface
 @interface_list Interface provided:

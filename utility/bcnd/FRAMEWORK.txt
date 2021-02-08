@@ -4,10 +4,10 @@
 @defgroup bcnd  Boundary condition module
 @ingroup utility
 
-@brief Diverse tools related to applying boundarry conditions
+@brief Diverse tools related to applying boundary conditions
 
 @details
-Set of boundarry condition related routines.
+Set of boundary condition related routines.
 
 */
 #List of existing submodules
