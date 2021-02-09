@@ -7,7 +7,7 @@
 @brief Routines related to module's runtime parameters.
 
 @details
-This module builds global parameter database for all registered tools.
+This module builds a global parameter database for all registered tools.
 
 @mod_interface
 @interface_list Interface provided:

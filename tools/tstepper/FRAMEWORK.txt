@@ -7,11 +7,11 @@
 @brief Time stepper for Nek5000
 
 @details
-This module implements time stepper method for linear solver in Nek5000 using userchk interface. 
-It allows to perform number of constant lenght cycles providing the result vector to 
+This module implements time stepper method for linear solver in Nek5000 using the userchk interface. 
+It allows to perform a number of constant length cycles providing the result vector to 
 the submodule. There are two possible submodules: power iteration and spectra calculation
-using Arnoldi algorithm implemented in \a PARPACK. The initial condition for the next stepping
-cycle is provided by submodule. Three stepper modes are supported: direct, adjoint, direct+adjoint.
+using the Arnoldi algorithm implemented in \a PARPACK. The initial condition for the next stepping
+cycle is provided by the submodule. Three stepper modes are supported: direct, adjoint, direct+adjoint.
 
 @mod_interface
 @interface_list Interface provided:
