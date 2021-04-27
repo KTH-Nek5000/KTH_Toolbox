@@ -1,4 +1,4 @@
-[_PSTAT]                # Runtime paramere section for pstat module
+[_PSTAT2D]                # Runtime paramere section for pstat module
 CRD_FNUM             = 1                      # CRD file number
 AMR_NREF             = 5                      # Nr. of initial refinemnt (AMR only)
 STS_NFILE            = 1                      # Number of stat files
