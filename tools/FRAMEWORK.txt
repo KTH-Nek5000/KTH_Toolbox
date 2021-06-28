@@ -13,7 +13,8 @@ This directory contains a number of tools developed at KTH.
 #List of existing submodules
 SUBMODULES tstepper \
            baseflow \
-           stat
+           stat \
+           tsrs
 
 #List of conflicting submodules
 EXCLUSIVE  tstepper \
