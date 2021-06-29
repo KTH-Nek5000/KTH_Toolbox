@@ -147,7 +147,7 @@
       common /SCRUZ/ lcoord
 
       ! functions
-      real dnekclock, glmin, glmax, mth_stepf
+      real dnekclock, glmin, glmax, math_stepf
 !-----------------------------------------------------------------------
       ! check if the module was already initialised
       if (spng_ifinit) then
@@ -273,12 +273,12 @@
                         rtmp=spng_str
                      elseif(rtmp.lt.xxmin) then ! fall; xmin
                         arg = (xxmin-rtmp)/(spng_wl(il)-spng_dl(il))
-                        rtmp = spng_str*mth_stepf(arg)
+                        rtmp = spng_str*math_stepf(arg)
                      elseif (rtmp.le.xxmax) then ! zero
                         rtmp = 0.0
                      elseif (rtmp.lt.xxmax_c) then ! rise
                         arg = (rtmp-xxmax)/(spng_wr(il)-spng_dr(il))
-                        rtmp = spng_str*mth_stepf(arg)
+                        rtmp = spng_str*math_stepf(arg)
                      else    ! constant
                         rtmp = spng_str
                      endif

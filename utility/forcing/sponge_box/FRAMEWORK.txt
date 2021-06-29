@@ -15,7 +15,7 @@ reference velocity field and current velocity field respectively. 1-dimensional 
 S\left((x - x_{max} + \Delta_{wr})/\Delta_{dr} \right) \right],\f]
 where:
 - \f$ \lambda_{max} \f$ - sponge strenght,
-- \f$ S(x) \f$ - step function @ref mth_stepf,
+- \f$ S(x) \f$ - step function @ref math_stepf,
 - \f$ x_{min}, x_{max} \f$ - left and right box boundaries,
 - \f$ \Delta_{wl}, \Delta_{wr} \f$ - left and right sponge section width,
 - \f$ \Delta_{dl}, \Delta_{dr} \f$ - left and right sponge section drop/rise width.

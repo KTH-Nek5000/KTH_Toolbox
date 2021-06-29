@@ -851,9 +851,9 @@
          enddo
 
          ! rotate bounding box to get 2D constraint; THIS IS NOT FINISHED
-         call mth_rot3Da(drtmp,gsem_bmin(1,il),
+         call math_rot3Da(drtmp,gsem_bmin(1,il),
      $        gsem_raxs(1,il),-gsem_rang(il))
-         call mth_rot3Da(drtmp,gsem_bmax(1,il),
+         call math_rot3Da(drtmp,gsem_bmax(1,il),
      $        gsem_raxs(1,il),-gsem_rang(il))
 
          ! Should I shift edges to the surface normal to gsem_bcrd???????
@@ -1386,7 +1386,7 @@
       integer il, jl, itmp
 
       ! functions
-      real mth_ran_rng
+      real math_ran_rng
 !-----------------------------------------------------------------------
       ! stamp logs
       call mntr_logi(gsem_id,lp_prd,'Initilise modes for family=',nfam)
@@ -1396,8 +1396,8 @@
          do il=0,gsem_neddy(nfam)-1
             itmp = gsem_eoff(nfam)+il
             do jl=1,ldim
-               gsem_eamp(jl,itmp) = mth_ran_rng(0.0,1.0)
-               gsem_ephs(jl,itmp) = mth_ran_rng(0.0,2.0*pi)
+               gsem_eamp(jl,itmp) = math_ran_rng(0.0,1.0)
+               gsem_ephs(jl,itmp) = math_ran_rng(0.0,2.0*pi)
             enddo
          enddo
       endif

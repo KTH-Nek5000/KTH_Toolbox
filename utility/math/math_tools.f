@@ -16,8 +16,8 @@
 !!  \f}
 !!  with \f$ x_{min} = 0.02\f$ and \f$ x_{max}=0.98\f$
 !! @param[in] x       function argument
-!! @return mth_stepf
-      real function mth_stepf(x)
+!! @return math_stepf
+      real function math_stepf(x)
       implicit none
 
       ! argument list
@@ -29,15 +29,15 @@
 !-----------------------------------------------------------------------
       ! get function vale
       if (x.le.xdmin) then
-         mth_stepf = 0.0
+         math_stepf = 0.0
       else if (x.le.xdmax) then
-         mth_stepf = 1./( 1. + exp(1./(x - 1.) + 1./x) )
+         math_stepf = 1./( 1. + exp(1./(x - 1.) + 1./x) )
       else
-         mth_stepf = 1.
+         math_stepf = 1.
       end if
 
       return
-      end function mth_stepf
+      end function math_stepf
 !=======================================================================
 !> @brief Give random distribution depending on position
 !! @ingroup math
@@ -51,7 +51,7 @@
 !! @param[in] xl           physical point coordinates
 !! @param[in] fcoeff       function coefficients
 !! @return  random distribution
-      real function mth_ran_dst(ix,iy,iz,ieg,xl,fcoeff)
+      real function math_ran_dst(ix,iy,iz,ieg,xl,fcoeff)
       implicit none
 
       include 'SIZE'
@@ -62,35 +62,35 @@
       real xl(LDIM)
       real fcoeff(3)
 !-----------------------------------------------------------------------
-      mth_ran_dst = fcoeff(1)*(ieg+xl(1)*sin(xl(2))) + fcoeff(2)*ix*iy +
-     $     fcoeff(3)*ix
-      if (IF3D) mth_ran_dst =
-     $     fcoeff(1)*(ieg +xl(NDIM)*sin(mth_ran_dst)) +
+      math_ran_dst = fcoeff(1)*(ieg+xl(1)*sin(xl(2))) +
+     $     fcoeff(2)*ix*iy + fcoeff(3)*ix
+      if (IF3D) math_ran_dst =
+     $     fcoeff(1)*(ieg +xl(NDIM)*sin(math_ran_dst)) +
      $     fcoeff(2)*iz*ix + fcoeff(3)*iz
-      mth_ran_dst = 1.e3*sin(mth_ran_dst)
-      mth_ran_dst = 1.e3*sin(mth_ran_dst)
-      mth_ran_dst = cos(mth_ran_dst)
+      math_ran_dst = 1.e3*sin(math_ran_dst)
+      math_ran_dst = 1.e3*sin(math_ran_dst)
+      math_ran_dst = cos(math_ran_dst)
 
       return
-      end function mth_ran_dst
+      end function math_ran_dst
 !=======================================================================
 !> @brief Give random number in the defined range
 !! @ingroup math
 !! @param[in] lower, upper     range for random numer
 !! @return  random number in the defined range
-      real function mth_ran_rng(lower, upper)
+      real function math_ran_rng(lower, upper)
       implicit none
 
       ! argument list
       real lower, upper
 
       ! functions
-      real mth_zbqlu01
+      real math_zbqlu01
 !-----------------------------------------------------------------------
-      mth_ran_rng = lower + mth_zbqlu01()*(upper-lower)
+      math_ran_rng = lower + math_zbqlu01()*(upper-lower)
 
       return
-      end function mth_ran_rng
+      end function math_ran_rng
 !=======================================================================
 !> @brief Marsaglia-Zaman random number generator
 !! @ingroup math
@@ -114,7 +114,7 @@
 !! @author Richard Chandler (richard@stats.ucl.ac.uk)
 !! @author Paul Northrop (northrop@stats.ox.ac.uk)
 !! @return  random number
-      real function mth_zbqlu01()
+      real function math_zbqlu01()
       implicit none
 
       ! global variables
@@ -164,9 +164,9 @@
          b2 = b2*br       
       enddo
       
-      mth_zbqlu01 = xr/b2
+      math_zbqlu01 = xr/b2
       return
-      end function mth_zbqlu01
+      end function math_zbqlu01
 !=======================================================================
 !> @brief Initialise Marsaglia-Zaman random number generator
 !! @ingroup math
@@ -245,7 +245,7 @@
 !! @param[out]   istop     upper loop bound
 !! @param[out]   iskip     stride
 !! @param[in]    iedg      edge number
-!! @param[in]    nx,ny,xz  element size
+!! @param[in]    nx,ny,nz  element size
       subroutine math_edgind(istart,istop,iskip,iedg,nx,ny,nz)
       implicit none
       include 'SIZE'
@@ -291,7 +291,7 @@
 !! @param[out]   vec       vector containg edge values
 !! @param[in]    edg       edge number
 !! @param[in]    vfld      pointer to singe element in the field
-!! @param[in]    nx,ny,xz  element size
+!! @param[in]    nx,ny,nz  element size
       subroutine math_etovec(vec,edg,vfld,nx,ny,nz)
       implicit none
 
@@ -325,7 +325,7 @@
 !! @param[in]  vi     input vector
 !! @param[in]  va     rotation axis
 !! @param[in]  an     rotation angle
-      subroutine mth_rot3Da(vo,vi,va,an)
+      subroutine math_rot3Da(vo,vi,va,an)
       implicit none
 
       ! parameters
