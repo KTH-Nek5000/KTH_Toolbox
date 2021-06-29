@@ -9,7 +9,7 @@
 !> @brief Register 2D mapping routines
 !! @ingroup map2d
 !! @note This routine should be called in frame_usr_register
-      subroutine map2D_register()
+      subroutine map2d_register()
       implicit none
 
       include 'SIZE'

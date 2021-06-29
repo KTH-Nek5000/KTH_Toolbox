@@ -6,9 +6,8 @@
 
 @brief Add white noise to velocity field at given time in a box
 
-@details
-This set of routines adds a white noise in the rectangular box performing global face averaging at the end. 
-To keep the field independent on number of number of processors we use @ref math_rand insted or @ref ran1 as
+@details This set of routines adds a white noise in the rectangular box performing global face averaging at the end. 
+To keep the field independent on number of number of processors we use @ref math_ran_dst insted or @ref ran1 as
 a random number ganarator. At the end velocity field is smoothed at the element faces.
 
 @mod_interface

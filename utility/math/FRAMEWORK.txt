@@ -17,7 +17,7 @@
 -# @ref math_zbqlini
 -# @ref math_edgind
 -# @ref math_etovec
--# @ref math_rot3Da
+-# @ref math_rot3da
 
 */
 #List of existing submodules

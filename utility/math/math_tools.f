@@ -325,7 +325,7 @@
 !! @param[in]  vi     input vector
 !! @param[in]  va     rotation axis
 !! @param[in]  an     rotation angle
-      subroutine math_rot3Da(vo,vi,va,an)
+      subroutine math_rot3da(vo,vi,va,an)
       implicit none
 
       ! parameters

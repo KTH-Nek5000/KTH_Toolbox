@@ -6,14 +6,13 @@
 
 @brief Tool for 3D to 2D grid mapping
 
-@details 
-3D to 2D mesh mappinfg for 2D-extruded meshes. This has to be extended.
+@details 3D to 2D mesh mappinfg for 2D-extruded meshes. This has to be extended.
 
 @mod_interface
 @interface_list Interface provided:
--# @ref map2D_register
--# @ref map2D_init
--# @ref map2D_get
+-# @ref map2d_register
+-# @ref map2d_init
+-# @ref map2d_get
 
 @par
 @interface_reqr Interface required:
