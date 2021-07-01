@@ -1,14 +1,46 @@
 #Configuration file for Nek5000 framework developed at KTH
 # Place for short description; doxygen style
 /**
-@defgroup stat   2D adn 3D statistics module
+@defgroup stat  2D and 3D statistics module
 @ingroup tools
 
-@brief Set of rutines to collect 44 fileds for statistics
+@brief Set of routines to collect 44 fields for statistics
 
 @details 
-This set of routines performs time, and in case for 2D version spanwise averaging and collect 44 different variables 
-for turbulent bu dgets calculation
+This set of routines performs temporal, and in case of the 2D version, spanwise 
+averaging of some 44 different fields, which include selected statistical moments
+of velocity and pressure up to fourth order. 
+A full list of fields is provided in the field_list.txt file located
+in the same directory as this file.
+Please note that there is no abuse of notation in the names of the quantities,
+ e.g. <uu> actually means <uu> and not <u'u'>.
+
+As metioned above, the module can operate in two regimes, 2D and 3D.
+In the 3D case, the fields are only averaged in time, whereas in 2D
+the they are also averaged spatially along a chosen homogeneous direction.
+To select the mode of operation, the parameter stat_rdim defined in
+the include file STATD should be set to either 1 for 2D statistics or 0
+for 3D.
+In the case of 2D statistics, the index of the homogeneous direction should
+be selected as well. This is done by setting the idir variable in the
+user_map2d_get subroutine, which should be copied into your .usr file.
+
+The module will compute the statistics based on sampling the solution every
+AVSTEP iterations. At each IOSTEP iteration, two files will be output with
+prefix c2D and sts, respectively.
+
+Each sts file will hold the data averaged over IOSTEP iterations.
+IOSTEP is thus both the averaging window length and the frequency of
+output. The sts files are in the same format as Nek5000 output files,
+meaning that they can, for example, be opened with Paraview or other
+tools. See also pstat2d and pstat3d in this Toolbox for ways of extracting
+data from: averaging across sts files, computing additional fields,
+extracting data at arbitrary points. 
+
+The c2D files..
+
+
+
 
 @mod_interface
 @interface_list Interface provided:
