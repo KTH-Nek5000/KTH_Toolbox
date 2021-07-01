@@ -11,10 +11,12 @@ This directory contains number of tools developed at KTH.
 
 */
 #List of existing submodules
-SUBMODULES pstat
+SUBMODULES pstat2d \
+           psta3d
 
 #List of conflicting submodules
-EXCLUSIVE  pstat
+EXCLUSIVE  pstat2d \
+           pstat3d
 
 #Default submodules
 DEFAULT

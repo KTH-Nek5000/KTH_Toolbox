@@ -168,6 +168,42 @@
       return
       end subroutine
 !=======================================================================
+!> @brief Finalise statistics module
+!! @ingroup stat
+!! @note This routine should be called in frame_usr_end
+      subroutine stat_end()
+      implicit none
+
+      include 'SIZE'
+      include 'FRAMELP'
+      include 'STATD'
+
+      ! local variables
+      real ltim
+
+      ! functions
+      real dnekclock
+!-----------------------------------------------------------------------
+      ! make sure all data in the buffer is saved
+      if (stat_atime.gt.0.0) then
+         if (stat_rdim.eq.1) then
+            ltim = dnekclock()
+            call mntr_log(stat_id,lp_inf,'Global sum')
+            call stat_gs_sum
+            ltim = dnekclock() - ltim
+            call mntr_tmr_add(stat_tmr_cmm_id,1,ltim)
+         endif
+
+         ltim = dnekclock()
+         call mntr_log(stat_id,lp_inf,'Writing stat file')
+         call stat_mfo
+         ltim = dnekclock() - ltim
+         call mntr_tmr_add(stat_tmr_io_id,1,ltim)
+      endif
+
+      return
+      end subroutine
+!=======================================================================
 !> @brief Check if module was initialised
 !! @ingroup stat
 !! @return stat_is_initialised
@@ -200,7 +236,7 @@
       ! simple timing
       real ltim
 
-      ! number of steps to bescarded in the simulation beginning
+      ! number of steps to be descarded in the simulation beginning
       ! This is necessary due to multistep restart scheme as 2-3 first steps
       ! are in general repeated from the previous simulation.
       ! It does not produce any problem in case of AMR, as in this case
@@ -530,7 +566,6 @@
 
       include 'SIZE'
       include 'FRAMELP'
-      include 'MAP2D'
       include 'STATD'
 
       ! argument list
@@ -544,7 +579,6 @@
 
       ! local variables
       integer il, jl, kl, el    ! loop index
-      integer el2               ! index of 2D element
 !-----------------------------------------------------------------------
       ! consistency check
       if(npos.gt.stat_lvar)
@@ -557,21 +591,18 @@
 
          ! perform 1D integral
          do el = 1, nelv
-            el2 = map2d_lmap(el)
-            if(el2.gt.0) then
-               do kl=1, stat_nm3
-                  do jl=1, stat_nm2
-                     do il=1, stat_nm1
-                        rtmp(jl,kl,el2) = rtmp(jl,kl,el2) +
-     $                       stat_bm1d(il,jl,kl,el)*lvar(il,jl,kl,el)
-                     enddo
+            do kl=1, stat_nm3
+               do jl=1, stat_nm2
+                  do il=1, stat_nm1
+                     rtmp(jl,kl,el) = rtmp(jl,kl,el) +
+     $                    stat_bm1d(il,jl,kl,el)*lvar(il,jl,kl,el)
                   enddo
                enddo
-            endif
+            enddo
          enddo
 
          ! time average
-         el = stat_nm2*stat_nm3*map2d_lnum
+         el = stat_nm2*stat_nm3*nelv
          call add2sxy(stat_ruavg(1,1,npos),alpha,rtmp,beta,el)
       else
          el = lx1**(LDIM)*lelt
@@ -592,7 +623,6 @@
 
       include 'SIZE'
       include 'FRAMELP'
-      include 'MAP2D'
       include 'STATD'
 
       ! argument list
@@ -607,7 +637,6 @@
 
       ! local variables
       integer il, jl, kl, el    ! loop index
-      integer el2               ! index of 2D element
 !-----------------------------------------------------------------------
       ! consistency check
       if(npos.gt.stat_lvar)
@@ -620,22 +649,19 @@
 
          ! perform 1D integral
          do el = 1, nelv
-            el2 = map2d_lmap(el)
-            if(el2.gt.0) then
-               do kl=1, stat_nm3
-                  do jl=1, stat_nm2
-                     do il=1, stat_nm1
-                        rtmp(jl,kl,el2) = rtmp(jl,kl,el2) +
-     $                       stat_bm1d(il,jl,kl,el)*
-     $                       lvar1(il,jl,kl,el)*lvar2(il,jl,kl,el)
-                     enddo
+            do kl=1, stat_nm3
+               do jl=1, stat_nm2
+                  do il=1, stat_nm1
+                     rtmp(jl,kl,el) = rtmp(jl,kl,el) +
+     $                    stat_bm1d(il,jl,kl,el)*
+     $                    lvar1(il,jl,kl,el)*lvar2(il,jl,kl,el)
                   enddo
                enddo
-            endif
+            enddo
          enddo
 
          ! time average
-         el = stat_nm2*stat_nm3*map2d_lnum
+         el = stat_nm2*stat_nm3*nelv
          call add2sxy(stat_ruavg(1,1,npos),alpha,rtmp,beta,el)
       else
          el = lx1**(LDIM)*lelt
@@ -665,14 +691,34 @@
       ! local variables
       integer gs_handle         ! gather-scatter handle
       integer*8 unodes(lx1*lz1*lelt) ! unique local nodes
-      integer il, jl
+      integer il, jl, el        ! loop index
+      integer el2               ! index of 2D element
       integer itmp1, itmp2
+      real rtmp_ruavg(lx1*lz1,lelt) ! tmp array for local 2D element aggragation
 !-----------------------------------------------------------------------
       ! if no space averaging return
       if (stat_rdim.eq.0) return
       
       ! stamp logs
       call mntr_log(stat_id,lp_vrb,'Global statistics summation.')
+
+      ! perform local summation of 2D contributions; not required for 3D version
+      do il = 1, stat_lvar
+         el = lx1*lz1*lelt
+         call rzero(rtmp_ruavg,el)
+         do el=1,nelv
+            el2 = map2d_lmap(el)
+            if(el2.gt.0) then
+               do jl = 1,stat_nm2*stat_nm3
+                  rtmp_ruavg(jl,el2) = rtmp_ruavg(jl,el2) +
+     $                 stat_ruavg(jl,el,il)
+               enddo
+            endif
+         enddo
+         ! copy data back
+         el = stat_nm2*stat_nm3*map2d_lnum
+         call copy(stat_ruavg(1,1,il),rtmp_ruavg,el)
+      enddo
 
       ! set up communicator
       itmp1 = stat_nm2*stat_nm3
@@ -764,14 +810,6 @@
 
       ! Compute derivative tensor and normalise pressure
       call user_stat_trnsv(tmpvel,dudx,dvdx,dwdx,slvel,tmppr)
-
-      ! call time series
-      ! adding time series here
-      ! notice I use tmpvel, so the mean pressure is subtracted from
-      ! pressure
-      if (if3d) then
-!          call stat_pts_compute(tmpvel,slvel,tmppr)
-      endif
 
       ! reset varaible counter
       lnvar = 0

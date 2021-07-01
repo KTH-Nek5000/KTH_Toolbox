@@ -4,15 +4,20 @@
 @defgroup math  Math module
 @ingroup utility
 
-@brief Diverse mathematical tools
+@brief Diverse tools for matht or data operations
 
-@details
-Set of math related routines for toolbox
+@details Set of math related routines for toolbox
 
 @mod_interface
 @interface_list Interface provided:
--# @ref mth_stepf
--# @ref mth_rand
+-# @ref math_stepf
+-# @ref math_ran_dst
+-# @ref math_ran_rng
+-# @ref math_zbqlu01
+-# @ref math_zbqlini
+-# @ref math_edgind
+-# @ref math_etovec
+-# @ref math_rot3da
 
 */
 #List of existing submodules
