@@ -1,6 +1,12 @@
 #!/bin/bash
 # Bash script to export all toolbox paths
 
+# Change a possible relative path to an absolute one
+# This is just a hack
+cd ${TOOLBOX_SRC}
+TOOLBOX_SRC=`pwd`
+cd -
+
 # Framework paths
 export DRIVER_SRC=${TOOLBOX_SRC}"/driver"
 export IO_SRC=${TOOLBOX_SRC}"/io"
