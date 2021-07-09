@@ -7,7 +7,7 @@
 @brief Set of tools for post-processing
 
 @details 
-This directory contains number of tools developed at KTH. 
+This directory contains  a number of tools developed at KTH. 
 
 */
 #List of existing submodules
