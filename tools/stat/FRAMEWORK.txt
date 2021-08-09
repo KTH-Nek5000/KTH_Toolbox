@@ -13,7 +13,7 @@ of velocity and pressure up to fourth order.
 A full list of fields is provided in the field_list.txt file located
 in the same directory as this file.
 Please note that there is no abuse of notation in the names of the quantities,
- e.g. <uu> actually means <uu> and not <u'u'>.
+ e.g. \<uu\> actually means \<uu\> and not \<u'u'\>.
 
 As metioned above, the module can operate in two regimes, 2D and 3D.
 In the 3D case, the fields are only averaged in time, whereas in 2D
