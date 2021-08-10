@@ -87,9 +87,6 @@ Post-processing of the produced fields can also be perfrmed with the
 !     monitor simulation
       call frame_monitor
 
-!     save/load files for full-restart
-      call chkpt_main
-
 !     collect statistics
       call stat_avg
 

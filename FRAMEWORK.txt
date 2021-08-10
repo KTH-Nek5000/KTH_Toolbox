@@ -8,11 +8,11 @@
 
 @details 
 This directory contains a number of tools used by toolboxes developed at KTH. 
-Files are grouped by taks and placed in a tree structure, where the parent directories (modules) 
+Files are grouped by tasks and placed in a tree structure, where the parent directories (modules) 
 perform some operations and can define tasks and interfaces that have to be provided by their 
 subdirectories (submodules). This structure can be repeated recursively with submodules becoming
-parent modules for nex level structures. The top level directories are related to the main services 
-that have to be provided for toolboxes. An examplary framework structure is presented in a figure.
+parent modules for next level structures. The top level directories are related to the main services 
+that have to be provided for toolboxes. An examplary framework structure is presented in the figure.
 
 @image html framework.png Examplary framework structure.
 
