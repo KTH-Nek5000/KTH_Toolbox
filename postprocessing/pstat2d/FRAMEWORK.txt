@@ -121,7 +121,7 @@ It can be read using the functions in `reader_int_fld.py` Python file.
 @param_list Parameters provided by sfd module (include file - \a STATD):
 |Varaible | Type |Runtime parameter | Description|
 |---------|------|------------------|------------|
-| CRD_FNUM | integer | _pstat:CRD_FNUM | CRD file number |
+| C2D_FNUM | integer | _pstat:C2D_FNUM | c2D file number |
 | AMR_REF  | integer | _pstat:IOStep   | Nr. of inital refinements (AMR only) |
 | STS_NFILE | integer | _pstat:STS_NFILE  | Number of collected sts files |
 | STS_STIME | float   | _pstat:STS_STIME  | Statistics starting time |
@@ -131,7 +131,7 @@ It can be read using the functions in `reader_int_fld.py` Python file.
 @mod_param_example
 @code{.txt}
 [_PSTAT2D]                # Runtime paramere section for pstat module
-CRD_FNUM             = 1                      # CRD file number
+C2D_FNUM             = 1                      # c2D file number
 AMR_NREF             = 5                      # Nr. of initial refinemnt (AMR only)
 STS_NFILE            = 1                      # Number of stat files
 STS_STIME            = 0.00000000E+00         # Statistics starting time

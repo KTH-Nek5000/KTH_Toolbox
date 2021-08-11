@@ -71,8 +71,8 @@
       call rprm_sec_set_act(.true.,pstat_sec_id)
 
       ! register parameters
-      call rprm_rp_reg(pstat_crd_fnr_id,pstat_sec_id,'CRD_FNUM',
-     $     'CRD file number',rpar_int,1,0.0,.false.,' ')
+      call rprm_rp_reg(pstat_crd_fnr_id,pstat_sec_id,'C2D_FNUM',
+     $     'c2D file number',rpar_int,1,0.0,.false.,' ')
       call rprm_rp_reg(pstat_amr_irnr_id,pstat_sec_id,'AMR_NREF',
      $ 'Nr. of initial refinemnt (AMR only)',rpar_int,1,0.0,.false.,' ')
       call rprm_rp_reg(pstat_nfile_id,pstat_sec_id,'STS_NFILE',
