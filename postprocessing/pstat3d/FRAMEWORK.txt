@@ -110,6 +110,8 @@ It can be read using the functions in `reader_int_fld.py` Python file.
 
       return
       end subroutine
+!======================================================================
+@endcode
 
 @mod_param
 @param_list Parameters provided by sfd module (include file - \a STATD):
