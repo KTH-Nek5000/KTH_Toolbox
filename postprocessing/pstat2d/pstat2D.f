@@ -162,14 +162,14 @@
 !=======================================================================
 !> @brief Check if module was initialised
 !! @ingroup pstat2d
-!! @return pstat_is_initialised
+!! @return pstat2d_is_initialised
       logical function pstat2d_is_initialised()
       implicit none
 
       include 'SIZE'
       include 'PSTAT2D'
 !-----------------------------------------------------------------------
-      pstat_is_initialised = pstat_ifinit
+      pstat2d_is_initialised = pstat_ifinit
 
       return
       end function

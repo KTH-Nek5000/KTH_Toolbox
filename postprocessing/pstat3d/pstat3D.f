@@ -156,14 +156,14 @@
 !=======================================================================
 !> @brief Check if module was initialised
 !! @ingroup pstat3d
-!! @return pstat_is_initialised
+!! @return pstat3d_is_initialised
       logical function pstat3d_is_initialised()
       implicit none
 
       include 'SIZE'
       include 'PSTAT3D'
 !-----------------------------------------------------------------------
-      pstat_is_initialised = pstat_ifinit
+      pstat3d_is_initialised = pstat_ifinit
 
       return
       end function
