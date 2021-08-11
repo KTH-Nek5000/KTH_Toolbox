@@ -1,19 +1,19 @@
-!> @file pstat.f
-!! @ingroup pstat
+!> @file pstat3D.f
+!! @ingroup pstat3d
 !! @brief Post processing for statistics module
 !! @author Adam Peplinski
 !! @date Mar 13, 2019
 !=======================================================================
 !> @brief Register post processing statistics module
-!! @ingroup pstat
+!! @ingroup pstat3d
 !! @note This routine should be called in frame_usr_register
-      subroutine pstat_register()
+      subroutine pstat3d_register()
       implicit none
 
       include 'SIZE'
       include 'INPUT'
       include 'FRAMELP'
-      include 'PSTATD'
+      include 'PSTAT3D'
 
       ! local variables
       integer lpmid, il
@@ -90,14 +90,14 @@
       end subroutine
 !=======================================================================
 !> @brief Initilise pstat module
-!! @ingroup pstat
+!! @ingroup pstat3d
 !! @note This routine should be called in frame_usr_init
-      subroutine pstat_init()
+      subroutine pstat3d_init()
       implicit none
 
       include 'SIZE'
       include 'FRAMELP'
-      include 'PSTATD'
+      include 'PSTAT3D'
 
       ! local variables
       integer itmp, il
@@ -155,13 +155,13 @@
       end subroutine
 !=======================================================================
 !> @brief Check if module was initialised
-!! @ingroup pstat
+!! @ingroup pstat3d
 !! @return pstat_is_initialised
-      logical function pstat_is_initialised()
+      logical function pstat3d_is_initialised()
       implicit none
 
       include 'SIZE'
-      include 'PSTATD'
+      include 'PSTAT3D'
 !-----------------------------------------------------------------------
       pstat_is_initialised = pstat_ifinit
 
@@ -169,13 +169,13 @@
       end function
 !=======================================================================
 !> @brief Main interface of pstat module
-!! @ingroup pstat
-      subroutine pstat_main
+!! @ingroup pstat3d
+      subroutine pstat3d_main
       implicit none
 
       include 'SIZE'
       include 'FRAMELP'
-      include 'PSTATD'
+      include 'PSTAT3D'
 
       ! local variables
       integer il
@@ -189,21 +189,21 @@
       ! read and average fields
       ltim = dnekclock()
       call mntr_log(pstat_id,lp_inf,'Field averaging')
-      call pstat_sts_avg
+      call pstat3d_sts_avg
       ltim = dnekclock() - ltim
       call mntr_tmr_add(pstat_tmr_avg_id,1,ltim)
 
       ! calculate new fields
       ltim = dnekclock()
       call mntr_log(pstat_id,lp_inf,'New field calculation')
-      call pstat_nfield
+      call pstat3d_nfield
       ltim = dnekclock() - ltim
       call mntr_tmr_add(pstat_tmr_new_id,1,ltim)
 
       ! interpolate into the set of points
       ltim = dnekclock()
       call mntr_log(pstat_id,lp_inf,'Point interpolation')
-      call pstat_interp
+      call pstat3d_interp
       ltim = dnekclock() - ltim
       call mntr_tmr_add(pstat_tmr_int_id,1,ltim)
 
@@ -211,8 +211,8 @@
       end subroutine
 !=======================================================================
 !> @brief Read in fields and average them
-!! @ingroup pstat
-      subroutine pstat_sts_avg
+!! @ingroup pstat3d
+      subroutine pstat3d_sts_avg
       implicit none
 
       include 'SIZE'
@@ -221,7 +221,7 @@
       include 'TSTEP'
       include 'SOLN'
       include 'FRAMELP'
-      include 'PSTATD'
+      include 'PSTAT3D'
 
       ! local variables
       integer il, jl            ! loop index
@@ -331,15 +331,15 @@
       end subroutine
 !=======================================================================
 !> @brief Calculate new fileds
-!! @ingroup pstat
-      subroutine pstat_nfield
+!! @ingroup pstat3d
+      subroutine pstat3d_nfield
       implicit none
 
       include 'SIZE'
       include 'INPUT'
       include 'SOLN'
       include 'FRAMELP'
-      include 'PSTATD'
+      include 'PSTAT3D'
 
       ! local variables
       integer il, jl            ! loop index
@@ -758,20 +758,20 @@
       call add2(pstat_rutmp(1,1,19),pstat_rutmp(1,1,20),nvec)
 
       ! write down fields
-      call pstat_mfo()
+      call pstat3d_mfo()
 
       return
       end subroutine
 !=======================================================================
 !> @brief Interpolate int the set of points
-!! @ingroup pstat
-      subroutine pstat_interp
+!! @ingroup pstat3d
+      subroutine pstat3d_interp
       implicit none
 
       include 'SIZE'
       include 'GEOM'
       include 'FRAMELP'
-      include 'PSTATD'
+      include 'PSTAT3D'
 
       ! global data structures
       integer mid,mp,nekcomm,nekgroup,nekreal
@@ -809,7 +809,7 @@
 #endif
 !-----------------------------------------------------------------------
       ! read point position
-      call pstat_mfi_interp
+      call pstat3d_mfi_interp
 
       ! initialise interpolation tool
       tol     = 5e-13
@@ -936,7 +936,7 @@
       call fgslib_findpts_free(ifpts)
 
       ! write down interpolated values
-      call pstat_mfo_interp
+      call pstat3d_mfo_interp
 
 #undef DEBUG
       return

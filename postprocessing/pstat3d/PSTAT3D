@@ -1,5 +1,5 @@
-!> @file PSTATD
-!! @ingroup pstat
+!> @file PSTAT3D
+!! @ingroup pstat3d
 !! @brief Include file with parameter and common block definitions for
 !!  post processing statistics module
 !! @author Adam Peplinski
