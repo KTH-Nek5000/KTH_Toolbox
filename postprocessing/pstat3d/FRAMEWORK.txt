@@ -22,7 +22,7 @@ Details below.
 The following workflow is suggested to use the module:
 - Create a new case directory with the same geometry as your main case.
 - Set up the `.usr` and `.par` and `makefile_usr.inc` files according to
- the examples herein. Compile the case.
+ the examples herein. (See also the phill_PSTAT3D example case.) Compile the case.
 - Create a folder called DATA in the case directory.
 - Copy the previously generated files with prefex `s01`-`s11` to this folder.
 If you are not interested in point interpolation the next 2 steps can be skipped.
@@ -35,9 +35,10 @@ eventually "crash" because no `int_pos` file will be found. That is OK.
 
 As a result, the tool will produce a set of files with prefix `a01` to
 `a22` containing data averaged across `STS_NFILE` of the provided
-`s01`-`s11` files, exlcluding those collected at times less than
+`s01`-`s11` files, excluding those collected at times less than
 `STS_STIME`.
-TODO: add txt file with list of fields and distribution across a* files.
+The list of fields and their distributon acros the files is given in
+field_list.txt in this folder.
 
 The interpolated point data is saved to a file called `int_fld`.
 It can be read using the functions in `reader_int_fld.py` Python file.
