@@ -7,7 +7,7 @@
 @brief Set of routines to collect 44 fields for statistics
 
 @details 
-This set of routines performs temporal, and in case of the 2D version, spanwise 
+This set of routines performs temporal, and, in case of the 2D version, spanwise 
 averaging of some 44 different fields, which include selected statistical moments
 of velocity and pressure up to fourth order. 
 A full list of fields is provided in the field_list.txt file located
@@ -21,7 +21,8 @@ the they are also averaged spatially along a chosen homogeneous direction.
 To select the mode of operation, the parameter `stat_rdim` defined in
 the include file `STATD` should be set to either 1 for 2D statistics or 0
 for 3D.
-A template for this file is provided in this directory.
+A template for this file is provided in this directory, you should copy it to
+your case folder and rename it to `STATD`.
 
 In the case of 2D statistics, the index of the homogeneous direction should
 be selected as well. This is done by setting the `idir` variable in the
@@ -54,8 +55,8 @@ that the names of the fields are always `x_velocity`, `y_velocity`,
 `z_velocity` and `temerature`.
 These names have nothing to do with the physical quantity stored.
 Instead, one should consult `field_list.txt` and map the 4 quantities
-list there to the names above, in the order listed.
-Post-processing of the produced fields can also be perfrmed with the 
+listed there to the names above, in the order listed.
+Post-processing of the produced fields can also be performed with the 
 `pstat3d` tool.
 
 @mod_interface
@@ -86,9 +87,6 @@ Post-processing of the produced fields can also be perfrmed with the
 
 !     monitor simulation
       call frame_monitor
-
-!     save/load files for full-restart
-      call chkpt_main
 
 !     collect statistics
       call stat_avg
