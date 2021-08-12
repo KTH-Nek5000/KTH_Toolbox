@@ -1,19 +1,19 @@
-!> @file pstat.f
-!! @ingroup pstat
+!> @file pstat2D_IO.f
+!! @ingroup pstat2d
 !! @brief Post processing I/O routines for statistics module
 !! @author Adam Peplinski
 !! @date Mar 13, 2019
 !=======================================================================
 !> @brief Read nonconforming data from the file
-!! @ingroup pstat
-      subroutine pstat_mfi_crd2D
+!! @ingroup pstat2d
+      subroutine pstat2d_mfi_crd2D
       implicit none
 
       include 'SIZE'
       include 'INPUT'
       include 'RESTART'
       include 'PARALLEL'
-      include 'PSTATD'
+      include 'PSTAT2D'
 
       ! global data structures
       integer mid,mp,nekcomm,nekgroup,nekreal
@@ -190,8 +190,8 @@
       end subroutine
 !=======================================================================
 !> @brief Read interpolation points position and redistribute them
-!! @ingroup pstat
-      subroutine pstat_mfi_interp
+!! @ingroup pstat2d
+      subroutine pstat2d_mfi_interp
       implicit none
 
       include 'SIZE'
@@ -199,7 +199,7 @@
       include 'RESTART'
       include 'PARALLEL'
       include 'FRAMELP'
-      include 'PSTATD'
+      include 'PSTAT2D'
 
       ! global data structures
       integer mid,mp,nekcomm,nekgroup,nekreal
@@ -383,8 +383,8 @@
       end subroutine
 !=======================================================================
 !> @brief Geather data and write it down
-!! @ingroup pstat
-      subroutine pstat_mfo_interp
+!! @ingroup pstat2d
+      subroutine pstat2d_mfo_interp
       implicit none
 
       include 'SIZE'
@@ -392,7 +392,7 @@
       include 'RESTART'
       include 'PARALLEL'
       include 'GEOM'
-      include 'PSTATD'
+      include 'PSTAT2D'
 
       ! global data structures
       integer mid,mp,nekcomm,nekgroup,nekreal

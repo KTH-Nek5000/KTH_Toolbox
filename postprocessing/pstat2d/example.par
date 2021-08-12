@@ -1,5 +1,5 @@
 [_PSTAT2D]                # Runtime paramere section for pstat module
-CRD_FNUM             = 1                      # CRD file number
+C2D_FNUM             = 1                      # c2D file number
 AMR_NREF             = 5                      # Nr. of initial refinemnt (AMR only)
 STS_NFILE            = 1                      # Number of stat files
 STS_STIME            = 0.00000000E+00         # Statistics starting time

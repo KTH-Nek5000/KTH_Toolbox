@@ -1,12 +1,12 @@
-!> @file pstat.f
-!! @ingroup pstat
+!> @file pstat3D_IO.f
+!! @ingroup pstat3d
 !! @brief Post processing I/O routines for statistics module
 !! @author Adam Peplinski
 !! @date Mar 13, 2019
 !=======================================================================
 !> @brief Write field data data to the file
-!! @ingroup pstat
-      subroutine pstat_mfo
+!! @ingroup pstat3d
+      subroutine pstat3d_mfo
       implicit none
 
       include 'SIZE'
@@ -15,7 +15,7 @@
 !      include 'RESTART'
 !      include 'PARALLEL'
       include 'FRAMELP'
-      include 'PSTATD'
+      include 'PSTAT3D'
 
       ! local variables
       integer il
@@ -78,8 +78,8 @@
       end subroutine
 !=======================================================================
 !> @brief Read interpolation points position and redistribute them
-!! @ingroup pstat
-      subroutine pstat_mfi_interp
+!! @ingroup pstat3d
+      subroutine pstat3d_mfi_interp
       implicit none
 
       include 'SIZE'
@@ -87,7 +87,7 @@
       include 'RESTART'
       include 'PARALLEL'
       include 'FRAMELP'
-      include 'PSTATD'
+      include 'PSTAT3D'
 
       ! global data structures
       integer mid,mp,nekcomm,nekgroup,nekreal
@@ -271,8 +271,8 @@
       end subroutine
 !=======================================================================
 !> @brief Geather data and write it down
-!! @ingroup pstat
-      subroutine pstat_mfo_interp
+!! @ingroup pstat3d
+      subroutine pstat3d_mfo_interp
       implicit none
 
       include 'SIZE'
@@ -280,7 +280,7 @@
       include 'RESTART'
       include 'PARALLEL'
       include 'GEOM'
-      include 'PSTATD'
+      include 'PSTAT3D'
 
       ! local variables
       integer il
@@ -381,185 +381,185 @@
      $     'Error opening interpolation file in pstat_mfo_interp.')
 
       ! write down point coordinates
-      call pstat_field_out(pstat_int_pts,ldim,ierr)
+      call pstat3d_field_out(pstat_int_pts,ldim,ierr)
       call mntr_check_abort(pstat_id,ierr,
      $    'Error writing coordinates in pstat_mfo_interp.')
 
       ! geather single field data and write it down to the file
       ! this is kind of strange, but I have to keep variables order from a** files
-      call pstat_field_out(pstat_int_avg(1,1),1,ierr) ! U
+      call pstat3d_field_out(pstat_int_avg(1,1),1,ierr) ! U
       call mntr_check_abort(pstat_id,ierr,'Error writing U interp.')
-      call pstat_field_out(pstat_int_avg(1,2),1,ierr) ! V
+      call pstat3d_field_out(pstat_int_avg(1,2),1,ierr) ! V
       call mntr_check_abort(pstat_id,ierr,'Error writing V interp.')
-      call pstat_field_out(pstat_int_avg(1,3),1,ierr) ! W
+      call pstat3d_field_out(pstat_int_avg(1,3),1,ierr) ! W
       call mntr_check_abort(pstat_id,ierr,'Error writing W interp.')
-      call pstat_field_out(pstat_int_avg(1,5),1,ierr) ! uu
+      call pstat3d_field_out(pstat_int_avg(1,5),1,ierr) ! uu
       call mntr_check_abort(pstat_id,ierr,'Error writing uu interp.')
-      call pstat_field_out(pstat_int_avg(1,6),1,ierr) ! vv
+      call pstat3d_field_out(pstat_int_avg(1,6),1,ierr) ! vv
       call mntr_check_abort(pstat_id,ierr,'Error writing vv interp.')
-      call pstat_field_out(pstat_int_avg(1,7),1,ierr) ! ww
+      call pstat3d_field_out(pstat_int_avg(1,7),1,ierr) ! ww
       call mntr_check_abort(pstat_id,ierr,'Error writing ww interp.')
-      call pstat_field_out(pstat_int_avg(1,9),1,ierr) ! uv
+      call pstat3d_field_out(pstat_int_avg(1,9),1,ierr) ! uv
       call mntr_check_abort(pstat_id,ierr,'Error writing uv interp.')
-      call pstat_field_out(pstat_int_avg(1,11),1,ierr) ! uw
+      call pstat3d_field_out(pstat_int_avg(1,11),1,ierr) ! uw
       call mntr_check_abort(pstat_id,ierr,'Error writing uw interp.')
-      call pstat_field_out(pstat_int_avg(1,10),1,ierr) ! vw
+      call pstat3d_field_out(pstat_int_avg(1,10),1,ierr) ! vw
       call mntr_check_abort(pstat_id,ierr,'Error writing vw interp.')
-      call pstat_field_out(pstat_int_avg(1,4),1,ierr) ! P
+      call pstat3d_field_out(pstat_int_avg(1,4),1,ierr) ! P
       call mntr_check_abort(pstat_id,ierr,'Error writing P interp.')
-      call pstat_field_out(pstat_int_avg(1,8),1,ierr) ! pp
+      call pstat3d_field_out(pstat_int_avg(1,8),1,ierr) ! pp
       call mntr_check_abort(pstat_id,ierr,'Error writing pp interp.')
-      call pstat_field_out(pstat_int_avg(1,27),1,ierr) ! ppp
+      call pstat3d_field_out(pstat_int_avg(1,27),1,ierr) ! ppp
       call mntr_check_abort(pstat_id,ierr,'Error writing ppp interp.')
-      call pstat_field_out(pstat_int_avg(1,38),1,ierr) ! pppp
+      call pstat3d_field_out(pstat_int_avg(1,38),1,ierr) ! pppp
       call mntr_check_abort(pstat_id,ierr,'Error writing pppp interp.')
-      call pstat_field_out(pstat_int_avg(1,24),1,ierr) ! uuu
+      call pstat3d_field_out(pstat_int_avg(1,24),1,ierr) ! uuu
       call mntr_check_abort(pstat_id,ierr,'Error writing uuu interp.')
-      call pstat_field_out(pstat_int_avg(1,25),1,ierr) ! vvv
+      call pstat3d_field_out(pstat_int_avg(1,25),1,ierr) ! vvv
       call mntr_check_abort(pstat_id,ierr,'Error writing vvv interp.')
-      call pstat_field_out(pstat_int_avg(1,26),1,ierr) ! www
+      call pstat3d_field_out(pstat_int_avg(1,26),1,ierr) ! www
       call mntr_check_abort(pstat_id,ierr,'Error writing www interp.')
-      call pstat_field_out(pstat_int_avg(1,28),1,ierr) ! uuv
+      call pstat3d_field_out(pstat_int_avg(1,28),1,ierr) ! uuv
       call mntr_check_abort(pstat_id,ierr,'Error writing uuv interp.')
-      call pstat_field_out(pstat_int_avg(1,29),1,ierr) ! uuw
+      call pstat3d_field_out(pstat_int_avg(1,29),1,ierr) ! uuw
       call mntr_check_abort(pstat_id,ierr,'Error writing uuw interp.')
-      call pstat_field_out(pstat_int_avg(1,30),1,ierr) ! uvv
+      call pstat3d_field_out(pstat_int_avg(1,30),1,ierr) ! uvv
       call mntr_check_abort(pstat_id,ierr,'Error writing uvv interp.')
-      call pstat_field_out(pstat_int_avg(1,31),1,ierr) ! vvw
+      call pstat3d_field_out(pstat_int_avg(1,31),1,ierr) ! vvw
       call mntr_check_abort(pstat_id,ierr,'Error writing vvw interp.')
-      call pstat_field_out(pstat_int_avg(1,32),1,ierr) ! uww
+      call pstat3d_field_out(pstat_int_avg(1,32),1,ierr) ! uww
       call mntr_check_abort(pstat_id,ierr,'Error writing uww interp.')
-      call pstat_field_out(pstat_int_avg(1,33),1,ierr) ! vww
+      call pstat3d_field_out(pstat_int_avg(1,33),1,ierr) ! vww
       call mntr_check_abort(pstat_id,ierr,'Error writing vww interp.')
-      call pstat_field_out(pstat_int_avg(1,34),1,ierr) ! uvw
+      call pstat3d_field_out(pstat_int_avg(1,34),1,ierr) ! uvw
       call mntr_check_abort(pstat_id,ierr,'Error writing uvw interp.')
-      call pstat_field_out(pstat_int_tmp(1,1),1,ierr) ! Pxx
+      call pstat3d_field_out(pstat_int_tmp(1,1),1,ierr) ! Pxx
       call mntr_check_abort(pstat_id,ierr,'Error writing Pxx interp.')
-      call pstat_field_out(pstat_int_tmp(1,2),1,ierr) ! Pyy
+      call pstat3d_field_out(pstat_int_tmp(1,2),1,ierr) ! Pyy
       call mntr_check_abort(pstat_id,ierr,'Error writing Pyy interp.')
-      call pstat_field_out(pstat_int_tmp(1,3),1,ierr) ! Pzz
+      call pstat3d_field_out(pstat_int_tmp(1,3),1,ierr) ! Pzz
       call mntr_check_abort(pstat_id,ierr,'Error writing Pzz interp.')
-      call pstat_field_out(pstat_int_tmp(1,4),1,ierr) ! Pxy
+      call pstat3d_field_out(pstat_int_tmp(1,4),1,ierr) ! Pxy
       call mntr_check_abort(pstat_id,ierr,'Error writing Pxy interp.')
-      call pstat_field_out(pstat_int_tmp(1,5),1,ierr) ! Pxz
+      call pstat3d_field_out(pstat_int_tmp(1,5),1,ierr) ! Pxz
       call mntr_check_abort(pstat_id,ierr,'Error writing Pxz interp.')
-      call pstat_field_out(pstat_int_tmp(1,6),1,ierr) ! Pyz
+      call pstat3d_field_out(pstat_int_tmp(1,6),1,ierr) ! Pyz
       call mntr_check_abort(pstat_id,ierr,'Error writing Pyz interp.')
-      call pstat_field_out(pstat_int_avg(1,39),1,ierr) ! Dxx
+      call pstat3d_field_out(pstat_int_avg(1,39),1,ierr) ! Dxx
       call mntr_check_abort(pstat_id,ierr,'Error writing Dxx interp.')
-      call pstat_field_out(pstat_int_avg(1,40),1,ierr) ! Dyy
+      call pstat3d_field_out(pstat_int_avg(1,40),1,ierr) ! Dyy
       call mntr_check_abort(pstat_id,ierr,'Error writing Dyy interp.')
-      call pstat_field_out(pstat_int_avg(1,41),1,ierr) ! Dzz
+      call pstat3d_field_out(pstat_int_avg(1,41),1,ierr) ! Dzz
       call mntr_check_abort(pstat_id,ierr,'Error writing Dzz interp.')
-      call pstat_field_out(pstat_int_avg(1,42),1,ierr) ! Dxy
+      call pstat3d_field_out(pstat_int_avg(1,42),1,ierr) ! Dxy
       call mntr_check_abort(pstat_id,ierr,'Error writing Dxy interp.')
-      call pstat_field_out(pstat_int_avg(1,43),1,ierr) ! Dxz
+      call pstat3d_field_out(pstat_int_avg(1,43),1,ierr) ! Dxz
       call mntr_check_abort(pstat_id,ierr,'Error writing Dxz interp.')
-      call pstat_field_out(pstat_int_avg(1,44),1,ierr) ! Dyz
+      call pstat3d_field_out(pstat_int_avg(1,44),1,ierr) ! Dyz
       call mntr_check_abort(pstat_id,ierr,'Error writing Dyz interp.')
-      call pstat_field_out(pstat_int_new(1,22),1,ierr) ! Txx
+      call pstat3d_field_out(pstat_int_new(1,22),1,ierr) ! Txx
       call mntr_check_abort(pstat_id,ierr,'Error writing Txx interp.')
-      call pstat_field_out(pstat_int_new(1,23),1,ierr) ! Tyy
+      call pstat3d_field_out(pstat_int_new(1,23),1,ierr) ! Tyy
       call mntr_check_abort(pstat_id,ierr,'Error writing Tyy interp.')
-      call pstat_field_out(pstat_int_new(1,24),1,ierr) ! Tzz
+      call pstat3d_field_out(pstat_int_new(1,24),1,ierr) ! Tzz
       call mntr_check_abort(pstat_id,ierr,'Error writing Tzz interp.')
-      call pstat_field_out(pstat_int_new(1,25),1,ierr) ! Txy
+      call pstat3d_field_out(pstat_int_new(1,25),1,ierr) ! Txy
       call mntr_check_abort(pstat_id,ierr,'Error writing Txy interp.')
-      call pstat_field_out(pstat_int_new(1,27),1,ierr) ! Txz
+      call pstat3d_field_out(pstat_int_new(1,27),1,ierr) ! Txz
       call mntr_check_abort(pstat_id,ierr,'Error writing Txz interp.')
-      call pstat_field_out(pstat_int_new(1,26),1,ierr) ! Tyz
+      call pstat3d_field_out(pstat_int_new(1,26),1,ierr) ! Tyz
       call mntr_check_abort(pstat_id,ierr,'Error writing Tyz interp.')
-      call pstat_field_out(pstat_int_new(1,16),1,ierr) ! VDxx
+      call pstat3d_field_out(pstat_int_new(1,16),1,ierr) ! VDxx
       call mntr_check_abort(pstat_id,ierr,'Error writing VDxx interp.')
-      call pstat_field_out(pstat_int_new(1,17),1,ierr) ! VDyy
+      call pstat3d_field_out(pstat_int_new(1,17),1,ierr) ! VDyy
       call mntr_check_abort(pstat_id,ierr,'Error writing VDyy interp.')
-      call pstat_field_out(pstat_int_new(1,18),1,ierr) ! VDzz
+      call pstat3d_field_out(pstat_int_new(1,18),1,ierr) ! VDzz
       call mntr_check_abort(pstat_id,ierr,'Error writing VDzz interp.')
-      call pstat_field_out(pstat_int_new(1,19),1,ierr) ! VDxy
+      call pstat3d_field_out(pstat_int_new(1,19),1,ierr) ! VDxy
       call mntr_check_abort(pstat_id,ierr,'Error writing VDxy interp.')
-      call pstat_field_out(pstat_int_new(1,21),1,ierr) ! VDxz
+      call pstat3d_field_out(pstat_int_new(1,21),1,ierr) ! VDxz
       call mntr_check_abort(pstat_id,ierr,'Error writing VDxz interp.')
-      call pstat_field_out(pstat_int_new(1,20),1,ierr) ! VDyz
+      call pstat3d_field_out(pstat_int_new(1,20),1,ierr) ! VDyz
       call mntr_check_abort(pstat_id,ierr,'Error writing VDyz interp.')
-      call pstat_field_out(pstat_int_tmp(1,7),1,ierr) ! Pixx
+      call pstat3d_field_out(pstat_int_tmp(1,7),1,ierr) ! Pixx
       call mntr_check_abort(pstat_id,ierr,'Error writing Pixx interp.')
-      call pstat_field_out(pstat_int_tmp(1,8),1,ierr) ! Piyy
+      call pstat3d_field_out(pstat_int_tmp(1,8),1,ierr) ! Piyy
       call mntr_check_abort(pstat_id,ierr,'Error writing Piyy interp.')
-      call pstat_field_out(pstat_int_tmp(1,9),1,ierr) ! Pizz
+      call pstat3d_field_out(pstat_int_tmp(1,9),1,ierr) ! Pizz
       call mntr_check_abort(pstat_id,ierr,'Error writing Pizz interp.')
-      call pstat_field_out(pstat_int_tmp(1,10),1,ierr) ! Pixy
+      call pstat3d_field_out(pstat_int_tmp(1,10),1,ierr) ! Pixy
       call mntr_check_abort(pstat_id,ierr,'Error writing Pixy interp.')
-      call pstat_field_out(pstat_int_tmp(1,11),1,ierr) ! Pixz
+      call pstat3d_field_out(pstat_int_tmp(1,11),1,ierr) ! Pixz
       call mntr_check_abort(pstat_id,ierr,'Error writing Pixz interp.')
-      call pstat_field_out(pstat_int_tmp(1,12),1,ierr) ! Piyz
+      call pstat3d_field_out(pstat_int_tmp(1,12),1,ierr) ! Piyz
       call mntr_check_abort(pstat_id,ierr,'Error writing Piyz interp.')
-      call pstat_field_out(pstat_int_new(1,10),1,ierr) ! Cxx
+      call pstat3d_field_out(pstat_int_new(1,10),1,ierr) ! Cxx
       call mntr_check_abort(pstat_id,ierr,'Error writing Cxx interp.')
-      call pstat_field_out(pstat_int_new(1,11),1,ierr) ! Cyy
+      call pstat3d_field_out(pstat_int_new(1,11),1,ierr) ! Cyy
       call mntr_check_abort(pstat_id,ierr,'Error writing Cyy interp.')
-      call pstat_field_out(pstat_int_new(1,12),1,ierr) ! Czz
+      call pstat3d_field_out(pstat_int_new(1,12),1,ierr) ! Czz
       call mntr_check_abort(pstat_id,ierr,'Error writing Czz interp.')
-      call pstat_field_out(pstat_int_new(1,13),1,ierr) ! Cxy
+      call pstat3d_field_out(pstat_int_new(1,13),1,ierr) ! Cxy
       call mntr_check_abort(pstat_id,ierr,'Error writing Cxy interp.')
-      call pstat_field_out(pstat_int_new(1,15),1,ierr) ! Cxz
+      call pstat3d_field_out(pstat_int_new(1,15),1,ierr) ! Cxz
       call mntr_check_abort(pstat_id,ierr,'Error writing Cxz interp.')
-      call pstat_field_out(pstat_int_new(1,14),1,ierr) ! Cyz
+      call pstat3d_field_out(pstat_int_new(1,14),1,ierr) ! Cyz
       call mntr_check_abort(pstat_id,ierr,'Error writing Cyz interp.')
-      call pstat_field_out(pstat_int_tmp(1,13),1,ierr) ! Pk
+      call pstat3d_field_out(pstat_int_tmp(1,13),1,ierr) ! Pk
       call mntr_check_abort(pstat_id,ierr,'Error writing Pk interp.')
-      call pstat_field_out(pstat_int_tmp(1,14),1,ierr) ! Dk
+      call pstat3d_field_out(pstat_int_tmp(1,14),1,ierr) ! Dk
       call mntr_check_abort(pstat_id,ierr,'Error writing Dk interp.')
-      call pstat_field_out(pstat_int_tmp(1,15),1,ierr) ! Tk
+      call pstat3d_field_out(pstat_int_tmp(1,15),1,ierr) ! Tk
       call mntr_check_abort(pstat_id,ierr,'Error writing Tk interp.')
-      call pstat_field_out(pstat_int_tmp(1,16),1,ierr) ! VDk
+      call pstat3d_field_out(pstat_int_tmp(1,16),1,ierr) ! VDk
       call mntr_check_abort(pstat_id,ierr,'Error writing VDk interp.')
-      call pstat_field_out(pstat_int_tmp(1,17),1,ierr) ! Pik
+      call pstat3d_field_out(pstat_int_tmp(1,17),1,ierr) ! Pik
       call mntr_check_abort(pstat_id,ierr,'Error writing Pik interp.')
-      call pstat_field_out(pstat_int_tmp(1,18),1,ierr) ! Ck
+      call pstat3d_field_out(pstat_int_tmp(1,18),1,ierr) ! Ck
       call mntr_check_abort(pstat_id,ierr,'Error writing Ck interp.')
-      call pstat_field_out(pstat_int_tmp(1,19),1,ierr) ! Resk
+      call pstat3d_field_out(pstat_int_tmp(1,19),1,ierr) ! Resk
       call mntr_check_abort(pstat_id,ierr,'Error writing Resk interp.')
-      call pstat_field_out(pstat_int_avg(1,12),1,ierr) ! PTxx
+      call pstat3d_field_out(pstat_int_avg(1,12),1,ierr) ! PTxx
       call mntr_check_abort(pstat_id,ierr,'Error writing PTxx interp.')
-      call pstat_field_out(pstat_int_avg(1,13),1,ierr) ! PTyy
+      call pstat3d_field_out(pstat_int_avg(1,13),1,ierr) ! PTyy
       call mntr_check_abort(pstat_id,ierr,'Error writing PTyy interp.')
-      call pstat_field_out(pstat_int_avg(1,14),1,ierr) ! PTzz
+      call pstat3d_field_out(pstat_int_avg(1,14),1,ierr) ! PTzz
       call mntr_check_abort(pstat_id,ierr,'Error writing PTzz interp.')
-      call pstat_field_out(pstat_int_avg(1,15),1,ierr) ! PTxy
+      call pstat3d_field_out(pstat_int_avg(1,15),1,ierr) ! PTxy
       call mntr_check_abort(pstat_id,ierr,'Error writing PTxy interp.')
-      call pstat_field_out(pstat_int_avg(1,16),1,ierr) ! PTxz
+      call pstat3d_field_out(pstat_int_avg(1,16),1,ierr) ! PTxz
       call mntr_check_abort(pstat_id,ierr,'Error writing PTxz interp.')
-      call pstat_field_out(pstat_int_avg(1,17),1,ierr) ! PTyz
+      call pstat3d_field_out(pstat_int_avg(1,17),1,ierr) ! PTyz
       call mntr_check_abort(pstat_id,ierr,'Error writing PTyz interp.')
-      call pstat_field_out(pstat_int_avg(1,18),1,ierr) ! PSxx
+      call pstat3d_field_out(pstat_int_avg(1,18),1,ierr) ! PSxx
       call mntr_check_abort(pstat_id,ierr,'Error writing PSxx interp.')
-      call pstat_field_out(pstat_int_avg(1,19),1,ierr) ! PSyy
+      call pstat3d_field_out(pstat_int_avg(1,19),1,ierr) ! PSyy
       call mntr_check_abort(pstat_id,ierr,'Error writing PSyy interp.')
-      call pstat_field_out(pstat_int_avg(1,20),1,ierr) ! PSzz
+      call pstat3d_field_out(pstat_int_avg(1,20),1,ierr) ! PSzz
       call mntr_check_abort(pstat_id,ierr,'Error writing PSzz interp.')
-      call pstat_field_out(pstat_int_avg(1,21),1,ierr) ! PSxy
+      call pstat3d_field_out(pstat_int_avg(1,21),1,ierr) ! PSxy
       call mntr_check_abort(pstat_id,ierr,'Error writing PSxy interp.')
-      call pstat_field_out(pstat_int_avg(1,22),1,ierr) ! PSxz
+      call pstat3d_field_out(pstat_int_avg(1,22),1,ierr) ! PSxz
       call mntr_check_abort(pstat_id,ierr,'Error writing PSxz interp.')
-      call pstat_field_out(pstat_int_avg(1,23),1,ierr) ! PSyz
+      call pstat3d_field_out(pstat_int_avg(1,23),1,ierr) ! PSyz
       call mntr_check_abort(pstat_id,ierr,'Error writing PSyz interp.')
-      call pstat_field_out(pstat_int_new(1,1),1,ierr) ! dUdx
+      call pstat3d_field_out(pstat_int_new(1,1),1,ierr) ! dUdx
       call mntr_check_abort(pstat_id,ierr,'Error writing dUdx interp.')
-      call pstat_field_out(pstat_int_new(1,2),1,ierr) ! dUdy
+      call pstat3d_field_out(pstat_int_new(1,2),1,ierr) ! dUdy
       call mntr_check_abort(pstat_id,ierr,'Error writing dUdy interp.')
-      call pstat_field_out(pstat_int_new(1,3),1,ierr) ! dUdz
+      call pstat3d_field_out(pstat_int_new(1,3),1,ierr) ! dUdz
       call mntr_check_abort(pstat_id,ierr,'Error writing dUdz interp.')
-      call pstat_field_out(pstat_int_new(1,4),1,ierr) ! dVdx
+      call pstat3d_field_out(pstat_int_new(1,4),1,ierr) ! dVdx
       call mntr_check_abort(pstat_id,ierr,'Error writing dVdx interp.')
-      call pstat_field_out(pstat_int_new(1,5),1,ierr) ! dVdy
+      call pstat3d_field_out(pstat_int_new(1,5),1,ierr) ! dVdy
       call mntr_check_abort(pstat_id,ierr,'Error writing dVdy interp.')
-      call pstat_field_out(pstat_int_new(1,6),1,ierr) ! dVdz
+      call pstat3d_field_out(pstat_int_new(1,6),1,ierr) ! dVdz
       call mntr_check_abort(pstat_id,ierr,'Error writing dVdz interp.')
-      call pstat_field_out(pstat_int_new(1,7),1,ierr) ! dWdx
+      call pstat3d_field_out(pstat_int_new(1,7),1,ierr) ! dWdx
       call mntr_check_abort(pstat_id,ierr,'Error writing dWdx interp.')
-      call pstat_field_out(pstat_int_new(1,8),1,ierr) ! dWdy
+      call pstat3d_field_out(pstat_int_new(1,8),1,ierr) ! dWdy
       call mntr_check_abort(pstat_id,ierr,'Error writing dWdy interp.')
-      call pstat_field_out(pstat_int_new(1,9),1,ierr) ! dWdz
+      call pstat3d_field_out(pstat_int_new(1,9),1,ierr) ! dWdz
       call mntr_check_abort(pstat_id,ierr,'Error writing dWdz interp.')
 
       ! master closes the file
@@ -575,16 +575,16 @@
       end subroutine
 !=======================================================================
 !> @brief Geather single field data and write it down
-!! @ingroup pstat
+!! @ingroup pstat3d
 !! @param[in]   int_field     interpolated field
 !! @param[in]   fldim         field dimension
 !! @param[out]  ierr          error flag
-      subroutine pstat_field_out(int_field,fldim,ierr)
+      subroutine pstat3d_field_out(int_field,fldim,ierr)
       implicit none
 
       include 'SIZE'
       include 'PARALLEL'
-      include 'PSTATD'
+      include 'PSTAT3D'
 
       ! global data structures
       integer mid,mp,nekcomm,nekgroup,nekreal

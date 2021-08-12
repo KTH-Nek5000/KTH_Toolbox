@@ -1,19 +1,19 @@
-!> @file pstat.f
-!! @ingroup pstat
+!> @file pstat2D.f
+!! @ingroup pstat2d
 !! @brief Post processing for statistics module
 !! @author Adam Peplinski
 !! @date Mar 13, 2019
 !=======================================================================
 !> @brief Register post processing statistics module
-!! @ingroup pstat
+!! @ingroup pstat2d
 !! @note This routine should be called in frame_usr_register
-      subroutine pstat_register()
+      subroutine pstat2d_register()
       implicit none
 
       include 'SIZE'
       include 'INPUT'
       include 'FRAMELP'
-      include 'PSTATD'
+      include 'PSTAT2D'
 
       ! local variables
       integer lpmid, il
@@ -71,8 +71,8 @@
       call rprm_sec_set_act(.true.,pstat_sec_id)
 
       ! register parameters
-      call rprm_rp_reg(pstat_crd_fnr_id,pstat_sec_id,'CRD_FNUM',
-     $     'CRD file number',rpar_int,1,0.0,.false.,' ')
+      call rprm_rp_reg(pstat_crd_fnr_id,pstat_sec_id,'C2D_FNUM',
+     $     'c2D file number',rpar_int,1,0.0,.false.,' ')
       call rprm_rp_reg(pstat_amr_irnr_id,pstat_sec_id,'AMR_NREF',
      $ 'Nr. of initial refinemnt (AMR only)',rpar_int,1,0.0,.false.,' ')
       call rprm_rp_reg(pstat_nfile_id,pstat_sec_id,'STS_NFILE',
@@ -94,14 +94,14 @@
       end subroutine
 !=======================================================================
 !> @brief Initilise pstat module
-!! @ingroup pstat
+!! @ingroup pstat2d
 !! @note This routine should be called in frame_usr_init
-      subroutine pstat_init()
+      subroutine pstat2d_init()
       implicit none
 
       include 'SIZE'
       include 'FRAMELP'
-      include 'PSTATD'
+      include 'PSTAT2D'
 
       ! local variables
       integer itmp, il
@@ -161,27 +161,27 @@
       end subroutine
 !=======================================================================
 !> @brief Check if module was initialised
-!! @ingroup pstat
-!! @return pstat_is_initialised
-      logical function pstat_is_initialised()
+!! @ingroup pstat2d
+!! @return pstat2d_is_initialised
+      logical function pstat2d_is_initialised()
       implicit none
 
       include 'SIZE'
-      include 'PSTATD'
+      include 'PSTAT2D'
 !-----------------------------------------------------------------------
-      pstat_is_initialised = pstat_ifinit
+      pstat2d_is_initialised = pstat_ifinit
 
       return
       end function
 !=======================================================================
 !> @brief Main interface of pstat module
-!! @ingroup pstat
-      subroutine pstat_main
+!! @ingroup pstat2d
+      subroutine pstat2d_main
       implicit none
 
       include 'SIZE'
       include 'FRAMELP'
-      include 'PSTATD'
+      include 'PSTAT2D'
 
       ! local variables
       integer il
@@ -195,32 +195,32 @@
       ! read element centre data
       ltim = dnekclock()
       call mntr_log(pstat_id,lp_inf,'Updating 2D mesh structure')
-      call pstat_mfi_crd2D
+      call pstat2d_mfi_crd2D
       ltim = dnekclock() - ltim
       call mntr_tmr_add(pstat_tmr_ini_id,1,ltim)
 
       ! perform element ordering to get 2D mesh corresponing to 3D projected one
       ! in case of AMR this performs refinemnt of 2D mesh as well
-      call pstat_mesh_manipulate
+      call pstat2d_mesh_manipulate
 
       ! read and average fields
       ltim = dnekclock()
       call mntr_log(pstat_id,lp_inf,'Field averaging')
-      call pstat_sts_avg
+      call pstat2d_sts_avg
       ltim = dnekclock() - ltim
       call mntr_tmr_add(pstat_tmr_avg_id,1,ltim)
 
       ! calculate derivatives
       ltim = dnekclock()
       call mntr_log(pstat_id,lp_inf,'Derivative calculation')
-      call pstat_deriv
+      call pstat2d_deriv
       ltim = dnekclock() - ltim
       call mntr_tmr_add(pstat_tmr_der_id,1,ltim)
 
       ! interpolate into the set of points
       ltim = dnekclock()
       call mntr_log(pstat_id,lp_inf,'Point interpolation')
-      call pstat_interp
+      call pstat2d_interp
       ltim = dnekclock() - ltim
       call mntr_tmr_add(pstat_tmr_int_id,1,ltim)
 
@@ -228,8 +228,8 @@
       end subroutine
 !=======================================================================
 !> @brief Manipulate mesh to find proper element ordering (in case of AMR refine)
-!! @ingroup pstat
-      subroutine pstat_mesh_manipulate
+!! @ingroup pstat2d
+      subroutine pstat2d_mesh_manipulate
       implicit none
 
       include 'SIZE'
@@ -237,7 +237,7 @@
       include 'PARALLEL'
       include 'INPUT'
       include 'FRAMELP'
-      include 'PSTATD'
+      include 'PSTAT2D'
 
       ! global data structures
       integer mid,mp,nekcomm,nekgroup,nekreal
@@ -585,8 +585,8 @@
       end subroutine
 !=======================================================================
 !> @brief Reshuffle elements between sts and current ordering
-!! @ingroup pstat
-      subroutine pstat_transfer()
+!! @ingroup pstat2d
+      subroutine pstat2d_transfer()
       implicit none
 
       include 'SIZE'
@@ -594,7 +594,7 @@
       include 'SOLN'
       include 'PARALLEL'
       include 'FRAMELP'
-      include 'PSTATD'
+      include 'PSTAT2D'
 
       ! local variables
       integer il, jl
@@ -688,8 +688,8 @@
       end subroutine
 !=======================================================================
 !> @brief Read in fields and average them
-!! @ingroup pstat
-      subroutine pstat_sts_avg
+!! @ingroup pstat2d
+      subroutine pstat2d_sts_avg
       implicit none
 
       include 'SIZE'
@@ -698,7 +698,7 @@
       include 'TSTEP'
       include 'SOLN'
       include 'FRAMELP'
-      include 'PSTATD'
+      include 'PSTAT2D'
 
       ! local variables
       integer il, jl            ! loop index
@@ -779,7 +779,7 @@
          istepr = istepr + istpr
 
          ! reshuffle lelements
-         call pstat_transfer()
+         call pstat2d_transfer()
 
          ! accumulate fileds
          do jl = 1,pstat_svar
@@ -821,15 +821,15 @@
       end subroutine
 !=======================================================================
 !> @brief Calculate derivatives
-!! @ingroup pstat
-      subroutine pstat_deriv
+!! @ingroup pstat2d
+      subroutine pstat2d_deriv
       implicit none
 
       include 'SIZE'
       include 'INPUT'
       include 'SOLN'
       include 'FRAMELP'
-      include 'PSTATD'
+      include 'PSTAT2D'
 
       ! local variables
       integer il                    ! loop index
@@ -1100,14 +1100,14 @@
       end subroutine
 !=======================================================================
 !> @brief Interpolate int the set of points
-!! @ingroup pstat
-      subroutine pstat_interp
+!! @ingroup pstat2d
+      subroutine pstat2d_interp
       implicit none
 
       include 'SIZE'
       include 'GEOM'
       include 'FRAMELP'
-      include 'PSTATD'
+      include 'PSTAT2D'
 
       ! global data structures
       integer mid,mp,nekcomm,nekgroup,nekreal
@@ -1145,7 +1145,7 @@
 #endif
 !-----------------------------------------------------------------------
       ! read point position
-      call pstat_mfi_interp
+      call pstat2d_mfi_interp
 
       ! initialise interpolation tool
       tol     = 5e-13
@@ -1248,7 +1248,7 @@
       call fgslib_findpts_free(ifpts)
 
       ! write down interpolated values
-      call pstat_mfo_interp
+      call pstat2d_mfo_interp
 
 #undef DEBUG
       return
