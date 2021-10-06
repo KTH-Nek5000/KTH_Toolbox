@@ -562,7 +562,7 @@
          itmp = (il-1)*3
          call add4(pstat_runew(1,1,15+il),pstat_rutmp(1,1,itmp+1),
      $        pstat_rutmp(1,1,itmp+2),pstat_rutmp(1,1,itmp+3),nvec)
-         call cmult(pstat_rutmp(1,1,15+il),rtmp,nvec)
+         call cmult(pstat_runew(1,1,15+il),rtmp,nvec)
       enddo
 
       ! Derivatives of the triple-product terms
