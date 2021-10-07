@@ -21,7 +21,7 @@ fields. Details below.
 The following workflow is suggested to use the module:
 - Create a new case directory, and generate the geometry that corresponds to the same
 2D slice that is obtained when squashing the 3D geometry of your case across the
-statistically homogenous direction.
+statistically homogenous direction. Set the `ldimt` variable in the SIZE file for this case to 69.
 - Set up the `.usr` and `.par` and `makefile_usr.inc` files according to
  the examples herein. (See also the phill_PSTAT2D example case.) Compile the case.
 - Create a folder called DATA in the case directory.
