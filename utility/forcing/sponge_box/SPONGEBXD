@@ -21,7 +21,7 @@
 
 
 !     parameter section
-      real spng_str      !<  @var sponge strength
+      real spng_str      !<  @var maximum sponge strength
       integer spng_str_id
       real spng_wl(LDIM) !<  @var sponge width (left section; every dmension separately)
       integer spng_wl_id(LDIM)
@@ -31,17 +31,17 @@
       integer spng_dl_id(LDIM)
       real spng_dr(LDIM) !<  @var sponge drop/rise width (right section)
       integer spng_dr_id(LDIM)
-      
+
 !     sponge function
-      real spng_fun(LX1*LY1*LZ1*LELV)
+      real spng_fun(LX1*LY1*LZ1*LELV)  !< @var sponge strength
 
 !     reference velocity field
       real spng_vr(LX1*LY1*LZ1*LELV,LDIM)
 
 !     common block section
-      common /SPONGEI/ spng_id, spng_tmr_id, spng_sec_id, spng_str_id, 
+      common /SPONGEI/ spng_id, spng_tmr_id, spng_sec_id, spng_str_id,
      $ spng_wl_id, spng_wr_id, spng_dl_id, spng_dr_id
-      
+
       common /SPONGEL/ spng_ifinit
 
       common /SPONGER/ spng_str, spng_wl, spng_wr, spng_dl, spng_dr

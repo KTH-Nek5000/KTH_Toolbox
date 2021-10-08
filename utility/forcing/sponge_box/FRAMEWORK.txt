@@ -9,18 +9,21 @@
 @details
 Set of routines to apply sponge (fringe in periodic domains) for simple box mesh. It calculates a volume forcing
 \f[ \vec F = \lambda(x) \left( \vec U - \vec u\right),\f]
-with \f$ \lambda(x), \vec U\f$ and \f$ \vec u\f$ beeing non-negative sponge/fringe function, constant in time
-reference velocity field and current velocity field respectively. 1-dimensional sponge funcion is definde as
-\f[ \lambda(x) = \lambda_{max} *\left[S\left((x_{min} + \Delta_{wl} - x)/\Delta_{dl} \right) + 
-S\left((x - x_{max} + \Delta_{wr})/\Delta_{dr} \right) \right],\f]
+with \f$ \lambda(x), \vec U\f$ and \f$ \vec u\f$ being non-negative sponge/fringe function, constant in time
+reference velocity field and current velocity field respectively. 1-dimensional sponge function is defined as
+\f[ \lambda(x) = \lambda_{max} * \left[
+S\left((x_{min} - x) / \left(\Delta_{wl} - \Delta_{dl} \right)\right) +
+S\left((x - x_{max}) / \left(\Delta_{wr} - \Delta_{dr} \right)\right) \right],\f]
 where:
-- \f$ \lambda_{max} \f$ - sponge strenght,
+- \f$ x \f$ - position along the coordinate \f$ X,\,Y,\, \text{or}\ Z\f$,
+- \f$ \lambda_{max} \f$ - maximum sponge strength, see parameter strength or @ref spng_str,
+- \f$ \lambda \f$ - sponge strength @ref spng_fun,
 - \f$ S(x) \f$ - step function @ref math_stepf,
 - \f$ x_{min}, x_{max} \f$ - left and right box boundaries,
 - \f$ \Delta_{wl}, \Delta_{wr} \f$ - left and right sponge section width,
-- \f$ \Delta_{dl}, \Delta_{dr} \f$ - left and right sponge section drop/rise width.
+- \f$ \Delta_{dl}, \Delta_{dr} \f$ - left and right sponge section drop/rise width, the constant part.
 
-In our implementation each dimension is treated separately and the final 3-dimensional function takes a 
+In our implementation each dimension is treated separately and the final 3-dimensional function takes a
 maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta_{wr} \f$ can be set to zero.
 
 @mod_interface
@@ -36,7 +39,6 @@ maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta
       include 'SIZE'
       include 'NEKUSE'          ! FF[XYZ]
       include 'PARALLEL'        ! GLLEL
-      include 'SOLN'            ! V[XYZ]
 
       FFX = 0.0
       FFY = 0.0
@@ -63,7 +65,7 @@ maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta
       if (ISTEP.eq.NSTEPS.or.LASTEP.eq.1) then
          call frame_end
       endif
-      
+
       return
       end
 !======================================================================
@@ -85,17 +87,14 @@ maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta
       implicit none
 
       include 'SIZE'
+      include 'SOLN'            ! V[XYZ]
       include 'FRAMELP'
 
       ! local variables
-      integer nn
-      real vtmp(lx1*ly1*lz1*lelt,ldim)
-      common /CTMP1/ vtmp
 !-----------------------------------------------------------------------
-!     initialise modules
-      nn = lx1*ly1*lz1*lelt*ldim
-      call rzero(vtmp,nn)
-      call spng_init(vtmp(1,1),vtmp(1,2),vtmp(1,ndim))
+!     initialise sponge box module with reference velocities
+!     (in this case initial condition)
+      call spng_init(vx, vy, vz)
 
       return
       end subroutine
@@ -152,7 +151,7 @@ droprz = 0.0
 
 */
 #List of existing submodules
-SUBMODULES 
+SUBMODULES
 
 #List of conflicting submodules
 EXCLUSIVE
@@ -172,4 +171,4 @@ OBJECT spongebx.o
 
 #List of include files
 INCLUDE SPONGEBXD
- 
+
