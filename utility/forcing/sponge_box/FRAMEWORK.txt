@@ -21,7 +21,7 @@ where:
 - \f$ S(x) \f$ - step function @ref math_stepf,
 - \f$ x_{min}, x_{max} \f$ - left and right box boundaries,
 - \f$ \Delta_{wl}, \Delta_{wr} \f$ - left and right sponge section width,
-- \f$ \Delta_{dl}, \Delta_{dr} \f$ - left and right sponge section drop/rise width, the constant part.
+- \f$ \Delta_{dl}, \Delta_{dr} \f$ - left and right sponge section drop/rise width, where the strength gradually varies.
 
 In our implementation each dimension is treated separately and the final 3-dimensional function takes a
 maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta_{wr} \f$ can be set to zero.

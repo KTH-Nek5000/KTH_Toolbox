@@ -244,6 +244,21 @@
      $              spng_wr(il).lt.spng_dr(il)) then
                   call mntr_abort(spng_id,"Wrong sponge parameters")
                endif
+c
+c                        spng_fun
+c                        *********
+c
+c            bmin   xxmin_c         xxmax_c  bmax
+c              |     |  xxmin     xxmax |    |
+c              |_____|  |          |    |____|
+c            ^       \                 /
+c            |        \     x->       /
+c    spng_str|         \             /
+c            v          \___________/
+c              <-------->           <-------->
+c                  wl                   wr
+c                    <-->           <-->
+c                     dl             dr
 
                ! sponge beginning (rise at xmax; right)
                xxmax = bmax(il) - spng_wr(il)
