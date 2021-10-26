@@ -9,7 +9,7 @@
 @details
 Set of routines to apply sponge (fringe in periodic domains) for simple box mesh. It calculates a volume forcing
 \f[ \vec F = \lambda(x) \left( \vec U - \vec u\right),\f]
-with \f$ \lambda(x), \vec U\f$ and \f$ \vec u\f$ being non-negative sponge/fringe function, constant in time
+with \f$ \lambda(x) being non-negative sponge/fringe function, \vec U\f$ and \f$ \vec u\f$ being constant in time
 reference velocity field and current velocity field respectively. 1-dimensional sponge function is defined as
 \f[ \lambda(x) = \lambda_{max} * \left[
 S\left((x_{min} - x) / \left(\Delta_{wl} - \Delta_{dl} \right)\right) +
