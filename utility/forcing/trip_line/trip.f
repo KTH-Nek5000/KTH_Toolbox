@@ -237,9 +237,9 @@
       ! initialise random generator seed and number of time intervals
       do il=1,trip_nline
          trip_seed(il) = -32*il
+         trip_ntdt(il) = 1 - trip_nset_max
+         trip_ntdt_old(il) = trip_ntdt(il)
       enddo
-      trip_ntdt = 1 - trip_nset_max
-      trip_ntdt_old = trip_ntdt
       
       ! generate random phases (time independent and time dependent)
       call trip_rphs_get
@@ -547,7 +547,7 @@
       do il = 1, trip_nline
          itmp = int(time/trip_tdt(il))
          call bcast(itmp,ISIZE) ! just for safety
-         do kl= trip_ntdt+1, itmp
+         do kl= trip_ntdt(il)+1, itmp
             do jl= trip_nset_max,3,-1
                call copy(trip_rphs(1,jl,il),trip_rphs(1,jl-1,il),
      $              trip_nmode(il))
@@ -556,11 +556,10 @@
                trip_rphs(jl,2,il) = 2.0*pi*trip_ran2(il)
             enddo
          enddo
+         ! update time interval
+         trip_ntdt_old(il) = trip_ntdt(il)
+         trip_ntdt(il) = itmp
       enddo
-      
-      ! update time interval
-      trip_ntdt_old = trip_ntdt
-      trip_ntdt = itmp
 
 #ifdef DEBUG
       ! for testing
@@ -655,6 +654,7 @@
       integer il, jl, kl, ll
       integer istart
       real theta0, theta
+      logical ifntdt_dif
 
 #ifdef DEBUG
       character*3 str1, str2
@@ -693,7 +693,26 @@
          endif
       else
          ! reset only time dependent part if needed
-         if (trip_ntdt.ne.trip_ntdt_old) then
+         ifntdt_dif = .FALSE.
+         do il= 1, trip_nline
+            if (trip_ntdt(il).ne.trip_ntdt_old(il)) then
+               ifntdt_dif = .TRUE.
+               do jl= trip_nset_max,3,-1
+                  call copy(trip_frcs(1,jl,il),trip_frcs(1,jl-1,il),
+     $                 trip_npoint(il))
+               enddo
+               call rzero(trip_frcs(1,2,il),trip_npoint(il))
+               do jl= 1, trip_npoint(il)
+                  theta0 = 2*pi*trip_prj(jl,il)
+                  do kl= 1, trip_nmode(il)
+                     theta = theta0*kl
+                     trip_frcs(jl,2,il) = trip_frcs(jl,2,il) +
+     $                    sin(theta+trip_rphs(kl,2,il))
+                  enddo
+               enddo
+            endif
+         enddo
+         if (ifntdt_dif) then
 #ifdef TRIP_PR_RST
             ! reset projection space
             ! pressure
@@ -709,21 +728,6 @@
                if (IF3D) ivproj(2,3) = 0
             endif
 #endif
-            do il= 1, trip_nline
-               do jl= trip_nset_max,3,-1
-                  call copy(trip_frcs(1,jl,il),trip_frcs(1,jl-1,il),
-     $                 trip_npoint(il))
-               enddo
-               call rzero(trip_frcs(1,2,il),trip_npoint(il))
-               do jl= 1, trip_npoint(il)
-                  theta0 = 2*pi*trip_prj(jl,il)
-                  do kl= 1, trip_nmode(il)
-                     theta = theta0*kl
-                     trip_frcs(jl,2,il) = trip_frcs(jl,2,il) +
-     $                    sin(theta+trip_rphs(kl,2,il))
-                  enddo
-               enddo
-            enddo
          endif
       endif
       
@@ -739,7 +743,7 @@
       endif
       ! interpolation in time
       do il = 1, trip_nline
-         theta0= time/trip_tdt(il)-real(trip_ntdt)
+         theta0= time/trip_tdt(il)-real(trip_ntdt(il))
          if (theta0.gt.0.0) then
             theta0=theta0*theta0*(3.0-2.0*theta0)
             !theta0=theta0*theta0*theta0*(10.0+(6.0*theta0-15.0)*theta0)
