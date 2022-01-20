@@ -431,7 +431,7 @@
       call bcast(if_byte_sw,lsize)
 
       ! check dimension consistency
-      if (ldim.ne.ldiml) call mntr_check_abort(tsrs_id,
+      if (ldim.ne.ldiml) call mntr_abort(tsrs_id,
      $       'tsrs_mfi_points: Inconsisten dimension.')
 
       ! calculate point distribution; I assume it is post-processing
