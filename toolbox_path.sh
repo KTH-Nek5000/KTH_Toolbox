@@ -14,10 +14,8 @@ export POSTPR_SRC=${TOOLBOX_SRC}"/postprocessing"
 export TOOLS_SRC=${TOOLBOX_SRC}"/tools"
 export UTILITY_SRC=${TOOLBOX_SRC}"/utility"
 
-export COMM_SRC=${DRIVER_SRC}"/comm"
-TOOLBOX_INC=" -I"${COMM_SRC}
 export FRAME_SRC=${DRIVER_SRC}"/frame"
-TOOLBOX_INC+=" -I"${FRAME_SRC}
+TOOLBOX_INC=" -I"${FRAME_SRC}
 
 export MONITOR_SRC=${FRAME_SRC}"/monitor"
 TOOLBOX_INC+=" -I"${MONITOR_SRC}
@@ -54,6 +52,8 @@ export POWERIT_SRC=${TSTEPPER_SRC}"/powerit"
 TOOLBOX_INC+=" -I"${POWERIT_SRC}
 
 export BCND_SRC=${UTILITY_SRC}"/bcnd"
+export COMM_SRC=${UTILITY_SRC}"/comm"
+TOOLBOX_INC+=" -I"${COMM_SRC}
 export CONHT_SRC=${UTILITY_SRC}"/conht"
 TOOLBOX_INC+=" -I"${CONHT_SRC}
 export FORCING_SRC=${UTILITY_SRC}"/forcing"

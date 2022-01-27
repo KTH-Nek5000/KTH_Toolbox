@@ -2,7 +2,7 @@
 # Place for short description; doxygen style
 /**
 @defgroup comm_mpi   Comunication routines.
-@ingroup driver
+@ingroup utility
 
 @brief MPI communication wrappers.
 
