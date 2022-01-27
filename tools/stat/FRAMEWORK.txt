@@ -411,26 +411,3 @@ IOSTEP               = 50 # The output frequency, in time-steps, which also defi
 @endcode
 
 */
-#List of existing submodules
-SUBMODULES
-
-#List of conflicting submodules
-EXCLUSIVE
-
-#Default submodules
-DEFAULT
-
-#List of conflicting modules
-CONFLICTS
-
-#List of required modules
-REQUIRED driver/runparam \
-         io/io_tools \
-         io/checkpoint/chkpt_mstep \
-
-#List of object files
-OBJECT tsrs.o \
-       tsrs_IO.o
-
-#List of include files
-INCLUDE TSRSD

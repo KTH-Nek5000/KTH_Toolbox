@@ -253,24 +253,3 @@
 
 
 */
-#List of existing submodules
-SUBMODULES 
-
-#List of conflicting submodules
-EXCLUSIVE
-
-#Default submodules
-DEFAULT
-
-#List of conflicting modules
-CONFLICTS
-
-#List of required modules
-REQUIRED
-
-#List of object files
-OBJECT map2D.o
-
-#List of include files
-INCLUDE MAP2D
- 

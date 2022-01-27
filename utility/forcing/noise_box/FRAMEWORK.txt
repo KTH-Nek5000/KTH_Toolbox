@@ -106,25 +106,3 @@ boxmaxz = 0.0
 
 
 */
-#List of existing submodules
-SUBMODULES 
-
-#List of conflicting submodules
-EXCLUSIVE
-
-#Default submodules
-DEFAULT
-
-#List of conflicting modules
-CONFLICTS
-
-#List of required modules
-REQUIRED utility/math \
-         driver/runparam
-
-#List of object files
-OBJECT noisebx.o
-
-#List of include files
-INCLUDE NOISEBXD
- 

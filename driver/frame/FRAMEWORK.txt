@@ -97,25 +97,3 @@ export FRAMELOGL
 @endcode
 
 */
-#List of existing submodules
-SUBMODULES monitor \
-           runparam
-
-#List of conflicting submodules
-EXCLUSIVE
-
-#Default submodules
-DEFAULT monitor \
-        runparam
-
-#List of conflicting modules
-CONFLICTS
-
-#List of required modules
-REQUIRED io/io_tools
-
-#List of object files
-OBJECT frame.o
-
-#List of include files
-INCLUDE  FRAMELP

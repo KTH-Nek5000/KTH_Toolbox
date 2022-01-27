@@ -39,24 +39,3 @@
 @endcode
 
 */
-#List of existing submodules
-SUBMODULES
-
-#List of conflicting submodules
-EXCLUSIVE
-
-#Default submodules
-DEFAULT
-
-#List of conflicting modules
-CONFLICTS tools/tstepper/arn_arp
-
-#List of required modules
-REQUIRED io/io_tools \
-         io/checkpoint/mstep
-
-#List of object files
-OBJECT powerit.o
-
-#List of include files
-INCLUDE POWERITD

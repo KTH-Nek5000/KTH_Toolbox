@@ -151,25 +151,3 @@ droprz = 0.0
 
 
 */
-#List of existing submodules
-SUBMODULES 
-
-#List of conflicting submodules
-EXCLUSIVE
-
-#Default submodules
-DEFAULT
-
-#List of conflicting modules
-CONFLICTS
-
-#List of required modules
-REQUIRED utility/math \
-         driver/frame
-
-#List of object files
-OBJECT spongebx.o
-
-#List of include files
-INCLUDE SPONGEBXD
- 

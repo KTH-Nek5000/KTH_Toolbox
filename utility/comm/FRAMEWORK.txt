@@ -15,23 +15,3 @@ Set of subroutines to wrap MPI communication missing in Nek5000.
 -# @ref ibcastn
 
 */
-#List of existing submodules
-SUBMODULES 
-
-#List of conflicting submodules
-EXCLUSIVE 
-
-#Default submodules
-DEFAULT 
-
-#List of conflicting modules
-CONFLICTS 
-
-#List of required modules
-REQUIRED 
-
-#List of object files
-OBJECT comm_mpi_wrp.o
-
-#List of include files
-INCLUDE

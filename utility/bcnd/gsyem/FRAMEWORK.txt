@@ -170,26 +170,3 @@ famdirz01            = 0.0
 
 
 */
-#List of existing submodules
-SUBMODULES 
-
-#List of conflicting submodules
-EXCLUSIVE
-
-#Default submodules
-DEFAULT
-
-#List of conflicting modules
-CONFLICTS
-
-#List of required modules
-REQUIRED io/checkpoint/mstep \
-		 utility/math \
-         driver/runparam
-
-#List of object files
-OBJECT gSyEM.o
-
-#List of include files
-INCLUDE GSYEMD
- 

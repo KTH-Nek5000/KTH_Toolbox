@@ -74,25 +74,3 @@ This binary file in git is not good idea. Repalce with separate repository for P
 by sub.module.
 
 */
-#List of existing submodules
-SUBMODULES
-
-#List of conflicting submodules
-EXCLUSIVE
-
-#Default submodules
-DEFAULT
-
-#List of conflicting modules
-CONFLICTS tools/tstepper/powerit
-
-#List of required modules
-REQUIRED io/io_tools \
-         io/checkpoint/dummy
-
-#List of object files
-OBJECT arn_arp.o \
-       arn_arp_io.o
-
-#List of include files
-INCLUDE ARN_ARPD

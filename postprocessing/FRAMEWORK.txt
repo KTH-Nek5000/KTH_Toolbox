@@ -10,25 +10,3 @@
 This directory contains  a number of tools developed at KTH. 
 
 */
-#List of existing submodules
-SUBMODULES pstat2d \
-           psta3d
-
-#List of conflicting submodules
-EXCLUSIVE  pstat2d \
-           pstat3d
-
-#Default submodules
-DEFAULT
-
-#List of conflicting modules
-CONFLICTS
-
-#List of required modules
-REQUIRED
-
-#List of object files
-OBJECT
-
-#List of include files
-INCLUDE

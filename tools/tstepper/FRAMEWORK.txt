@@ -79,25 +79,3 @@ ifuzawa = T
 @endcode
 
 */
-#List of existing submodules
-SUBMODULES arnildi_arpack \
-           powerit
-
-#List of conflicting submodules
-EXCLUSIVE arn_arp \
-          powerit
-
-#Default submodules
-DEFAULT arn_arp
-
-#List of conflicting modules
-CONFLICTS
-
-#List of required modules
-REQUIRED driver/runparam
-                   
-#List of object files
-OBJECT time_stepper.o
-
-#List of include files
-INCLUDE TIME_STEPPERD

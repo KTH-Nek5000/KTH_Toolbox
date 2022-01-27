@@ -146,25 +146,3 @@ sfdreadchkpt = no
 @endcode
 
 */
-#List of existing submodules
-SUBMODULES
-
-#List of conflicting submodules
-EXCLUSIVE
-
-#Default submodules
-DEFAULT
-
-#List of conflicting modules
-CONFLICTS
-
-#List of required modules
-REQUIRED driver/runparam \
-         io/io_tools
-         io/checkpoint/chkpt_mstep
-
-#List of object files
-OBJECT sfd.o
-
-#List of include files
-INCLUDE SFDD

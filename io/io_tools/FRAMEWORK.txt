@@ -84,25 +84,3 @@ Set of I/O speciffic routines for toolbox
 @endcode
 
 */
-#List of existing submodules
-SUBMODULES
-
-#List of conflicting submodules
-EXCLUSIVE
-
-#Default submodules
-DEFAULT
-
-#List of conflicting modules
-CONFLICTS
-
-
-#List of required modules
-REQUIRED
-
-#List of object files
-OBJECT io_tools_block.o \
-       io_tools.o
-
-#List of include files
-INCLUDE IOTOOLD

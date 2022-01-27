@@ -10,26 +10,3 @@
 Set of forcing related routines covering e.g. sponges, fringes and purturbing solution with white noise.
 
 */
-#List of existing submodules
-SUBMODULES sponge_box \
-           noise_box  \
-           trip_line
-
-#List of conflicting submodules
-EXCLUSIVE
-
-#Default submodules
-DEFAULT
-
-#List of conflicting modules
-CONFLICTS
-
-#List of required modules
-REQUIRED
-
-#List of object files
-OBJECT
-
-#List of include files
-INCLUDE
- 

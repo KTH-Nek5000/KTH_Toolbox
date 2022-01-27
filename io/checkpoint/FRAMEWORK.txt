@@ -105,29 +105,3 @@ chkpFnumber = 1
 @endcode
 
 */
-#List of existing submodules
-SUBMODULES mstep \
-           sstep \
-           dummy
-
-#List of conflicting submodules
-EXCLUSIVE  mstep \
-           sstep \
-           dummy
-
-#Default submodules
-DEFAULT mstep
-
-#List of conflicting modules
-CONFLICTS
-
-#List of required modules
-REQUIRED driver/monitor  \
-         driver/runparam \
-         io/io_tools
-
-#List of object files
-OBJECT chkpoint.o
-
-#List of include files
-INCLUDE CHKPOINTD

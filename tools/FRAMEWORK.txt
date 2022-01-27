@@ -10,28 +10,3 @@
 This directory contains a number of tools developed at KTH. 
 
 */
-#List of existing submodules
-SUBMODULES tstepper \
-           baseflow \
-           stat \
-           tsrs
-
-#List of conflicting submodules
-EXCLUSIVE  tstepper \
-           baseflow \
-           stat
-
-#Default submodules
-DEFAULT
-
-#List of conflicting modules
-CONFLICTS
-
-#List of required modules
-REQUIRED
-
-#List of object files
-OBJECT
-
-#List of include files
-INCLUDE

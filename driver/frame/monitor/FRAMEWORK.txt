@@ -54,28 +54,3 @@ WallTime = 02:05
 @endcode
 
 */
-#List of existing submodules
-SUBMODULES 
-
-#List of conflicting submodules
-EXCLUSIVE
-
-#Default submodules
-DEFAULT
-
-#List of conflicting modules
-CONFLICTS
-
-#List of required modules
-REQUIRED
-
-#List of object files
-OBJECT mntrlog_block.o \
-       mntrlog.o
-       mntrtmr_block.o \
-       mntrtmr.o
-
-
-#List of include files
-INCLUDE MNTRLOGD \
-        MNTRTMRD
