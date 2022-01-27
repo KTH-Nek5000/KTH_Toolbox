@@ -1,1 +1,1 @@
-$(OBJDIR)/frame.o           :frame.f FRAMELP;                        $(F77) -c $(FL2) -I./ $< -o $@
+$(OBJDIR)/frame.o           :$(FRAME_SRC)/frame.f;                   $(F77) -c $(FL2) $< -o $@

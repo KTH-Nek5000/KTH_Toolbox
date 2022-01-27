@@ -1,1 +1,1 @@
-$(OBJDIR)/map2D.o           :map2D.f MAP2D FRAMELP;                  $(F77) -c $(FL2) -I./ $< -o $@
+$(OBJDIR)/map2D.o           :$(MAP2D_SRC)/map2D.f;                   $(F77) -c $(FL2) $< -o $@

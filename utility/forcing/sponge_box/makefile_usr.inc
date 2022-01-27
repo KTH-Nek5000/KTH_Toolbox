@@ -1,1 +1,1 @@
-$(OBJDIR)/spongebx.o        :spongebx.f SPONGEBXD;                   $(F77) -c $(FL2) -I./ $< -o $@
+$(OBJDIR)/spongebx.o        :$(SPONGE_BOX_SRC)/spongebx.f;           $(F77) -c $(FL2) $< -o $@

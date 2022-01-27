@@ -1,1 +1,1 @@
-$(OBJDIR)/noisebx.o         :noisebx.f NOISEBXD;                     $(F77) -c $(FL2) -I./ $< -o $@
+$(OBJDIR)/noisebx.o         :$(NOISE_BOX_SRC)/noisebx.f;             $(F77) -c $(FL2) $< -o $@

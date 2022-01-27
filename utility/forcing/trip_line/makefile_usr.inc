@@ -1,1 +1,1 @@
-$(OBJDIR)/trip.o            :trip.f TRIPD FRAMELP;                   $(F77) -c $(FL2) -I./ $< -o $@
+$(OBJDIR)/trip.o            :$(TRIP_LINE_SRC)/trip.f ./TRIPD;        $(F77) -c $(FL2) $< -o $@

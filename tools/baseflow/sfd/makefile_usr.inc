@@ -1,1 +1,1 @@
-$(OBJDIR)/sfd.o             :sfd.f SFDD FRAMELP;         $(F77) -c $(FL2) -I./ $< -o $@
+$(OBJDIR)/sfd.o             :$(SFD_SRC)/sfd.f;                       $(F77) -c $(FL2) $< -o $@
