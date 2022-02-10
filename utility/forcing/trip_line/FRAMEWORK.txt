@@ -6,37 +6,53 @@
 
 @brief Random volume force along the line
 
-@details Set of routines to generate random volume force along the line running in the spanwise direction of the doman to 
-mimic sand paper effect. Its aim is to introduce to the flow low amplitude random noise, that can be used to 
-study e.g. a stability of a boundary layer. This focing is applied only in the eliptical region along the line 
-defined by the smoothing lengths SMTHX and SMTHY and rotated counterclockwise by ROTA angle. This angel is used 
-as well to rotate the force (x- and y-components), so the forcing can be normal to the wall. 
+@details Set of routines to generate random volume force along the line defined by its starting and ending points.
+This tool can be used e.g. to mimic sand paper effect by setting a line running in a spanwise direction of the domain.
+Its aim is to introduce to the flow low amplitude random noise, that can be used to study e.g. a stability of a 
+boundary layer. 
+
+Each line can be declared as finate in size (streatching from the starting point to the ending on) or the infinite 
+one. The focing is applied only in the eliptical region along the line defined by the smoothing lengths SMTHX and 
+SMTHY and rotated counterclockwise by ROTA angle. This angel is used as well to rotate the force, so it can be e.g. 
+normal to the wall. In case of a finite length line the smoothing in the third direction SMTHZ is taken into account 
+at the line ending points as well. The forcing is always normal to the line and its direction is not changin along 
+the line. It is just forcing magnitude that fluctuates. As a line direction is specified by its starting and ending 
+points, to determine the forcing direction we define line's local coordinate system build of three versors VX, VY 
+and VZ, where VZ is by definition parallel to the line. To determine versors normal to the line we use va ector cross 
+product:
+\f[ VY = VZ \times VL,\f]
+where VL is a vrsor parallel to the physical y axis for VZ parallel to the physical x axis, and it is parallel to 
+the physical x axis otherwise. Finally 
+\f[ VX = VZ \times VY.\f]
+The last operation is rotetion of the local vresors VX and VY by ROTA angle along VZ versor. The forcing is always 
+directed along VY versor.
+
 The smoothing function is defined in the following way:
 \f{eqnarray*}{
     f_{smth}(r) = \left\{ \begin{array}{ll}
      exp\left(-r^2\right)*\left(1-r^2\right)^2  &\mbox{ if $r \leq 1.0$} \\
-     0 &\mbox{ if $x >  1.0$}
+     0 &\mbox{ if $r >  1.0$}
      \end{array} \right.
 \f}
 where
-\f[ r^2 = \left( {x_{rot} \over SMTHX} \right)^2 + \left( {y_{rot} \over SMTHY} \right)^2 \f],
-and
-\f{eqnarray*}{ 
-x_{rot} &=&  x_{tr}*cos(ROTA)+y_{tr}*sin(ROTA), \\
-y_{rot} &=& -x_{tr}*sin(ROTA)+y_{tr}*cos(ROTA). 
-\f}
-\f$x_{tr}\f$ and \f$y_{tr}\f$ are here the GLL point coordinates relative to the tripping line.
+\f[ r^2 = \left( {x_{loc} \over SMTHX} \right)^2 + \left( {y_{loc} \over SMTHY} \right)^2, \f]
+for an infinite line and the interior of the finite line, and
+\f[ r^2 = \left( {x_{loc} \over SMTHX} \right)^2 + \left( {y_{loc} \over SMTHY} \right)^2 + \left( {z_{lrel} \over SMTHZ} \right)^2 \f]
+for the finite line endings. \f$x_{loc}\f$ and \f$y_{loc}\f$ are the point coordinates in the line's locall coordinate 
+system, and \f$z_{lrel}\f$ is a third local coordinate relative to the corresponding line ending.
+
 However, the function with limitted support can be easily replaced with simple Gauss profile
 (see commented lines in @ref trip_1dprj and notice factor 4.0 in the Gauss function necessary to 
 make smoothing lenghts consistent with the original function).
 The tripping has both steady and unsteeady parts with amplitudes TIAMP and TDAMP respectively,
 and the forcing is given by:
  \f{eqnarray*}{ 
-f_x &=& -f_{smth}(r)*f(z,t)*sin(ROTA), \\
-f_y &=&  f_{smth}(r)*f(z,t)cos(ROTA), 
+f_x &=& f_{smth}(r)*f(z,t)*VY_x, \\
+f_y &=& f_{smth}(r)*f(z,t)*VY_y, \\
+f_z &=& f_{smth}(r)*f(z,t)*VY_z, 
 \f}
 where
-\f[ f(z,t) = TIAMP*g(z) + TDAMP*\left[ \left(1-b(t)\right)h^i(z) +  b(t)h^{i+1}(z) \right] \f],
+\f[ f(z,t) = TIAMP*g(z) + TDAMP*\left[ \left(1-b(t)\right)h^i(z) +  b(t)h^{i+1}(z) \right], \f]
 and 
 \f{eqnarray*}{
 i &=& int(t/TDT), \\
@@ -55,7 +71,7 @@ and is described in detail in @cite Schlatter2012.
 
 This tool can simulate number of lines with different set of parameters for each line. The maximal
 number of lines is given by trip_nline_max in TRIPD include file. In the same way maximal number of 
-Fouries modes per line is given by trip_nmode_max parameter. User havs to adjust values of these variables
+Fouries modes per line is given by trip_nmode_max parameter. User has to adjust values of these variables
 before compilation of the code.
 
 @mod_interface
@@ -66,6 +82,13 @@ before compilation of the code.
 -# @ref trip_update
 -# @ref trip_forcing
 -# @ref trip_reset
+
+@par
+@interface_reqr Interface required:
+-# multiple interfaces from [frame] (@ref frame), [runtime parameters] (@ref runparam) and [monitor] (@ref monitor) modules
+-# @ref math_rot3da from @ref math module
+-# @ref io_file_freeid from [Input/output] (@ref io) module (debuggin only)
+
 
 @mod_interface_example
 @code{.f}
@@ -99,9 +122,6 @@ before compilation of the code.
 !     monitor simulation
       call frame_monitor
 
-!     save/load files for full-restart
-      call chkpt_main
-
 !     for tripping
       call trip_update
 
@@ -122,7 +142,6 @@ before compilation of the code.
 !-----------------------------------------------------------------------
 !     register modules
       call io_register
-      call chkpt_register
       call trip_register
 
       return
@@ -137,7 +156,6 @@ before compilation of the code.
       include 'SOLN'
 !-----------------------------------------------------------------------
 !     initialise modules
-      call chkpt_init
       call trip_init
 
       return

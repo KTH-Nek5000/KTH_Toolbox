@@ -1,13 +1,9 @@
 !> @file trip.f
 !! @ingroup trip_line
-!! @brief Tripping function for AMR version of nek5000
-!! @note  This version uses developed framework parts. This is because
-!!   I'm in a hurry and I want to save some time writing the code. So
-!!   I reuse already tested code and focuse important parts. For the
-!!   same reason for now only lines parallel to z axis are considered. 
-!!   The tripping is based on a similar implementation in the SIMSON code
-!!   (Chevalier et al. 2007, KTH Mechanics), and is described in detail 
-!!   in the paper Schlatter & Örlü, JFM 2012, DOI 10.1017/jfm.2012.324.
+!! @brief Tripping function supporting conformal and AMR version of nek5000
+!! @details The tripping is based on a similar implementation in the
+!!   SIMSON code (Chevalier et al. 2007, KTH Mechanics), and is described
+!!   in detail in the paper Schlatter & Örlü, JFM 2012, DOI 10.1017/jfm.2012.324.
 !! @author Adam Peplinski
 !! @date May 03, 2018
 !=======================================================================
@@ -151,7 +147,8 @@
       logical ltmp
       character*20 ctmp
 
-      integer il, jl
+      integer il, jl, kl
+      real rtmpv(ldim)
 
       ! functions
       real dnekclock
@@ -199,29 +196,83 @@
          trip_tdt(il) = rtmp
       enddo
 
-      ! get sure z position of stating point is lower than ending point position
-      do il=1,trip_nline
-         if (trip_spos(ldim,il).gt.trip_epos(ldim,il)) then
-            do jl=1,LDIM
-               rtmp = trip_spos(jl,il)
-               trip_spos(jl,il) = trip_epos(jl,il)
-               trip_epos(jl,il) = rtmp
-            enddo
-         endif
-      enddo
+      ! check simulation dimension
+      if (.not.IF3D) call mntr_abort(trip_id,
+     $        '2D simulation is not supported.')
 
-      ! get inverse line lengths and smoothing radius
+      ! get line versor, inverse line lengths and scaled smoothing lengths
       do il=1,trip_nline
+         call mntr_logi(trip_id,lp_inf,'Line info; line nr: ',il)
          trip_ilngt(il) = 0.0
+
          do jl=1,LDIM
-            trip_ilngt(il) = trip_ilngt(il) + (trip_epos(jl,il)-
-     $           trip_spos(jl,il))**2
+            ! the last (third) versor is parallel to the line
+            trip_vrs(jl,ldim,il) = trip_epos(jl,il) - trip_spos(jl,il)
+            trip_ilngt(il) = trip_ilngt(il) + trip_vrs(jl,ldim,il)**2
          enddo
+         trip_ilngt(il) = sqrt(trip_ilngt(il))
+         call mntr_logr(trip_id,lp_inf,'Line length: ',trip_ilngt(il))
          if (trip_ilngt(il).gt.0.0) then
-            trip_ilngt(il) = 1.0/sqrt(trip_ilngt(il))
+            trip_ilngt(il) = 1.0/trip_ilngt(il)
+            do jl=1,LDIM
+               trip_vrs(jl,ldim,il) = trip_vrs(jl,ldim,il)*
+     $            trip_ilngt(il)
+            enddo
          else
-            trip_ilngt(il) = 1.0
+            call mntr_abort(trip_id,
+     $        'Line with zero lenght is not supported.')
          endif
+         ! the rest of versors given by cross product starting with the
+         ! second versor
+         call rzero(rtmpv,ldim)
+         ! the first versor guess depends on the last versor coordinates
+         if (trip_vrs(1,ldim,il).lt.0.95) then
+            rtmpv(1) = 1.0
+         else
+            rtmpv(2) = 1.0
+         endif
+         ! the second versor
+         call cross(trip_vrs(1,2,il),trip_vrs(1,ldim,il),rtmpv)
+         ! the first versor
+         call cross(trip_vrs(1,1,il),trip_vrs(1,2,il),
+     $              trip_vrs(1,ldim,il))
+         ! correct versor length
+         do jl = 1, ldim
+            rtmp = 0.0
+            do kl = 1, ldim
+               rtmp = rtmp + trip_vrs(kl,jl,il)*trip_vrs(kl,jl,il)
+            end do
+            if (rtmp.gt.0.0) then
+               rtmp = 1.0/sqrt(rtmp)
+               do kl = 1, ldim
+                  trip_vrs(kl,jl,il) = trip_vrs(kl,jl,il)*rtmp
+               end do
+            else
+               call mntr_abort(trip_id,
+     $               'Line versor with zero lenght.')
+            end if
+         end do
+         ! rotate the first and second versors along the third versor
+         do jl = 1, 2
+            call math_rot3da(rtmpv,trip_vrs(1,jl,il),trip_vrs(1,ldim,il)
+     $       ,trip_rota(il))
+            do kl = 1, ldim
+               trip_vrs(kl,jl,il) = rtmpv(kl)
+            end do
+         end do
+
+         ! stump the log
+         do jl = 1, ldim
+            call mntr_logi(trip_id,lp_inf,'Line versor: ',jl)
+            call mntr_logrv(trip_id,lp_inf,'Coordinates:',
+     $           trip_vrs(1,jl,il),ldim)
+         end do
+
+         ! rescale smoothing lengths
+         do jl=1,LDIM
+           trip_smth(jl,il) = trip_smth(jl,il)*trip_ilngt(il)
+         enddo
+         ! get inverse smoothing lenght
          do jl=1,LDIM
             if (trip_smth(jl,il).gt.0.0) then
                trip_ismth(jl,il) = 1.0/trip_smth(jl,il)
@@ -329,8 +380,10 @@
             ipos = trip_map(ix,iy,iz,iel,il)
             ffn = trip_ftrp(ipos,il)*ffn
 
-            ffx = ffx - ffn*sin(trip_rota(il))
-            ffy = ffy + ffn*cos(trip_rota(il))
+            ! I assume forcing direction is given by the second versor
+            ffx = ffx + ffn*trip_vrs(1,2,il)
+            ffy = ffy + ffn*trip_vrs(2,2,il)
+            ffz = ffz + ffn*trip_vrs(ldim,2,il)
          endif
       enddo
 
@@ -369,8 +422,10 @@
 !=======================================================================
 !> @brief Get 1D projection, array mapping and forcing smoothing
 !! @ingroup trip_line
-!! @details This routine is just a simple version supporting only lines
-!!   paralles to z axis. In future it can be generalised.
+!! @details This routine supports straight lines given by their starting
+!!    and ending points. Additional flagg allows to introuduce forcing
+!!    periodicity or contain it between starting and ending points + smooting
+!!    lenght in z
 !! @remark This routine uses global scratch space \a CTMP0 and \a CTMP1
       subroutine trip_1dprj()
       implicit none
@@ -383,128 +438,109 @@
       ! global memory access
       real lcoord(LX1*LY1*LZ1*LELT)
       common /CTMP0/ lcoord
-      integer lmap(LX1*LY1*LZ1*LELT)
-      common /CTMP1/ lmap
+      integer lmap(LX1*LY1*LZ1*LELT), lmap_el(4,LX1*LY1*LZ1*LELT)
+      common /CTMP1/ lmap, lmap_el
 
       ! local variables
-      integer npxy, npel, nptot, itmp, jtmp, ktmp, eltmp, istart
-      integer il, jl
-      real xl, yl, zl, xr, yr, rota, rtmp, ptmp, epsl
+      integer nptot, itmp
+      integer il, jl, kl, ll, ml, nl
+      real rota, rtmp, epsl
       parameter (epsl = 1.0e-10)
+      real rtmpv(ldim), rtmpc(ldim)
+      ! functions
+      real dot
 !-----------------------------------------------------------------------
-      npxy = NX1*NY1
-      npel = npxy*NZ1
-      nptot = npel*NELV
+      nptot = NX1*NY1*NZ1*NELV
       
       ! for each line
       do il=1,trip_nline
          ! reset mapping array
          call ifill(trip_map(1,1,1,1,il),-1,nptot)
-
-         ! Get coordinates and sort them
-         call copy(lcoord,zm1,nptot)
-         call sort(lcoord,lmap,nptot)
-
-         ! if we do not extend a line exclude points below line start (z coordinate matters only)
-         ! this cannot be mixed with Gauss profile
-         istart = 1
-         if (.not.trip_lext(il)) then
-            do jl=1,nptot
-               if (lcoord(jl).lt.
-     $              (trip_spos(ldim,il)-3.0*trip_smth(ldim,il))) then
-                  istart = istart+1
-               else
-                  exit
-               endif
-            enddo
-         endif
-
-         ! find unique entrances and provide mapping
-         trip_npoint(il) = 1
-         trip_prj(trip_npoint(il),il) = lcoord(istart)
-         itmp = lmap(istart)-1
-         eltmp = itmp/npel + 1
-         itmp = itmp - npel*(eltmp-1)
-         ktmp = itmp/npxy + 1
-         itmp = itmp - npxy*(ktmp-1)
-         jtmp = itmp/nx1 + 1
-         itmp = itmp - nx1*(jtmp-1) + 1
-         trip_map(itmp,jtmp,ktmp,eltmp,il) = trip_npoint(il)
-         do jl=istart+1,nptot
-            ! if line is not extended finish at proper position
-            if (.not.trip_lext(il).and.(lcoord(jl).gt.
-     $           (trip_epos(ldim,il)+3.0*trip_smth(ldim,il)))) exit
-
-            if((lcoord(jl)-trip_prj(trip_npoint(il),il)).gt.
-     $           max(epsl,abs(epsl*lcoord(jl)))) then
-               trip_npoint(il) = trip_npoint(il) + 1
-               trip_prj(trip_npoint(il),il) = lcoord(jl)
-            endif
-
-            itmp = lmap(jl)-1
-            eltmp = itmp/npel + 1
-            itmp = itmp - npel*(eltmp-1)
-            ktmp = itmp/npxy + 1
-            itmp = itmp - npxy*(ktmp-1)
-            jtmp = itmp/nx1 + 1
-            itmp = itmp - nx1*(jtmp-1) + 1
-            trip_map(itmp,jtmp,ktmp,eltmp,il) = trip_npoint(il)
-         enddo
-             
-         ! rescale 1D array
-         do jl=1,trip_npoint(il)
-            trip_prj(jl,il) = (trip_prj(jl,il) - trip_spos(ldim,il))
-     $           *trip_ilngt(il)
-         enddo
-         
-         ! get smoothing profile
-         rota = trip_rota(il)
+         ! initialise number of points per line
+         trip_npoint(il) = 0
          ! initialize smoothing factor
          call rzero(trip_fsmth(1,1,1,1,il),nptot)
-         
-         do jl=1,nptot
-            itmp = jl-1
-            eltmp = itmp/npel + 1
-            itmp = itmp - npel*(eltmp-1)
-            ktmp = itmp/npxy + 1
-            itmp = itmp - npxy*(ktmp-1)
-            jtmp = itmp/nx1 + 1
-            itmp = itmp - nx1*(jtmp-1) + 1
+         ! initialize projected point position
+         call rzero(trip_prj(1,il),nptot)
 
-            ! take only mapped points
-            istart = trip_map(itmp,jtmp,ktmp,eltmp,il)
-            if (istart.gt.0) then
+         ! Projection onto the line
+         ! count points on the line
+         itmp = 0
+         do jl = 1, nelv
+            do kl = 1, lz1
+               do ll = 1, ly1
+                  do ml = 1, lx1
+                     ! get point position relative to the line start
+                     rtmpv(1) = xm1(ml,ll,kl,jl)-trip_spos(1,il)
+                     rtmpv(2) = ym1(ml,ll,kl,jl)-trip_spos(2,il)
+                     rtmpv(ldim) = zm1(ml,ll,kl,jl)-trip_spos(ldim,il)
+                     ! get point coordinates in the local line system
+                     do nl = 1, ldim
+                        rtmpc(nl) = dot(rtmpv,trip_vrs(1,nl,il),ldim)
+                        rtmpc(nl) = rtmpc(nl)*trip_ilngt(il)
+                     end do
+                     ! distance from the line
+                     ! 2D
+                     rtmp = (rtmpc(1)*trip_ismth(1,il))**2+
+     $                      (rtmpc(2)*trip_ismth(2,il))**2
+                     ! do we extend a line beyond its ends
+                     if (.not.trip_lext(il)) then
+                        if (rtmpc(ldim).lt.0.0) then
+                           rtmp = rtmp +
+     $                            (rtmpc(ldim)*trip_ismth(ldim,il))**2
+                        elseif (rtmpc(ldim).gt.1.0) then
+                           rtmp = rtmp +
+     $                      ((rtmpc(ldim)-1.0)*trip_ismth(ldim,il))**2
+                        end if
+                     end if
 
-               ! rotation
-               xl = xm1(itmp,jtmp,ktmp,eltmp)-trip_spos(1,il)
-               yl = ym1(itmp,jtmp,ktmp,eltmp)-trip_spos(2,il)
+                     ! get smoothing profile
+                     ! Gauss; cannot be used with lines not extended beyond their ending points
+                     !trip_fsmth(itmp,jtmp,ktmp,eltmp,il) = exp(-4.0*rtmp)
+                     ! limited support
+                     if (rtmp.lt.1.0) then
+                        trip_fsmth(ml,ll,kl,jl,il) =
+     $                       exp(-rtmp)*(1-rtmp)**2
+                        ! add the point to the list
+                        itmp = itmp + 1
+                        ! save data
+                        ! coordinate along the line in line length unit
+                        lcoord(itmp) = rtmpc(ldim)
+                        ! point position
+                        lmap_el(1,itmp) = jl
+                        lmap_el(2,itmp) = kl
+                        lmap_el(3,itmp) = ll
+                        lmap_el(4,itmp) = ml
+                     else
+                        trip_fsmth(ml,ll,kl,jl,il) = 0.0
+                     endif
+                  end do
+               end do
+            end do
+         end do
 
-               xr = xl*cos(rota)+yl*sin(rota)
-               yr = -xl*sin(rota)+yl*cos(rota)
+         if (itmp.ge.1) then
+            ! point sorting acording to the last coordinate
+            call sort(lcoord,lmap,itmp)
 
-               rtmp = (xr*trip_ismth(1,il))**2+(yr*trip_ismth(2,il))**2
-               ! do we extend a line beyond its ends
-               if (.not.trip_lext(il)) then
-                  if (trip_prj(istart,il).lt.0.0) then
-                     zl = zm1(itmp,jtmp,ktmp,eltmp)-trip_spos(ldim,il)
-                     rtmp = rtmp+(zl*trip_ismth(ldim,il))**2
-                  elseif(trip_prj(istart,il).gt.1.0) then
-                     zl = zm1(itmp,jtmp,ktmp,eltmp)-trip_epos(ldim,il)
-                     rtmp = rtmp+(zl*trip_ismth(ldim,il))**2
-                  endif
+            ! identify unique points
+            trip_npoint(il) = 1
+            trip_prj(trip_npoint(il),il) = lcoord(1)
+            ! generate mapping
+            trip_map(lmap_el(4,1),lmap_el(3,1),
+     $          lmap_el(2,1),lmap_el(1,1),il) = trip_npoint(il)
+            do jl = 2, itmp
+               ! compare positions along the line
+               if((lcoord(jl)-trip_prj(trip_npoint(il),il)).gt.
+     $              max(epsl,abs(epsl*lcoord(jl)))) then
+                  trip_npoint(il) = trip_npoint(il) + 1
+                  trip_prj(trip_npoint(il),il) = lcoord(jl)
                endif
-               ! Gauss; cannot be used with lines not extended beyond their ending points
-               !trip_fsmth(itmp,jtmp,ktmp,eltmp,il) = exp(-4.0*rtmp)
-               ! limited support
-               if (rtmp.lt.1.0) then
-                  trip_fsmth(itmp,jtmp,ktmp,eltmp,il) =
-     $                 exp(-rtmp)*(1-rtmp)**2
-               else
-                  trip_fsmth(itmp,jtmp,ktmp,eltmp,il) = 0.0
-               endif
-            endif
-
-         enddo
+               ! generate mapping
+               trip_map(lmap_el(4,jl),lmap_el(3,jl),
+     $          lmap_el(2,jl),lmap_el(1,jl),il) = trip_npoint(il)
+            end do
+         end if
       enddo
 
       return

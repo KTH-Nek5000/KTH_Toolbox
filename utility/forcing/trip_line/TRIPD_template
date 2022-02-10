@@ -22,9 +22,9 @@
 
 !     max number of lines and Fourier modes
       integer trip_nline_max
-      parameter (trip_nline_max=2)
+      parameter (trip_nline_max=2) ! CASE SPECIFIC
       integer trip_nmode_max
-      parameter (trip_nmode_max=500)
+      parameter (trip_nmode_max=500) ! CASE SPECIFIC
 !     max number of random phase sets stored; 1- time independent, 2, 3 and 4 - time dependent
 !     I keep two old random pahase sets to get correct restart after AMR refinement
       integer trip_nset_max
@@ -76,6 +76,9 @@
 !     number of tripping time intervals
       integer trip_ntdt(trip_nline_max), trip_ntdt_old(trip_nline_max)
       
+!     versor system defined for each tripping line
+      real trip_vrs(ldim,ldim,trip_nline_max)
+      
 !     set of random phases (static, current and prevoious)
       real trip_rphs(trip_nmode_max,trip_nset_max,trip_nline_max)
 
@@ -94,6 +97,7 @@
 
       common /tripr/ trip_tiamp, trip_tdamp, trip_tdt, trip_spos,
      $     trip_epos, trip_smth, trip_rota, trip_ilngt, trip_ismth,
-     $     trip_prj, trip_fsmth, trip_rphs, trip_frcs, trip_ftrp
+     $     trip_prj, trip_fsmth, trip_vrs, trip_rphs, trip_frcs, 
+     $     trip_ftrp
 
       common /tripl/ trip_ifinit, trip_lext
