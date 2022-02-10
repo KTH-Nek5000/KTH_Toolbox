@@ -27,6 +27,7 @@ dynamical databases.
 -# @ref mntr_log_local
 -# @ref mntr_logi
 -# @ref mntr_logr
+-# @ref mntr_logrv
 -# @ref mntr_logl
 -# @ref mntr_warn
 -# @ref mntr_error

@@ -7,7 +7,7 @@
 @brief Driver routines for toolboxes
 
 @details 
-Driver module provides most fundamental services that can be shared by a number of tools related e.g. 
-to runtime parameters or global communication.
+Driver module provides most fundamental services that can be shared by most of the tools 
+providing e.g. framowork databases and interfaces for timing and logging.
 
 */

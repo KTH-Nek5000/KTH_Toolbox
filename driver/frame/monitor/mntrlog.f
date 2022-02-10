@@ -721,6 +721,34 @@
       return
       end subroutine
 !=======================================================================
+!> @brief Write log message adding real vector of length n
+!! @ingroup monitor
+!! @param[in] mid       module id
+!! @param[in] priority  log priority
+!! @param[in] logs      log body
+!! @param[in] rvarv     real vector
+!! @param[in] rvarn     vector length
+      subroutine mntr_logrv(mid,priority,logs,rvarv,rvarn)
+      implicit none
+
+      ! argument list
+      integer mid,priority,rvarn
+      character*(*) logs
+      real rvarv(rvarn)
+
+      ! local variables
+      integer il
+      character*20 str
+!-----------------------------------------------------------------------
+      call mntr_log(mid,priority,trim(logs))
+      do il = 1, rvarn
+         write(str,'(E15.8)') rvarv(il)
+         call mntr_log(mid,priority,'    '//trim(str))
+      end do
+
+      return
+      end subroutine
+!=======================================================================
 !> @brief Write log message adding single logical
 !! @ingroup monitor
 !! @param[in] mid       module id
