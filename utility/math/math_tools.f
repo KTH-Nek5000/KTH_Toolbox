@@ -325,6 +325,7 @@
 !! @param[in]  vi     input vector
 !! @param[in]  va     rotation axis
 !! @param[in]  an     rotation angle
+!! @todo Add check if (vi == va) => vo = vi
       subroutine math_rot3da(vo,vi,va,an)
       implicit none
 
