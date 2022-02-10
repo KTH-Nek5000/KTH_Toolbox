@@ -1,0 +1,3 @@
+[_RUNPAR]               # Runtime parameter section for rprm module
+PARFWRITE            = no                     # Do we write runtime parameter file
+PARFNAME             = outparfile             # Runtime parameter file name for output (without .par)

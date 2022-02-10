@@ -12,15 +12,17 @@
 @interface_list Interface provided:
 -# @ref chkpt_register
 -# @ref chkpt_init
+-# @ref chkpt_is_initialised
 -# @ref chkpt_main
 -# @ref chkpt_get_fset
 
 @par
 @interface_reqr Interface required:
--# chkpts_register
--# chkpts_init
--# chkpts_read
--# chkpts_write
+-# multiple interfaces from [frame] (@ref frame), [runtime parameters] (@ref runparam) and [monitor] (@ref monitor) modules
+-# (\a chkpts_register); provided by submodule
+-# (\a chkpts_init); provided by submodule
+-# (\a chkpts_read); provided by submodule
+-# (\a chkpts_write); provided by submodule
 
 @mod_interface_example
 @code{.f}
@@ -55,7 +57,6 @@
       include 'FRAMELP'
 !-----------------------------------------------------------------------
 !     register modules
-      call io_register
       call chkpt_register
 
       return

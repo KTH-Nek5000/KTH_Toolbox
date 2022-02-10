@@ -9,7 +9,12 @@
 @details 
 Monitor module provides basic services allowing to monitor tooboxes during the simulation.
 Its basic tasks are module registration, timing and message logging which is done by building
-dynamical databases.
+dynamical databases. Maximun number of registered modules and timers are defned by (\a mntr_id_max)
+and (\a mntr_tmr_id_max) parameters in MNTRLOGD and MNTRTMRD include files, respectively. 
+Logging verbosity can be set using FRAMELP include file provided by [framework] (@ref frame) module.
+
+This module is automatically registered by [framework] (@ref frame) and should not be registered 
+inside (\a frame_usr_register).
 
 @mod_interface
 @interface_list Interface provided:
@@ -51,7 +56,7 @@ dynamical databases.
 [_MONITOR]
 LogLevel = 4
 IfTimDscr = no
-WallTime = 02:05
+WallTime = 00:05
 @endcode
 
 */

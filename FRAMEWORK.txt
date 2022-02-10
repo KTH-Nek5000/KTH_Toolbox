@@ -12,7 +12,7 @@ Files are grouped by tasks and placed in a tree structure, where the parent dire
 perform some operations and can define tasks and interfaces that have to be provided by their 
 subdirectories (submodules). This structure can be repeated recursively with submodules becoming
 parent modules for next level structures. The top level directories are related to the main services 
-that have to be provided for toolboxes. An examplary framework structure is presented in the figure.
+that have to be provided for toolboxes. An exemplary framework structure is presented in the figure.
 
 @image html framework.png Examplary framework structure.
 
@@ -25,7 +25,10 @@ Each module has to contain:
 - FRAMEWORK.txt -module description
 - makefile_usr.inc - compilation rules
 - source code
-- optionally, an example of \a setup.par including corresponding runtime parameter section
+- optionally
+   + example.par including corresponding runtime parameter section
+   + example.usr including example of required user defined interfaces (modiffication required)
+   + more detailed documentation
 
 Dependences between modules are described in FRAMEWORK.txt (present in almost every directory) including:
 - documentation section written in a form of doxygen C comment

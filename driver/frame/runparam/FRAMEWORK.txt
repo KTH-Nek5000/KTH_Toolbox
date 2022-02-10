@@ -7,7 +7,12 @@
 @brief Routines related to module's runtime parameters.
 
 @details
-This module builds a global parameter database for all registered tools.
+This module builds a global parameter database for all registered tools. Maximun number of 
+registered runtime parameters and runtime parameter sections are defned by (\a rprm_par_id_max)
+and (\a rprm_sec_id_max) parameters in RPRMD include files.
+
+This module is automatically registered by [framework] (@ref frame) and should not be registered 
+inside (\a frame_usr_register).
 
 @mod_interface
 @interface_list Interface provided:

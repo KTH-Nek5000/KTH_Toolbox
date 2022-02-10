@@ -1,0 +1,37 @@
+!=======================================================================
+!> @brief Register user specified modules
+      subroutine frame_usr_register
+      implicit none
+
+      include 'SIZE'
+      include 'FRAMELP'
+!-----------------------------------------------------------------------
+!     register modules
+
+      return
+      end subroutine
+!======================================================================
+!> @brief Initialise user specified modules
+      subroutine frame_usr_init
+      implicit none
+
+      include 'SIZE'
+      include 'FRAMELP'
+!-----------------------------------------------------------------------
+!     initialise modules
+
+      return
+      end subroutine
+!======================================================================
+!> @brief Finalise user specified modules
+      subroutine frame_usr_end
+      implicit none
+
+      include 'SIZE'
+      include 'FRAMELP'
+!-----------------------------------------------------------------------
+!     finalise modules
+      
+      return
+      end subroutine
+!======================================================================
