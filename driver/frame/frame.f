@@ -35,19 +35,20 @@
 
       ! register backbone modules na runtime parameters
       call mntr_register_mod(log_thr)
-      call rprm_register
-      call mntr_register_par
+      call rprm_register()
+      call mntr_register_par()
+      call io_register()
 
       ! regisred user specified moduels
       call frame_usr_register
 
       ! get runtime parameters from Nek5000 dictionary
-      call rprm_dict_get
-      call mntr_init
-      call rprm_init
+      call rprm_dict_get()
+      call mntr_init()
+      call rprm_init()
 
       ! initialise user specified modules
-      call frame_usr_init
+      call frame_usr_init()
 
       return
       end subroutine
