@@ -107,7 +107,6 @@ Post-processing of the produced fields can also be performed with the
       include 'FRAMELP'
 !-----------------------------------------------------------------------
       ! register modules
-      call io_register
       call chkpt_register
       call stat_register
 

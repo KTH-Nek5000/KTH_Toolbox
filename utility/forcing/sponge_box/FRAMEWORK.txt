@@ -9,16 +9,19 @@
 @details
 Set of routines to apply sponge (fringe in periodic domains) for simple box mesh. It calculates a volume forcing
 \f[ \vec F = \lambda(x) \left( \vec U - \vec u\right),\f]
-with \f$ \lambda(x), \vec U\f$ and \f$ \vec u\f$ beeing non-negative sponge/fringe function, constant in time
-reference velocity field and current velocity field respectively. 1-dimensional sponge funcion is definde as
-\f[ \lambda(x) = \lambda_{max} *\left[S\left((x_{min} + \Delta_{wl} - x)/\Delta_{dl} \right) + 
-S\left((x - x_{max} + \Delta_{wr})/\Delta_{dr} \right) \right],\f]
+with \f$ \lambda(x) \f$ being non-negative sponge/fringe function, \f$ \vec U\f$ and \f$ \vec u\f$ being constant in time
+reference velocity field and current velocity field respectively. 1-dimensional sponge function is defined as
+\f[ \lambda(x) = \lambda_{max} * \left[
+S\left((x_{min} - x) / \left(\Delta_{wl} - \Delta_{dl} \right)\right) +
+S\left((x - x_{max}) / \left(\Delta_{wr} - \Delta_{dr} \right)\right) \right],\f]
 where:
-- \f$ \lambda_{max} \f$ - sponge strenght,
+- \f$ x \f$ - position along the coordinate \f$X\f$, \f$Y\f$ or \f$Z\f$,
+- \f$ \lambda_{max} \f$ - maximum sponge strength, see parameter  spng_str in SPONGEBXD,
+- \f$ \lambda \f$ - sponge strength, see array spng_fun in SPONGEBXD,
 - \f$ S(x) \f$ - step function @ref math_stepf,
 - \f$ x_{min}, x_{max} \f$ - left and right box boundaries,
 - \f$ \Delta_{wl}, \Delta_{wr} \f$ - left and right sponge section width,
-- \f$ \Delta_{dl}, \Delta_{dr} \f$ - left and right sponge section drop/rise width.
+- \f$ \Delta_{dl}, \Delta_{dr} \f$ - left and right sponge section drop/rise width, where the strength gradually varies.
 
 In our implementation each dimension is treated separately and the final 3-dimensional function takes a 
 maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta_{wr} \f$ can be set to zero.
@@ -30,13 +33,16 @@ maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta
 -# @ref spng_forcing
 -# @ref spng_is_initialised
 
+@par
+@interface_reqr Interface required:
+-# multiple interfaces from [runtime parameters] (@ref runparam) and [monitor] (@ref monitor) modules
+
+
 @mod_interface_example
 @code{.f}
       subroutine userf  (ix,iy,iz,ieg)
       include 'SIZE'
       include 'NEKUSE'          ! FF[XYZ]
-      include 'PARALLEL'        ! GLLEL
-      include 'SOLN'            ! V[XYZ]
 
       FFX = 0.0
       FFY = 0.0
@@ -63,7 +69,7 @@ maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta
       if (ISTEP.eq.NSTEPS.or.LASTEP.eq.1) then
          call frame_end
       endif
-      
+
       return
       end
 !======================================================================
@@ -85,17 +91,13 @@ maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta
       implicit none
 
       include 'SIZE'
+      include 'SOLN'
       include 'FRAMELP'
-
-      ! local variables
-      integer nn
-      real vtmp(lx1*ly1*lz1*lelt,ldim)
-      common /CTMP1/ vtmp
 !-----------------------------------------------------------------------
 !     initialise modules
-      nn = lx1*ly1*lz1*lelt*ldim
-      call rzero(vtmp,nn)
-      call spng_init(vtmp(1,1),vtmp(1,2),vtmp(1,ndim))
+!     initialise sponge box module with reference velocities
+!     (in this case initial condition)
+      call spng_init(vx, vy, vz)
 
       return
       end subroutine
@@ -111,6 +113,7 @@ maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta
       return
       end subroutine
 !======================================================================
+
 @endcode
 
 @mod_param
@@ -132,22 +135,6 @@ maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta
 |spng_dr(3) | real | _spongebx:droprz | 0.0 | sponge right drop/rise section width; dimension Z |
 
 @mod_param_example
-@code{.txt}
-[_SPONGEBX]
-strength = 1.0
-widthlx = 4.0
-widthly = 0.0
-widthlz = 0.0
-widthrx = 4.0
-widthry = 0.0
-widthrz = 0.0
-droplx = 2.0
-droply = 0.0
-droplz = 0.0
-droprx = 2.0
-dropry = 0.0
-droprz = 0.0
-@endcode
-
+@include Toolbox/utility/forcing/sponge_box/example.par
 
 */

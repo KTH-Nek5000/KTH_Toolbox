@@ -68,42 +68,7 @@ export FRAMELOGL
       return
       end
 !======================================================================
-!> @brief Register user specified modules; called by frame_start
-      subroutine frame_usr_register
-      implicit none
-
-      include 'SIZE'
-      include 'FRAMELP'
-!-----------------------------------------------------------------------
-!     place for module registration
-
-      return
-      end subroutine
-!======================================================================
-!> @brief Initialise user specified modules; called by frame_start
-      subroutine frame_usr_init
-      implicit none
-
-      include 'SIZE'
-      include 'FRAMELP'
-!-----------------------------------------------------------------------
-!     place for module initialisation
-
-      return
-      end subroutine
-!======================================================================
-!> @brief Finalise user specified modules; called by frame_start
-      subroutine frame_usr_end
-      implicit none
-
-      include 'SIZE'
-      include 'FRAMELP'
-!-----------------------------------------------------------------------
-!     place for module finalisation
-      
-      return
-      end subroutine
-!======================================================================
 @endcode
+@include Toolbox/driver/frame/example.usr
 
 */

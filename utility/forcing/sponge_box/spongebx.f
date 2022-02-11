@@ -227,6 +227,21 @@
       ! zero spng_fun
       call rzero(spng_fun,ntot)
 
+!
+!                        spng_fun
+!                        *********
+!
+!            bmin   xxmin_c         xxmax_c  bmax
+!              |     |  xxmin     xxmax |    |
+!              |_____|  |          |    |____|
+!            ^       \                 /
+!            |        \     x->       /
+!    spng_str|         \             /
+!            v          \___________/
+!              <-------->           <-------->
+!                  wl                   wr
+!                    <-->           <-->
+!                     dl             dr
 
       if(spng_str.gt.0.0) then
          call mntr_log(spng_id,lp_inf,"Sponge turned on")

@@ -22,13 +22,13 @@
 
 !     max number of:
       integer gsem_nfam_max     ! bc families
-      parameter (gsem_nfam_max=1)
+      parameter (gsem_nfam_max=1) ! CASE SPECIFIC
       integer gsem_neddy_max    ! eddies per family
-      parameter (gsem_neddy_max=10000)
+      parameter (gsem_neddy_max=10000) ! CASE SPECIFIC
       integer gsem_npoint_max   ! point number per family profile (initialisation only)
-      parameter (gsem_npoint_max=500)
+      parameter (gsem_npoint_max=500) ! CASE SPECIFIC
       integer gsem_edge_max     ! max number of edges per family (initialisation only)
-      parameter (gsem_edge_max=500)
+      parameter (gsem_edge_max=500) ! CASE SPECIFIC
 
 !     parameter section
       integer gsem_mode         !< @var GSEM mode

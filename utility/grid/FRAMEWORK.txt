@@ -8,7 +8,7 @@
 
 @details 
 This directory contains number of different mesh related tools. It covers number of different simulation 
-aspects like 3D to 2D mesh mappinfg for 2D-extruded meshes.
+aspects like 3D to 2D mesh mappinfg for meshes uniform in one direction.
 
 
 */

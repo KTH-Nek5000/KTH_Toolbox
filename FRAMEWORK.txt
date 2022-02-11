@@ -3,6 +3,7 @@
 /**
 @defgroup toolbox  Toolbox
 @ingroup framework
+@todo Add description of toolbox_path.sh
 
 @brief Toolbox for Nek5000
 
@@ -41,4 +42,7 @@ Dependences between modules are described in FRAMEWORK.txt (present in almost ev
   + list of requred runtime parameters (module dependency)
   + example of a section in \a setup.par file
 
+In addition there is a bash script @ref toolbox_path.sh located at the top level directory of the toolbox.
+It provides a set of the environment variables defining absolute paths of each of the modules in the toolbox containg
+the code. These variables are later used in (\a makefile_usr.inc) to define compilation rules.
 */

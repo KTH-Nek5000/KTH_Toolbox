@@ -85,13 +85,14 @@ before compilation of the code.
 
 @par
 @interface_reqr Interface required:
--# multiple interfaces from [frame] (@ref frame), [runtime parameters] (@ref runparam) and [monitor] (@ref monitor) modules
--# @ref math_rot3da from @ref math module
+-# multiple interfaces from [runtime parameters] (@ref runparam) and [monitor] (@ref monitor) modules
 -# @ref io_file_freeid from [Input/output] (@ref io) module (debuggin only)
+-# @ref math_rot3da from @ref math module
 
 
 @mod_interface_example
 @code{.f}
+!======================================================================
       subroutine userf  (ix,iy,iz,ieg)
       include 'SIZE'
       include 'NEKUSE'          ! FF[XYZ]
@@ -109,7 +110,7 @@ before compilation of the code.
 
       return
       end
-!-----------------------------------------------------------------------
+!======================================================================
       subroutine userchk
       implicit none
       include 'SIZE'            !
@@ -172,6 +173,7 @@ before compilation of the code.
       return
       end subroutine
 !======================================================================
+
 @endcode
 
 @mod_param
@@ -196,39 +198,6 @@ before compilation of the code.
 |trip_tdt(il)   | real | _tripping:tdt'il'  | 0.0 | Time step for tripping of 'il' line |
 
 @mod_param_example
-@code{.txt}
-[_TRIPPING]             # Runtime paramere section for tripping module
-NLINE                = 2                      # Number of tripping lines
-TIAMP                = 0.00000000E+00         # Time independent amplitude
-TDAMP                = 1.00000000E+01         # Time dependent amplitude
-SPOSX01              = 8.30000000E+00         # Starting pont X
-SPOSY01              = 3.03500000E+00         # Starting pont Y
-SPOSZ01              = 0.00000000E+00         # Starting pont Z
-EPOSX01              = 8.30000000E+00         # Ending pont X
-EPOSY01              = 3.03500000E+00         # Ending pont Y
-EPOSZ01              = 4.50000000E+00         # Ending pont Z
-SMTHX01              = 1.36000000E+00         # Smoothing length X
-SMTHY01              = 0.34000000E+00         # Smoothing length Y
-SMTHZ01              = 0.00000000E+00         # Smoothing length Z
-LEXT01               = yes                    # Line extension
-ROTA01               = 0.00000000E+00         # Rotation angle in radians
-NMODE01              = 16                     # Number of Fourier modes
-TDT01                = 0.14000000E+00         # Time step for tripping
-SPOSX02              = 8.80000000E+00         # Starting pont X
-SPOSY02              = 0.99430000E+00         # Starting pont Y
-SPOSZ02              = 0.00000000E+00         # Starting pont Z
-EPOSX02              = 8.80000000E+00         # Ending pont X
-EPOSY02              = 0.99430000E+00         # Ending pont Y
-EPOSZ02              = 4.50000000E+00         # Ending pont Z
-SMTHX02              = 0.28000000E+00         # Smoothing length X
-SMTHY02              = 0.07000000E+00         # Smoothing length Y
-SMTHZ02              = 0.00000000E+00         # Smoothing length Z
-SMTHZ02              = 0.20000000E+00         # Smoothing length Z
-LEXT02               = no                     # Line extension
-ROTA02               = 0.12300000E+00         # Rotation angle in radians
-NMODE02              = 76                     # Number of Fourier modes
-TDT02                = 0.14000000E+00         # Time step for tripping
-@endcode
-
+@include Toolbox/utility/forcing/trip_line/example.par
 
 */

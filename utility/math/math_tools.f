@@ -14,7 +14,7 @@
 !!  1 &\mbox{ if $x >  x_{max}$}
 !!       \end{array} \right.
 !!  \f}
-!!  with \f$ x_{min} = 0.02\f$ and \f$ x_{max}=0.98\f$
+!!  with \f$ x_{min} = 0.0001\f$ and \f$ x_{max}=0.9999\f$
 !! @param[in] x       function argument
 !! @return math_stepf
       real function math_stepf(x)
@@ -25,7 +25,7 @@
 
       ! local variables
       real xdmin, xdmax
-      parameter (xdmin = 0.001, xdmax = 0.999)
+      parameter (xdmin = 0.0001, xdmax = 0.9999)
 !-----------------------------------------------------------------------
       ! get function vale
       if (x.le.xdmin) then
@@ -114,6 +114,8 @@
 !! @author Richard Chandler (richard@stats.ucl.ac.uk)
 !! @author Paul Northrop (northrop@stats.ox.ac.uk)
 !! @return  random number
+!! @todo Remove all common blocks and save variables to make it possible
+!!    to be used by multiple tools
       real function math_zbqlu01()
       implicit none
 
@@ -126,7 +128,6 @@
       save curpos,id22,id43
       data curpos,id22,id43 /1,22,43/
       real xr,b2,binv
-
 !-----------------------------------------------------------------------
       b2 = br
       binv = 1.0/br
@@ -173,6 +174,8 @@
 !! @details To initialise the random number generator - either repeatably
 !!    or nonrepeatably. 
 !! @param[in] seed     number which generates elements of the array ZBQLIX
+!! @todo Remove all common blocks and save variables to make it possible
+!!    to be used by multiple tools
       subroutine math_zbqlini(seed)
       implicit none
 
@@ -235,7 +238,7 @@
       return
       end subroutine math_zbqlini
 !=======================================================================
-!> @brief Give bounds for loops to extract edge
+!> @brief Give bounds for loops to extract edge of a 3D element.
 !! @ingroup math
 !! @note All edge related routines used IXCN and ESKIP, but this
 !!   caused some problems as these arrays have to be continuosly
@@ -285,9 +288,9 @@
       return
       end subroutine
 !=======================================================================
-!> @brief Extract element edge
+!> @brief Extract 3D element edge.
 !! @ingroup math
-!! @note This routine works on singe element not whole field.
+!! @note This routine works on singe element not the whole field.
 !! @param[out]   vec       vector containg edge values
 !! @param[in]    edg       edge number
 !! @param[in]    vfld      pointer to singe element in the field
@@ -319,13 +322,12 @@
       return
       end subroutine
 !=======================================================================
-!> @brief 3D rotation of a vector along given axis
+!> @brief 3D rotation of a vector along given axis.
 !! @ingroup math
 !! @param[in]  vo     output vector
 !! @param[in]  vi     input vector
 !! @param[in]  va     rotation axis
 !! @param[in]  an     rotation angle
-!! @todo Add check if (vi == va) => vo = vi
       subroutine math_rot3da(vo,vi,va,an)
       implicit none
 
@@ -339,9 +341,17 @@
       ! local variables
       integer il, jl
       real mat(ldim,ldim), ta(ldim)
-      real rtmp, can, can1, san
+      real rtmp, can, can1, san, epsl
+      parameter (epsl = 1.0e-10)
+      logical if_same
 !-----------------------------------------------------------------------
-      if (an.eq.0.0) then
+      ! check if a rotated vector and an axis differ
+      if_same = .true.
+      do il = 1,ldim
+         if (abs(vi(il)-va(il)).gt.epsl) if_same = .false.
+      end do
+      ! perform rotation
+      if (an.eq.0.0.or.if_same) then
          call copy(vo,vi,ldim)
       else
          ! make sure the axis vector is normalised

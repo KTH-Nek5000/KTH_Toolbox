@@ -18,10 +18,12 @@ Poletto, Ruggero: Divergence free development of the synthetic eddy method in or
 
 @par
 @interface_reqr Interface required:
--# usr_gen_eddy
+-# multiple interfaces from [runtime parameters] (@ref runparam) and [monitor] (@ref monitor) modules
+-# (\a usr_gen_eddy); user defined
 
 @mod_interface_example
 @code{.f}
+!======================================================================
       subroutine userchk
       include 'TSTEP'           ! ISTEP
       
@@ -50,7 +52,6 @@ Poletto, Ruggero: Divergence free development of the synthetic eddy method in or
       include 'FRAMELP'
 !-----------------------------------------------------------------------
 !     register modules
-      call io_register
       call chkpt_register
       call gsem_register
 
@@ -83,62 +84,8 @@ Poletto, Ruggero: Divergence free development of the synthetic eddy method in or
       return
       end subroutine
 !======================================================================
-!> @brief Generate single eddy for a given family
-!! @param[out] epos       eddy position
-!! @param[out] eps        eddy orientation
-!! @param[in]  nfam       family number
-!! @param[in]  ifinit     intial distribution
-      subroutine usr_gen_eddy(epos,eps,nfam,ifinit)
-      implicit none
-
-      include 'SIZE'
-      include 'TSTEP'           ! pi
-      include 'GSYEMD'
-
-      ! argument list
-      real epos(ldim)
-      integer eps(ldim)
-      integer nfam
-      logical ifinit
-
-      ! local variables
-      real rho, theta, vrtmp(ldim)
-      integer il
-
-      real yp_cut
-      parameter (yp_cut=0.45)
-      
-      ! functions
-      real math_ran_rng
-!-----------------------------------------------------------------------
-      rho = yp_cut*sqrt(math_ran_rng(0.0,1.0))  
-      theta = math_ran_rng(0.,2.0*pi)
-
-      vrtmp(1) = rho*cos(theta)
-      vrtmp(2) = rho*sin(theta)
-      if (ifinit) then
-         vrtmp(ldim) = math_ran_rng(-gsem_bext(nfam),gsem_bext(nfam))
-      else
-         vrtmp(ldim) = -gsem_bext(nfam)
-      endif
-
-      ! rotate coordinates
-      call math_rot3Da(epos,vrtmp,
-     $        gsem_raxs(1,nfam),gsem_rang(nfam))
-
-      do il=1,ldim
-         rho = math_ran_rng(0.0,1.0)
-         if (rho.gt.0.5) then
-            eps(il) = 1
-         else
-            eps(il) = -1
-         endif
-      enddo
-
-      return
-      end subroutine
-!=======================================================================
 @endcode
+@include Toolbox/utility/bcnd/gsyem/example.usr
 
 @mod_param
 @param_list Parameters provided by sponge_box module (include file - \a SPONGRBD):
@@ -155,18 +102,7 @@ Poletto, Ruggero: Divergence free development of the synthetic eddy method in or
 |gsem_famdirz(il) | real | _gsyem:famdirz'il' | 0.025 | X normal component of 'il' family |
 
 @mod_param_example
-@code{.txt}
-[_GSYEM]
-mode = 1
-nfam = 1
-neddy01              = 10000
-fambc01              = 1
-famasig01            = 0.25
-famisig01            = 0.0025
-famdirx01            = 0.0
-famdiry01            = 0.0
-famdirz01            = 0.0
-@endcode
+@include Toolbox/utility/bcnd/gsyem/example.par
 
 
 */

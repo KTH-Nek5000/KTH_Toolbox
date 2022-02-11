@@ -52,11 +52,6 @@ inside (\a frame_usr_register).
 | mntr_wtimes | string  | _monitor:WallTime  | 00:00   | simulation wall time |
 
 @mod_param_example
-@code{.txt}
-[_MONITOR]
-LogLevel = 4
-IfTimDscr = no
-WallTime = 00:05
-@endcode
+@include Toolbox/driver/frame/monitor/example.par
 
 */

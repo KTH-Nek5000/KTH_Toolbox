@@ -90,7 +90,6 @@ It can be read using the functions in `reader_int_fld.py` Python file.
       include 'FRAMELP'
 !-----------------------------------------------------------------------
       ! register modules
-      call io_register
       call pstat2d_register
 
       return

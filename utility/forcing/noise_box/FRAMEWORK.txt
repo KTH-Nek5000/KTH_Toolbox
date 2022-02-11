@@ -7,7 +7,7 @@
 @brief Add white noise to velocity field at given time in a box
 
 @details This set of routines adds a white noise in the rectangular box performing global face averaging at the end. 
-To keep the field independent on number of number of processors we use @ref math_ran_dst insted or @ref ran1 as
+To keep the field independent on number of processors we use @ref math_ran_dst insted or @ref ran1 as
 a random number ganarator. At the end velocity field is smoothed at the element faces.
 
 @mod_interface
@@ -15,6 +15,11 @@ a random number ganarator. At the end velocity field is smoothed at the element 
 -# @ref nseb_register
 -# @ref nseb_init
 -# @ref nseb_noise_add
+
+@par
+@interface_reqr Interface required:
+-# multiple interfaces from [runtime parameters] (@ref runparam) and [monitor] (@ref monitor) modules
+-# @ref math_ran_dst from @ref math module
 
 @mod_interface_example
 @code{.f}
@@ -76,6 +81,7 @@ a random number ganarator. At the end velocity field is smoothed at the element 
       return
       end subroutine
 !======================================================================
+
 @endcode
 
 @mod_param
@@ -92,17 +98,7 @@ a random number ganarator. At the end velocity field is smoothed at the element 
 |nseb_bmax(3) | real | _noisebx:boxmaxz | 0.0 | position of upper right box corner; dimension Y |
 
 @mod_param_example
-@code{.txt}
-[_NOISEBX]
-time = 0.0
-amplitude = 0.0
-boxminx = 0.0
-boxminy = 0.0
-boxminz = 0.0
-boxmaxx = 0.0
-boxmaxy = 0.0
-boxmaxz = 0.0
-@endcode
+@include Toolbox/utility/forcing/noise_box/example.par
 
 
 */

@@ -43,10 +43,6 @@ inside (\a frame_usr_register).
 | rprm_parfnm | string | _runpar:parfname | outparfile | Runtime parameter file name for output (without .par) |
 
 @mod_param_example
-@code{.txt}
-[_RUNPAR
-PARFWRITE = no
-PARFNAME = outparfile
-@endcode
+@include Toolbox/driver/frame/runparam/example.par
 
 */

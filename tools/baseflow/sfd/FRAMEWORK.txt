@@ -77,7 +77,6 @@ Description of the implementation and performed tests can be found in @cite Pepl
       include 'FRAMELP'
 !-----------------------------------------------------------------------
       ! register modules
-      call io_register
       call chkpt_register
       call sfd_register
 

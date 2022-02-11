@@ -1,7 +1,7 @@
 #Configuration file for Nek5000 framework developed at KTH
 # Place for short description; doxygen style
 /**
-@defgroup math  Math module
+@defgroup math  math
 @ingroup utility
 
 @brief Diverse tools for matht or data operations

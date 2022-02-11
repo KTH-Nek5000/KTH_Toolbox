@@ -60,7 +60,6 @@ writes the in a binary file. This have to be completed
       include 'FRAMELP'
 !-----------------------------------------------------------------------
       ! register modules
-      call io_register
       call chkpt_register
       call tsrs_register
 

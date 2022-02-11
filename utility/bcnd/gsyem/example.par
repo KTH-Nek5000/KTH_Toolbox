@@ -1,0 +1,10 @@
+[_GSYEM]
+mode = 1
+nfam = 1
+neddy01              = 10000
+fambc01              = 1
+famasig01            = 0.25
+famisig01            = 0.0025
+famdirx01            = 0.0
+famdiry01            = 0.0
+famdirz01            = 0.0
