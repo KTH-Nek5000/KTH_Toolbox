@@ -16,8 +16,11 @@
       include 'NOISEBXD'
 
       ! local variables
-      integer lpmid
+      integer lpmid, il, jl
       real ltim
+      ! initial values for nseb_rfc
+      real rfc(3,ldim)
+      character*1 str1, str2
 
       ! functions
       real dnekclock
@@ -86,6 +89,30 @@
      $     'BOXMAXZ','Position of upper right box corner; dimension Z ',
      $     rpar_real,0,0.0,.false.,' ')
 
+      ! function coefficients for random number generator
+      ! initial values
+      rfc(1,1) = 3.0e4
+      rfc(2,1) =-1.5e3
+      rfc(3,1) = 0.5e5
+      rfc(1,2) = 2.3e4
+      rfc(2,2) = 2.3e3
+      rfc(3,2) =-2.0e5
+      if (IF3D) then
+         rfc(1,ldim) = 2.e4
+         rfc(2,ldim) = 1.e3
+         rfc(3,ldim) = 1.e5
+      end if
+      do il = 1, ldim
+         write(str1,'(I1.1)') il
+         do jl=1, 3
+         write(str2,'(I1.1)') jl
+         call rprm_rp_reg(nseb_rfc_id(jl,il),nseb_sec_id,
+     $     'FRC'//str2//'_'//str1,
+     $     'Function coefficient for random number gnerator ',
+     $     rpar_real,0,rfc(jl,il),.false.,' ')
+         end do
+      end do
+
       ! timing
       ltim = dnekclock() - ltim
       call mntr_tmr_add(nseb_tmr_id,1,ltim)
@@ -106,7 +133,7 @@
       include 'NOISEBXD'
 
       ! local variables
-      integer ierr, nhour, nmin
+      integer ierr, nhour, nmin, il, jl
       integer itmp
       real rtmp, ltim
       logical ltmp
@@ -160,6 +187,15 @@
          nseb_bmax(ndim) = rtmp
       endif
 
+      ! function coefficients for random number generator
+      do il = 1, ldim
+         do jl=1, 3
+         call rprm_rp_get(itmp,rtmp,ltmp,ctmp,nseb_rfc_id(jl,il),
+     $     rpar_real)
+         nseb_rfc(jl,il) = rtmp
+         end do
+      end do
+
       ! is everything initialised
       nseb_ifinit=.true.
 
@@ -212,7 +248,7 @@
       if (nseb_amp.gt.0.0) then
          if (nseb_tim.ge.TIME.and.nseb_tim.le.(TIME+DT)) then
 
-      ! timing
+            ! timing
             ltim = dnekclock()
             call mntr_log(nseb_id,lp_inf,
      $          "Adding noise to velocity field")
@@ -235,24 +271,13 @@
                         enddo
 
                         if (ifadd) then
-                           fcoeff(1)=  3.0e4
-                           fcoeff(2)= -1.5e3
-                           fcoeff(3)=  0.5e5
                            VX(il,jl,kl,iel)=VX(il,jl,kl,iel)+nseb_amp*
-     $                          math_ran_dst(il,jl,kl,ieg,xl,fcoeff)
-                           fcoeff(1)=  2.3e4
-                           fcoeff(2)=  2.3e3
-                           fcoeff(3)= -2.0e5
+     $                      math_ran_dst(il,jl,kl,ieg,xl,nseb_rfc(1,1))
                            VY(il,jl,kl,iel)=VY(il,jl,kl,iel)+nseb_amp*
-     $                          math_ran_dst(il,jl,kl,ieg,xl,fcoeff)
-                           if (IF3D) then
-                              fcoeff(1)= 2.e4
-                              fcoeff(2)= 1.e3
-                              fcoeff(3)= 1.e5
-                              VZ(il,jl,kl,iel)=VZ(il,jl,kl,iel)+
-     $                             nseb_amp*
-     $                             math_ran_dst(il,jl,kl,ieg,xl,fcoeff)
-                           endif
+     $                      math_ran_dst(il,jl,kl,ieg,xl,nseb_rfc(1,2))
+                           if (IF3D) VZ(il,jl,kl,iel)=VZ(il,jl,kl,iel)+
+     $                          nseb_amp*math_ran_dst(il,jl,kl,ieg,xl,
+     $                                          nseb_rfc(1,ldim))
                         endif
 
                      enddo
@@ -260,11 +285,11 @@
                enddo
             enddo
 
-      ! face averaging
+            ! face averaging
             call opdssum(VX,VY,VZ)
             call opcolv (VX,VY,VZ,VMULT)
 
-      ! timing
+            ! timing
             ltim = dnekclock() - ltim
             call mntr_tmr_add(nseb_tmr_id,1,ltim)
 

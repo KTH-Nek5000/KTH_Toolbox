@@ -29,9 +29,13 @@
       integer nseb_bmin_id(LDIM)
       real nseb_bmax(LDIM)       !< @var max box bound
       integer nseb_bmax_id(LDIM)
+      real nseb_rfc(3,LDIM)      !< @var set of function coefficients for random number generator
+      integer nseb_rfc_id(3,LDIM)
 
 !     common block section
       common /NOISEBXI/ nseb_id, nseb_tmr_id, nseb_sec_id, 
-     $ nseb_tim_id, nseb_amp_id, nseb_bmin_id, nseb_bmax_id
+     $   nseb_tim_id, nseb_amp_id, nseb_bmin_id, nseb_bmax_id, 
+     $   nseb_rfc_id
 
-      common /NOISEBXR/ nseb_tim, nseb_amp, nseb_bmin, nseb_bmax
+      common /NOISEBXR/ nseb_tim, nseb_amp, nseb_bmin, nseb_bmax, 
+     $   nseb_rfc
