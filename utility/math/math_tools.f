@@ -41,9 +41,9 @@
 !=======================================================================
 !> @brief Give random distribution depending on position
 !! @ingroup math
-!! @details The original Nek5000 rundom number generator is implementted
+!! @details The original Nek5000 random number generator is implementted
 !!  in @ref ran1. This totally ad-hoc random number generator below
-!!  could be preferable to the origina one for the simple reason that it
+!!  could be preferable to the original one for the simple reason that it
 !!  gives the same initial cindition independent of the number of
 !!  processors, which is important for code verification.
 !! @param[in] ix,iy,iz     GLL point index

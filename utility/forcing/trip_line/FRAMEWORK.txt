@@ -86,7 +86,7 @@ before compilation of the code.
 @par
 @interface_reqr Interface required:
 -# multiple interfaces from [runtime parameters] (@ref runparam) and [monitor] (@ref monitor) modules
--# @ref io_file_freeid from [Input/output] (@ref io) module (debuggin only)
+-# @ref io_file_freeid from [Input/output] (@ref io) module (debugging only)
 -# @ref math_rot3da from @ref math module
 
 
