@@ -7,8 +7,20 @@
 @brief Turbulence at inlet generated with divergence-free synthetic eddy method.
 
 @details
-This set of routines 
-Poletto, Ruggero: Divergence free development of the synthetic eddy method in order to improve synthetic turbulence for embedded les simulations, PhD Thesis, The University of Manchester, 2015
+This set of routines generating set of vortices at the computational domain inlet.
+Poletto, Ruggero: Divergence free development of the synthetic eddy method in order to improve synthetic turbulence 
+for embedded les simulations, PhD Thesis, The University of Manchester, 2015
+
+This module requires runtime parameters defined by @ref chkpoint module to properly perform restart operations. 
+User defined routine (\a usr_gen_eddy) provides the rules for generating a single vortex. It allows the user to 
+specify vertex distribution on the face (e.g. within a circle or a rectangular region) and a given vortex orientation.
+An example provided in this directory gives random position within a circle (random rho and theta variables) assuming 
+the face is normal to Z axis. Two different options are considered depending on (\a ifinit) flag. The first one corresponsd
+to a simulation initialisation where the vortices fill the whole testing volume. In the second one the vortives are placed
+on at the inflow position only. Next a vortex position is rotated to match a real face position in the computational domain. 
+The final step is definition of the vortex orinetation with an integer array.
+@todo This description has to be extended.
+
 
 @mod_interface
 @interface_list Interface provided:
@@ -19,6 +31,7 @@ Poletto, Ruggero: Divergence free development of the synthetic eddy method in or
 @par
 @interface_reqr Interface required:
 -# multiple interfaces from [runtime parameters] (@ref runparam) and [monitor] (@ref monitor) modules
+-# @ref math_ran_rng, @ref math_zbqlini, @ref math_etovec and @ref math_rot3Da from @ref math module
 -# (\a usr_gen_eddy); user defined
 
 @mod_interface_example

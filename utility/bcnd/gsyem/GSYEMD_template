@@ -21,9 +21,9 @@
       integer gsem_sec_id    
 
 !     max number of:
-      integer gsem_nfam_max     ! bc families
+      integer gsem_nfam_max     ! max number of bc families
       parameter (gsem_nfam_max=1) ! CASE SPECIFIC
-      integer gsem_neddy_max    ! eddies per family
+      integer gsem_neddy_max    ! max number of eddies per family
       parameter (gsem_neddy_max=10000) ! CASE SPECIFIC
       integer gsem_npoint_max   ! point number per family profile (initialisation only)
       parameter (gsem_npoint_max=500) ! CASE SPECIFIC
