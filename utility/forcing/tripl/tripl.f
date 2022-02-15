@@ -1,5 +1,5 @@
-!> @file trip.f
-!! @ingroup trip_line
+!> @file tripl.f
+!! @ingroup tripl
 !! @brief Tripping function supporting conformal and AMR version of nek5000
 !! @details The tripping is based on a similar implementation in the
 !!   SIMSON code (Chevalier et al. 2007, KTH Mechanics), and is described
@@ -8,15 +8,15 @@
 !! @date May 03, 2018
 !=======================================================================
 !> @brief Register tripping module
-!! @ingroup trip_line
+!! @ingroup tripl
 !! @note This routine should be called in frame_usr_register
-      subroutine trip_register()
+      subroutine tripl_register()
       implicit none
 
       include 'SIZE'
       include 'INPUT'
       include 'FRAMELP'
-      include 'TRIPD'
+      include 'TRIPLD'
 
       ! local variables
       integer lpmid, il
@@ -30,10 +30,10 @@
       ltim = dnekclock()
 
       ! check if the current module was already registered
-      call mntr_mod_is_name_reg(lpmid,trip_name)
+      call mntr_mod_is_name_reg(lpmid,tripl_name)
       if (lpmid.gt.0) then
          call mntr_warn(lpmid,
-     $        'module ['//trim(trip_name)//'] already registered')
+     $        'module ['//trim(tripl_name)//'] already registered')
          return
       endif
 
@@ -46,100 +46,100 @@
       endif
 
       ! register module
-      call mntr_mod_reg(trip_id,lpmid,trip_name,
+      call mntr_mod_reg(tripl_id,lpmid,tripl_name,
      $      'Tripping along the line')
 
       ! register timer
       call mntr_tmr_is_name_reg(lpmid,'FRM_TOT')
-      call mntr_tmr_reg(trip_tmr_id,lpmid,trip_id,
-     $     'TRIP_TOT','Tripping total time',.false.)
+      call mntr_tmr_reg(tripl_tmr_id,lpmid,tripl_id,
+     $     'tripl_TOT','Tripping total time',.false.)
 
       ! register and set active section
-      call rprm_sec_reg(trip_sec_id,trip_id,'_'//adjustl(trip_name),
+      call rprm_sec_reg(tripl_sec_id,tripl_id,'_'//adjustl(tripl_name),
      $     'Runtime paramere section for tripping module')
-      call rprm_sec_set_act(.true.,trip_sec_id)
+      call rprm_sec_set_act(.true.,tripl_sec_id)
 
       ! register parameters
-      call rprm_rp_reg(trip_nline_id,trip_sec_id,'NLINE',
+      call rprm_rp_reg(tripl_nline_id,tripl_sec_id,'NLINE',
      $     'Number of tripping lines',rpar_int,0,0.0,.false.,' ')
 
-      call rprm_rp_reg(trip_tiamp_id,trip_sec_id,'TIAMP',
+      call rprm_rp_reg(tripl_tiamp_id,tripl_sec_id,'TIAMP',
      $     'Time independent amplitude',rpar_real,0,0.0,.false.,' ')
 
-      call rprm_rp_reg(trip_tdamp_id,trip_sec_id,'TDAMP',
+      call rprm_rp_reg(tripl_tdamp_id,tripl_sec_id,'TDAMP',
      $     'Time dependent amplitude',rpar_real,0,0.0,.false.,' ')
 
-      do il=1, trip_nline_max
+      do il=1, tripl_nline_max
          write(str,'(I2.2)') il
 
-         call rprm_rp_reg(trip_spos_id(1,il),trip_sec_id,'SPOSX'//str,
+         call rprm_rp_reg(tripl_spos_id(1,il),tripl_sec_id,'SPOSX'//str,
      $     'Starting point X',rpar_real,0,0.0,.false.,' ')
          
-         call rprm_rp_reg(trip_spos_id(2,il),trip_sec_id,'SPOSY'//str,
+         call rprm_rp_reg(tripl_spos_id(2,il),tripl_sec_id,'SPOSY'//str,
      $     'Starting point Y',rpar_real,0,0.0,.false.,' ')
 
          if (IF3D) then
-            call rprm_rp_reg(trip_spos_id(ldim,il),trip_sec_id,
+            call rprm_rp_reg(tripl_spos_id(ldim,il),tripl_sec_id,
      $           'SPOSZ'//str,'Starting point Z',
      $           rpar_real,0,0.0,.false.,' ')
          endif
         
-         call rprm_rp_reg(trip_epos_id(1,il),trip_sec_id,'EPOSX'//str,
+         call rprm_rp_reg(tripl_epos_id(1,il),tripl_sec_id,'EPOSX'//str,
      $     'Ending point X',rpar_real,0,0.0,.false.,' ')
          
-         call rprm_rp_reg(trip_epos_id(2,il),trip_sec_id,'EPOSY'//str,
+         call rprm_rp_reg(tripl_epos_id(2,il),tripl_sec_id,'EPOSY'//str,
      $     'Ending point Y',rpar_real,0,0.0,.false.,' ')
 
          if (IF3D) then
-            call rprm_rp_reg(trip_epos_id(ldim,il),trip_sec_id,
+            call rprm_rp_reg(tripl_epos_id(ldim,il),tripl_sec_id,
      $           'EPOSZ'//str,'Ending point Z',
      $           rpar_real,0,0.0,.false.,' ')
          endif
 
-         call rprm_rp_reg(trip_smth_id(1,il),trip_sec_id,'SMTHX'//str,
+         call rprm_rp_reg(tripl_smth_id(1,il),tripl_sec_id,'SMTHX'//str,
      $     'Smoothing length X',rpar_real,0,0.0,.false.,' ')
          
-         call rprm_rp_reg(trip_smth_id(2,il),trip_sec_id,'SMTHY'//str,
+         call rprm_rp_reg(tripl_smth_id(2,il),tripl_sec_id,'SMTHY'//str,
      $     'Smoothing length Y',rpar_real,0,0.0,.false.,' ')
 
          if (IF3D) then
-            call rprm_rp_reg(trip_smth_id(ldim,il),trip_sec_id,
+            call rprm_rp_reg(tripl_smth_id(ldim,il),tripl_sec_id,
      $           'SMTHZ'//str,'Smoothing length Z',
      $           rpar_real,0,0.0,.false.,' ')
          endif
 
-         call rprm_rp_reg(trip_lext_id(il),trip_sec_id,'LEXT'//str,
+         call rprm_rp_reg(tripl_lext_id(il),tripl_sec_id,'LEXT'//str,
      $        'Line extension',rpar_log,0,0.0,.false.,' ')
       
-         call rprm_rp_reg(trip_rota_id(il),trip_sec_id,'ROTA'//str,
+         call rprm_rp_reg(tripl_rota_id(il),tripl_sec_id,'ROTA'//str,
      $        'Rotation angle',rpar_real,0,0.0,.false.,' ')
-         call rprm_rp_reg(trip_nmode_id(il),trip_sec_id,'NMODE'//str,
+         call rprm_rp_reg(tripl_nmode_id(il),tripl_sec_id,'NMODE'//str,
      $     'Number of Fourier modes',rpar_int,0,0.0,.false.,' ')
-         call rprm_rp_reg(trip_tdt_id(il),trip_sec_id,'TDT'//str,
+         call rprm_rp_reg(tripl_tdt_id(il),tripl_sec_id,'TDT'//str,
      $     'Time step for tripping',rpar_real,0,0.0,.false.,' ')
       enddo
 
       ! set initialisation flag
-      trip_ifinit=.false.
+      tripl_ifinit=.false.
       
       ! timing
       ltim = dnekclock() - ltim
-      call mntr_tmr_add(trip_tmr_id,1,ltim)
+      call mntr_tmr_add(tripl_tmr_id,1,ltim)
 
       return
       end subroutine
 !=======================================================================
 !> @brief Initilise tripping module
-!! @ingroup trip_line
+!! @ingroup tripl
 !! @note This routine should be called in frame_usr_init
-      subroutine trip_init()
+      subroutine tripl_init()
       implicit none
 
       include 'SIZE'
       include 'INPUT'
       include 'GEOM'
       include 'FRAMELP'
-      include 'TRIPD'
+      include 'TRIPLD'
 
       ! local variables
       integer itmp
@@ -154,9 +154,9 @@
       real dnekclock
 !-----------------------------------------------------------------------
       ! check if the module was already initialised
-      if (trip_ifinit) then
-         call mntr_warn(trip_id,
-     $        'module ['//trim(trip_name)//'] already initiaised.')
+      if (tripl_ifinit) then
+         call mntr_warn(tripl_id,
+     $        'module ['//trim(tripl_name)//'] already initiaised.')
          return
       endif
       
@@ -164,171 +164,171 @@
       ltim = dnekclock()
 
       ! get runtime parameters
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,trip_nline_id,rpar_int)
-      trip_nline = itmp
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,trip_tiamp_id,rpar_real)
-      trip_tiamp = rtmp
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,trip_tdamp_id,rpar_real)
-      trip_tdamp = rtmp
-      do il=1,trip_nline
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tripl_nline_id,rpar_int)
+      tripl_nline = itmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tripl_tiamp_id,rpar_real)
+      tripl_tiamp = rtmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tripl_tdamp_id,rpar_real)
+      tripl_tdamp = rtmp
+      do il=1,tripl_nline
          do jl=1,LDIM
-            call rprm_rp_get(itmp,rtmp,ltmp,ctmp,trip_spos_id(jl,il),
+            call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tripl_spos_id(jl,il),
      $           rpar_real)
-            trip_spos(jl,il) = rtmp
-            call rprm_rp_get(itmp,rtmp,ltmp,ctmp,trip_epos_id(jl,il),
+            tripl_spos(jl,il) = rtmp
+            call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tripl_epos_id(jl,il),
      $           rpar_real)
-            trip_epos(jl,il) = rtmp
-            call rprm_rp_get(itmp,rtmp,ltmp,ctmp,trip_smth_id(jl,il),
+            tripl_epos(jl,il) = rtmp
+            call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tripl_smth_id(jl,il),
      $           rpar_real)
-            trip_smth(jl,il) = abs(rtmp)
+            tripl_smth(jl,il) = abs(rtmp)
          enddo
-         call rprm_rp_get(itmp,rtmp,ltmp,ctmp,trip_lext_id(il),
+         call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tripl_lext_id(il),
      $        rpar_log)
-         trip_lext(il) = ltmp
-         call rprm_rp_get(itmp,rtmp,ltmp,ctmp,trip_rota_id(il),
+         tripl_lext(il) = ltmp
+         call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tripl_rota_id(il),
      $        rpar_real)
-         trip_rota(il) = rtmp
-         call rprm_rp_get(itmp,rtmp,ltmp,ctmp,trip_nmode_id(il),
+         tripl_rota(il) = rtmp
+         call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tripl_nmode_id(il),
      $        rpar_int)
-         trip_nmode(il) = itmp
-         call rprm_rp_get(itmp,rtmp,ltmp,ctmp,trip_tdt_id(il),
+         tripl_nmode(il) = itmp
+         call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tripl_tdt_id(il),
      $        rpar_real)
-         trip_tdt(il) = rtmp
+         tripl_tdt(il) = rtmp
       enddo
 
       ! check simulation dimension
-      if (.not.IF3D) call mntr_abort(trip_id,
+      if (.not.IF3D) call mntr_abort(tripl_id,
      $        '2D simulation is not supported.')
 
       ! get line versor, inverse line lengths and scaled smoothing lengths
-      do il=1,trip_nline
-         call mntr_logi(trip_id,lp_inf,'Line info; line nr: ',il)
-         trip_ilngt(il) = 0.0
+      do il=1,tripl_nline
+         call mntr_logi(tripl_id,lp_inf,'Line info; line nr: ',il)
+         tripl_ilngt(il) = 0.0
 
          do jl=1,LDIM
             ! the last (third) versor is parallel to the line
-            trip_vrs(jl,ldim,il) = trip_epos(jl,il) - trip_spos(jl,il)
-            trip_ilngt(il) = trip_ilngt(il) + trip_vrs(jl,ldim,il)**2
+           tripl_vrs(jl,ldim,il) = tripl_epos(jl,il) - tripl_spos(jl,il)
+            tripl_ilngt(il) = tripl_ilngt(il) + tripl_vrs(jl,ldim,il)**2
          enddo
-         trip_ilngt(il) = sqrt(trip_ilngt(il))
-         call mntr_logr(trip_id,lp_inf,'Line length: ',trip_ilngt(il))
-         if (trip_ilngt(il).gt.0.0) then
-            trip_ilngt(il) = 1.0/trip_ilngt(il)
+         tripl_ilngt(il) = sqrt(tripl_ilngt(il))
+         call mntr_logr(tripl_id,lp_inf,'Line length: ',tripl_ilngt(il))
+         if (tripl_ilngt(il).gt.0.0) then
+            tripl_ilngt(il) = 1.0/tripl_ilngt(il)
             do jl=1,LDIM
-               trip_vrs(jl,ldim,il) = trip_vrs(jl,ldim,il)*
-     $            trip_ilngt(il)
+               tripl_vrs(jl,ldim,il) = tripl_vrs(jl,ldim,il)*
+     $            tripl_ilngt(il)
             enddo
          else
-            call mntr_abort(trip_id,
+            call mntr_abort(tripl_id,
      $        'Line with zero lenght is not supported.')
          endif
          ! the rest of versors given by cross product starting with the
          ! second versor
          call rzero(rtmpv,ldim)
          ! the first versor guess depends on the last versor coordinates
-         if (trip_vrs(1,ldim,il).lt.0.95) then
+         if (tripl_vrs(1,ldim,il).lt.0.95) then
             rtmpv(1) = 1.0
          else
             rtmpv(2) = 1.0
          endif
          ! the second versor
-         call cross(trip_vrs(1,2,il),trip_vrs(1,ldim,il),rtmpv)
+         call cross(tripl_vrs(1,2,il),tripl_vrs(1,ldim,il),rtmpv)
          ! the first versor
-         call cross(trip_vrs(1,1,il),trip_vrs(1,2,il),
-     $              trip_vrs(1,ldim,il))
+         call cross(tripl_vrs(1,1,il),tripl_vrs(1,2,il),
+     $              tripl_vrs(1,ldim,il))
          ! correct versor length
          do jl = 1, ldim
             rtmp = 0.0
             do kl = 1, ldim
-               rtmp = rtmp + trip_vrs(kl,jl,il)*trip_vrs(kl,jl,il)
+               rtmp = rtmp + tripl_vrs(kl,jl,il)*tripl_vrs(kl,jl,il)
             end do
             if (rtmp.gt.0.0) then
                rtmp = 1.0/sqrt(rtmp)
                do kl = 1, ldim
-                  trip_vrs(kl,jl,il) = trip_vrs(kl,jl,il)*rtmp
+                  tripl_vrs(kl,jl,il) = tripl_vrs(kl,jl,il)*rtmp
                end do
             else
-               call mntr_abort(trip_id,
+               call mntr_abort(tripl_id,
      $               'Line versor with zero lenght.')
             end if
          end do
          ! rotate the first and second versors along the third versor
          do jl = 1, 2
-            call math_rot3da(rtmpv,trip_vrs(1,jl,il),trip_vrs(1,ldim,il)
-     $       ,trip_rota(il))
+          call math_rot3da(rtmpv,tripl_vrs(1,jl,il),tripl_vrs(1,ldim,il)
+     $       ,tripl_rota(il))
             do kl = 1, ldim
-               trip_vrs(kl,jl,il) = rtmpv(kl)
+               tripl_vrs(kl,jl,il) = rtmpv(kl)
             end do
          end do
 
          ! stump the log
          do jl = 1, ldim
-            call mntr_logi(trip_id,lp_inf,'Line versor: ',jl)
-            call mntr_logrv(trip_id,lp_inf,'Coordinates:',
-     $           trip_vrs(1,jl,il),ldim)
+            call mntr_logi(tripl_id,lp_inf,'Line versor: ',jl)
+            call mntr_logrv(tripl_id,lp_inf,'Coordinates:',
+     $           tripl_vrs(1,jl,il),ldim)
          end do
 
          ! rescale smoothing lengths
          do jl=1,LDIM
-           trip_smth(jl,il) = trip_smth(jl,il)*trip_ilngt(il)
+           tripl_smth(jl,il) = tripl_smth(jl,il)*tripl_ilngt(il)
          enddo
          ! get inverse smoothing lenght
          do jl=1,LDIM
-            if (trip_smth(jl,il).gt.0.0) then
-               trip_ismth(jl,il) = 1.0/trip_smth(jl,il)
+            if (tripl_smth(jl,il).gt.0.0) then
+               tripl_ismth(jl,il) = 1.0/tripl_smth(jl,il)
             else
-               trip_ismth(jl,il) = 1.0
+               tripl_ismth(jl,il) = 1.0
             endif
          enddo
       enddo
 
       ! get 1D projection and array mapping
-      call trip_1dprj
+      call tripl_1dprj
 
       ! initialise random generator seed and number of time intervals
-      do il=1,trip_nline
-         trip_seed(il) = -32*il
-         trip_ntdt(il) = 1 - trip_nset_max
-         trip_ntdt_old(il) = trip_ntdt(il)
+      do il=1,tripl_nline
+         tripl_seed(il) = -32*il
+         tripl_ntdt(il) = 1 - tripl_nset_max
+         tripl_ntdt_old(il) = tripl_ntdt(il)
       enddo
       
       ! generate random phases (time independent and time dependent)
-      call trip_rphs_get
+      call tripl_rphs_get
 
       ! get forcing
-      call trip_frcs_get(.true.)
+      call tripl_frcs_get(.true.)
       
       ! everything is initialised
-      trip_ifinit=.true.
+      tripl_ifinit=.true.
 
       ! timing
       ltim = dnekclock() - ltim
-      call mntr_tmr_add(trip_tmr_id,1,ltim)
+      call mntr_tmr_add(tripl_tmr_id,1,ltim)
 
       return
       end subroutine
 !=======================================================================
 !> @brief Check if module was initialised
-!! @ingroup trip_line
-!! @return trip_is_initialised
-      logical function trip_is_initialised()
+!! @ingroup tripl
+!! @return tripl_is_initialised
+      logical function tripl_is_initialised()
       implicit none
 
       include 'SIZE'
-      include 'TRIPD'
+      include 'TRIPLD'
 !-----------------------------------------------------------------------
-      trip_is_initialised = trip_ifinit
+      tripl_is_initialised = tripl_ifinit
 
       return
       end function
 !=======================================================================
 !> @brief Update tripping
-!! @ingroup trip_line
-      subroutine trip_update()
+!! @ingroup tripl
+      subroutine tripl_update()
       implicit none
 
       include 'SIZE'
-      include 'TRIPD'
+      include 'TRIPLD'
 
       ! local variables
       real ltim
@@ -340,29 +340,29 @@
       ltim = dnekclock()      
 
       ! update random phases (time independent and time dependent)
-      call trip_rphs_get
+      call tripl_rphs_get
 
       ! update forcing
-      call trip_frcs_get(.false.)
+      call tripl_frcs_get(.false.)
 
       ! timing
       ltim = dnekclock() - ltim
-      call mntr_tmr_add(trip_tmr_id,1,ltim)
+      call mntr_tmr_add(tripl_tmr_id,1,ltim)
 
       return
       end subroutine      
 !=======================================================================
 !> @brief Compute tripping forcing
-!! @ingroup trip_line
+!! @ingroup tripl
 !! @param[inout] ffx,ffy,ffz     forcing; x,y,z component
 !! @param[in]    ix,iy,iz        GLL point index
 !! @param[in]    ieg             global element number
-      subroutine trip_forcing(ffx,ffy,ffz,ix,iy,iz,ieg)
+      subroutine tripl_forcing(ffx,ffy,ffz,ix,iy,iz,ieg)
       implicit none
 
       include 'SIZE'
       include 'PARALLEL'
-      include 'TRIPD'
+      include 'TRIPLD'
 
       ! argument list
       real ffx, ffy, ffz
@@ -374,16 +374,16 @@
 !-----------------------------------------------------------------------
       iel=GLLEL(ieg)
 
-      do il= 1, trip_nline
-         ffn = trip_fsmth(ix,iy,iz,iel,il)
+      do il= 1, tripl_nline
+         ffn = tripl_fsmth(ix,iy,iz,iel,il)
          if (ffn.gt.0.0) then
-            ipos = trip_map(ix,iy,iz,iel,il)
-            ffn = trip_ftrp(ipos,il)*ffn
+            ipos = tripl_map(ix,iy,iz,iel,il)
+            ffn = tripl_ftrp(ipos,il)*ffn
 
             ! I assume forcing direction is given by the second versor
-            ffx = ffx + ffn*trip_vrs(1,2,il)
-            ffy = ffy + ffn*trip_vrs(2,2,il)
-            ffz = ffz + ffn*trip_vrs(ldim,2,il)
+            ffx = ffx + ffn*tripl_vrs(1,2,il)
+            ffy = ffy + ffn*tripl_vrs(2,2,il)
+            ffz = ffz + ffn*tripl_vrs(ldim,2,il)
          endif
       enddo
 
@@ -391,12 +391,12 @@
       end subroutine
 !=======================================================================
 !> @brief Reset tripping
-!! @ingroup trip_line
-      subroutine trip_reset()
+!! @ingroup tripl
+      subroutine tripl_reset()
       implicit none
 
       include 'SIZE'
-      include 'TRIPD'
+      include 'TRIPLD'
 
       ! local variables
       real ltim
@@ -408,32 +408,32 @@
       ltim = dnekclock()      
 
       ! get 1D projection and array mapping
-      call trip_1dprj
+      call tripl_1dprj
       
       ! update forcing
-      call trip_frcs_get(.true.)
+      call tripl_frcs_get(.true.)
 
       ! timing
       ltim = dnekclock() - ltim
-      call mntr_tmr_add(trip_tmr_id,1,ltim)
+      call mntr_tmr_add(tripl_tmr_id,1,ltim)
 
       return
       end subroutine
 !=======================================================================
 !> @brief Get 1D projection, array mapping and forcing smoothing
-!! @ingroup trip_line
+!! @ingroup tripl
 !! @details This routine supports straight lines given by their starting
 !!    and ending points. Additional flagg allows to introuduce forcing
 !!    periodicity or contain it between starting and ending points + smooting
 !!    lenght in z
 !! @remark This routine uses global scratch space \a CTMP0 and \a CTMP1
-      subroutine trip_1dprj()
+      subroutine tripl_1dprj()
       implicit none
 
       include 'SIZE'
       include 'INPUT'
       include 'GEOM'
-      include 'TRIPD'
+      include 'TRIPLD'
 
       ! global memory access
       real lcoord(LX1*LY1*LZ1*LELT)
@@ -453,15 +453,15 @@
       nptot = NX1*NY1*NZ1*NELV
       
       ! for each line
-      do il=1,trip_nline
+      do il=1,tripl_nline
          ! reset mapping array
-         call ifill(trip_map(1,1,1,1,il),-1,nptot)
+         call ifill(tripl_map(1,1,1,1,il),-1,nptot)
          ! initialise number of points per line
-         trip_npoint(il) = 0
+         tripl_npoint(il) = 0
          ! initialize smoothing factor
-         call rzero(trip_fsmth(1,1,1,1,il),nptot)
+         call rzero(tripl_fsmth(1,1,1,1,il),nptot)
          ! initialize projected point position
-         call rzero(trip_prj(1,il),nptot)
+         call rzero(tripl_prj(1,il),nptot)
 
          ! Projection onto the line
          ! count points on the line
@@ -471,35 +471,35 @@
                do ll = 1, ly1
                   do ml = 1, lx1
                      ! get point position relative to the line start
-                     rtmpv(1) = xm1(ml,ll,kl,jl)-trip_spos(1,il)
-                     rtmpv(2) = ym1(ml,ll,kl,jl)-trip_spos(2,il)
-                     rtmpv(ldim) = zm1(ml,ll,kl,jl)-trip_spos(ldim,il)
+                     rtmpv(1) = xm1(ml,ll,kl,jl)-tripl_spos(1,il)
+                     rtmpv(2) = ym1(ml,ll,kl,jl)-tripl_spos(2,il)
+                     rtmpv(ldim) = zm1(ml,ll,kl,jl)-tripl_spos(ldim,il)
                      ! get point coordinates in the local line system
                      do nl = 1, ldim
-                        rtmpc(nl) = dot(rtmpv,trip_vrs(1,nl,il),ldim)
-                        rtmpc(nl) = rtmpc(nl)*trip_ilngt(il)
+                        rtmpc(nl) = dot(rtmpv,tripl_vrs(1,nl,il),ldim)
+                        rtmpc(nl) = rtmpc(nl)*tripl_ilngt(il)
                      end do
                      ! distance from the line
                      ! 2D
-                     rtmp = (rtmpc(1)*trip_ismth(1,il))**2+
-     $                      (rtmpc(2)*trip_ismth(2,il))**2
+                     rtmp = (rtmpc(1)*tripl_ismth(1,il))**2+
+     $                      (rtmpc(2)*tripl_ismth(2,il))**2
                      ! do we extend a line beyond its ends
-                     if (.not.trip_lext(il)) then
+                     if (.not.tripl_lext(il)) then
                         if (rtmpc(ldim).lt.0.0) then
                            rtmp = rtmp +
-     $                            (rtmpc(ldim)*trip_ismth(ldim,il))**2
+     $                            (rtmpc(ldim)*tripl_ismth(ldim,il))**2
                         elseif (rtmpc(ldim).gt.1.0) then
                            rtmp = rtmp +
-     $                      ((rtmpc(ldim)-1.0)*trip_ismth(ldim,il))**2
+     $                      ((rtmpc(ldim)-1.0)*tripl_ismth(ldim,il))**2
                         end if
                      end if
 
                      ! get smoothing profile
                      ! Gauss; cannot be used with lines not extended beyond their ending points
-                     !trip_fsmth(itmp,jtmp,ktmp,eltmp,il) = exp(-4.0*rtmp)
+                     !tripl_fsmth(itmp,jtmp,ktmp,eltmp,il) = exp(-4.0*rtmp)
                      ! limited support
                      if (rtmp.lt.1.0) then
-                        trip_fsmth(ml,ll,kl,jl,il) =
+                        tripl_fsmth(ml,ll,kl,jl,il) =
      $                       exp(-rtmp)*(1-rtmp)**2
                         ! add the point to the list
                         itmp = itmp + 1
@@ -512,7 +512,7 @@
                         lmap_el(3,itmp) = ll
                         lmap_el(4,itmp) = ml
                      else
-                        trip_fsmth(ml,ll,kl,jl,il) = 0.0
+                        tripl_fsmth(ml,ll,kl,jl,il) = 0.0
                      endif
                   end do
                end do
@@ -524,21 +524,21 @@
             call sort(lcoord,lmap,itmp)
 
             ! identify unique points
-            trip_npoint(il) = 1
-            trip_prj(trip_npoint(il),il) = lcoord(1)
+            tripl_npoint(il) = 1
+            tripl_prj(tripl_npoint(il),il) = lcoord(1)
             ! generate mapping
-            trip_map(lmap_el(4,1),lmap_el(3,1),
-     $          lmap_el(2,1),lmap_el(1,1),il) = trip_npoint(il)
+            tripl_map(lmap_el(4,1),lmap_el(3,1),
+     $          lmap_el(2,1),lmap_el(1,1),il) = tripl_npoint(il)
             do jl = 2, itmp
                ! compare positions along the line
-               if((lcoord(jl)-trip_prj(trip_npoint(il),il)).gt.
+               if((lcoord(jl)-tripl_prj(tripl_npoint(il),il)).gt.
      $              max(epsl,abs(epsl*lcoord(jl)))) then
-                  trip_npoint(il) = trip_npoint(il) + 1
-                  trip_prj(trip_npoint(il),il) = lcoord(jl)
+                  tripl_npoint(il) = tripl_npoint(il) + 1
+                  tripl_prj(tripl_npoint(il),il) = lcoord(jl)
                endif
                ! generate mapping
-               trip_map(lmap_el(4,jl),lmap_el(3,jl),
-     $          lmap_el(2,jl),lmap_el(1,jl),il) = trip_npoint(il)
+               tripl_map(lmap_el(4,jl),lmap_el(3,jl),
+     $          lmap_el(2,jl),lmap_el(1,jl),il) = tripl_npoint(il)
             end do
          end if
       enddo
@@ -547,19 +547,19 @@
       end subroutine      
 !=======================================================================
 !> @brief Generate set of random phases
-!! @ingroup trip_line
-      subroutine trip_rphs_get
+!! @ingroup tripl
+      subroutine tripl_rphs_get
       implicit none
 
       include 'SIZE'
       include 'TSTEP'
       include 'PARALLEL'
-      include 'TRIPD'
+      include 'TRIPLD'
       
       ! local variables
       integer il, jl, kl
       integer itmp
-      real trip_ran2
+      real tripl_ran2
 
 #ifdef DEBUG
       character*3 str1, str2
@@ -571,30 +571,30 @@
 #endif
 !-----------------------------------------------------------------------
       ! time independent part
-      if (trip_tiamp.gt.0.0.and..not.trip_ifinit) then
-         do il = 1, trip_nline
-            do jl=1, trip_nmode(il)
-               trip_rphs(jl,1,il) = 2.0*pi*trip_ran2(il)
+      if (tripl_tiamp.gt.0.0.and..not.tripl_ifinit) then
+         do il = 1, tripl_nline
+            do jl=1, tripl_nmode(il)
+               tripl_rphs(jl,1,il) = 2.0*pi*tripl_ran2(il)
             enddo
          enddo
       endif
 
       ! time dependent part
-      do il = 1, trip_nline
-         itmp = int(time/trip_tdt(il))
+      do il = 1, tripl_nline
+         itmp = int(time/tripl_tdt(il))
          call bcast(itmp,ISIZE) ! just for safety
-         do kl= trip_ntdt(il)+1, itmp
-            do jl= trip_nset_max,3,-1
-               call copy(trip_rphs(1,jl,il),trip_rphs(1,jl-1,il),
-     $              trip_nmode(il))
+         do kl= tripl_ntdt(il)+1, itmp
+            do jl= tripl_nset_max,3,-1
+               call copy(tripl_rphs(1,jl,il),tripl_rphs(1,jl-1,il),
+     $              tripl_nmode(il))
             enddo
-            do jl=1, trip_nmode(il)
-               trip_rphs(jl,2,il) = 2.0*pi*trip_ran2(il)
+            do jl=1, tripl_nmode(il)
+               tripl_rphs(jl,2,il) = 2.0*pi*tripl_ran2(il)
             enddo
          enddo
          ! update time interval
-         trip_ntdt_old(il) = trip_ntdt(il)
-         trip_ntdt(il) = itmp
+         tripl_ntdt_old(il) = tripl_ntdt(il)
+         tripl_ntdt(il) = itmp
       enddo
 
 #ifdef DEBUG
@@ -606,8 +606,8 @@
       write(str2,'(i3.3)') icalldl
       open(unit=iunit,file='trp_rps.txt'//str1//'i'//str2)
 
-      do il=1,trip_nmode(1)
-         write(iunit,*) il,trip_rphs(il,1:4,1)
+      do il=1,tripl_nmode(1)
+         write(iunit,*) il,tripl_rphs(il,1:4,1)
       enddo
 
       close(iunit)
@@ -617,7 +617,7 @@
       end subroutine
 !=======================================================================
 !> @brief A simple portable random number generator
-!! @ingroup trip_line
+!! @ingroup tripl
 !! @details  Requires 32-bit integer arithmetic. Taken from Numerical
 !!   Recipes, William Press et al. Gives correlation free random
 !!   numbers but does not have a very large dynamic range, i.e only
@@ -625,60 +625,60 @@
 !!   initialization
 !! @param[in]   il      line number
 !! @return      ran
-      real function trip_ran2(il)
+      real function tripl_ran2(il)
       implicit none
 
       include 'SIZE'
-      include 'TRIPD'
+      include 'TRIPLD'
       
       ! argument list
       integer il
 
       ! local variables
-      integer iff(trip_nline_max), iy(trip_nline_max)
-      integer ir(97,trip_nline_max)
+      integer iff(tripl_nline_max), iy(tripl_nline_max)
+      integer ir(97,tripl_nline_max)
       integer m,ia,ic,j
       real rm
       parameter (m=714025,ia=1366,ic=150889,rm=1./m)
       save iff,ir,iy
-      data iff /trip_nline_max*0/
+      data iff /tripl_nline_max*0/
 !-----------------------------------------------------------------------
       ! initialise
-      if (trip_seed(il).lt.0.or.iff(il).eq.0) then
+      if (tripl_seed(il).lt.0.or.iff(il).eq.0) then
          iff(il)=1
-         trip_seed(il)=mod(ic-trip_seed(il),m)
+         tripl_seed(il)=mod(ic-tripl_seed(il),m)
          do j=1,97
-            trip_seed(il)=mod(ia*trip_seed(il)+ic,m)
-            ir(j,il)=trip_seed(il)
+            tripl_seed(il)=mod(ia*tripl_seed(il)+ic,m)
+            ir(j,il)=tripl_seed(il)
          end do
-         trip_seed(il)=mod(ia*trip_seed(il)+ic,m)
-         iy(il)=trip_seed(il)
+         tripl_seed(il)=mod(ia*tripl_seed(il)+ic,m)
+         iy(il)=tripl_seed(il)
       end if
       
       ! generate random number
       j=1+(97*iy(il))/m
       iy(il)=ir(j,il)
-      trip_ran2=iy(il)*rm
-      trip_seed(il)=mod(ia*trip_seed(il)+ic,m)
-      ir(j,il)=trip_seed(il)
+      tripl_ran2=iy(il)*rm
+      tripl_seed(il)=mod(ia*tripl_seed(il)+ic,m)
+      ir(j,il)=tripl_seed(il)
 
       end function
 !=======================================================================
 !> @brief Generate forcing along 1D line
-!! @ingroup trip_line
+!! @ingroup tripl
 !! @param[in] ifreset    reset flag
-      subroutine trip_frcs_get(ifreset)
+      subroutine tripl_frcs_get(ifreset)
       implicit none
 
       include 'SIZE'
       include 'INPUT'
       include 'TSTEP'
-      include 'TRIPD'
+      include 'TRIPLD'
 
       ! argument list
       logical ifreset
 
-#ifdef TRIP_PR_RST
+#ifdef TRIPL_PR_RST
       ! variables necessary to reset pressure projection for P_n-P_n-2
       integer nprv(2)
       common /orthbi/ nprv
@@ -703,53 +703,53 @@
 !-----------------------------------------------------------------------
       ! reset all
       if (ifreset) then
-         if (trip_tiamp.gt.0.0) then
+         if (tripl_tiamp.gt.0.0) then
             istart = 1
          else
             istart = 2
          endif
-         do il= 1, trip_nline
-            do jl = istart, trip_nset_max
-               call rzero(trip_frcs(1,jl,il),trip_npoint(il))
-               do kl= 1, trip_npoint(il)
-                  theta0 = 2*pi*trip_prj(kl,il)
-                  do ll= 1, trip_nmode(il)
+         do il= 1, tripl_nline
+            do jl = istart, tripl_nset_max
+               call rzero(tripl_frcs(1,jl,il),tripl_npoint(il))
+               do kl= 1, tripl_npoint(il)
+                  theta0 = 2*pi*tripl_prj(kl,il)
+                  do ll= 1, tripl_nmode(il)
                      theta = theta0*ll
-                     trip_frcs(kl,jl,il) = trip_frcs(kl,jl,il) +
-     $                    sin(theta+trip_rphs(ll,jl,il))
+                     tripl_frcs(kl,jl,il) = tripl_frcs(kl,jl,il) +
+     $                    sin(theta+tripl_rphs(ll,jl,il))
                   enddo
                enddo
             enddo
          enddo
          ! rescale time independent part
-         if (trip_tiamp.gt.0.0) then
-            do il= 1, trip_nline
-               call cmult(trip_frcs(1,1,il),trip_tiamp,trip_npoint(il))
+         if (tripl_tiamp.gt.0.0) then
+            do il= 1, tripl_nline
+             call cmult(tripl_frcs(1,1,il),tripl_tiamp,tripl_npoint(il))
             enddo
          endif
       else
          ! reset only time dependent part if needed
          ifntdt_dif = .FALSE.
-         do il= 1, trip_nline
-            if (trip_ntdt(il).ne.trip_ntdt_old(il)) then
+         do il= 1, tripl_nline
+            if (tripl_ntdt(il).ne.tripl_ntdt_old(il)) then
                ifntdt_dif = .TRUE.
-               do jl= trip_nset_max,3,-1
-                  call copy(trip_frcs(1,jl,il),trip_frcs(1,jl-1,il),
-     $                 trip_npoint(il))
+               do jl= tripl_nset_max,3,-1
+                  call copy(tripl_frcs(1,jl,il),tripl_frcs(1,jl-1,il),
+     $                 tripl_npoint(il))
                enddo
-               call rzero(trip_frcs(1,2,il),trip_npoint(il))
-               do jl= 1, trip_npoint(il)
-                  theta0 = 2*pi*trip_prj(jl,il)
-                  do kl= 1, trip_nmode(il)
+               call rzero(tripl_frcs(1,2,il),tripl_npoint(il))
+               do jl= 1, tripl_npoint(il)
+                  theta0 = 2*pi*tripl_prj(jl,il)
+                  do kl= 1, tripl_nmode(il)
                      theta = theta0*kl
-                     trip_frcs(jl,2,il) = trip_frcs(jl,2,il) +
-     $                    sin(theta+trip_rphs(kl,2,il))
+                     tripl_frcs(jl,2,il) = tripl_frcs(jl,2,il) +
+     $                    sin(theta+tripl_rphs(kl,2,il))
                   enddo
                enddo
             endif
          enddo
          if (ifntdt_dif) then
-#ifdef TRIP_PR_RST
+#ifdef TRIPL_PR_RST
             ! reset projection space
             ! pressure
             if (int(PARAM(95)).gt.0) then
@@ -768,34 +768,34 @@
       endif
       
       ! get tripping for current time step
-      if (trip_tiamp.gt.0.0) then
-         do il= 1, trip_nline
-           call copy(trip_ftrp(1,il),trip_frcs(1,1,il),trip_npoint(il))
+      if (tripl_tiamp.gt.0.0) then
+         do il= 1, tripl_nline
+         call copy(tripl_ftrp(1,il),tripl_frcs(1,1,il),tripl_npoint(il))
          enddo
       else
-         do il= 1, trip_nline
-            call rzero(trip_ftrp(1,il),trip_npoint(il))
+         do il= 1, tripl_nline
+            call rzero(tripl_ftrp(1,il),tripl_npoint(il))
          enddo
       endif
       ! interpolation in time
-      do il = 1, trip_nline
-         theta0= time/trip_tdt(il)-real(trip_ntdt(il))
+      do il = 1, tripl_nline
+         theta0= time/tripl_tdt(il)-real(tripl_ntdt(il))
          if (theta0.gt.0.0) then
             theta0=theta0*theta0*(3.0-2.0*theta0)
             !theta0=theta0*theta0*theta0*(10.0+(6.0*theta0-15.0)*theta0)
-            do jl= 1, trip_npoint(il)
-               trip_ftrp(jl,il) = trip_ftrp(jl,il) +
-     $              trip_tdamp*((1.0-theta0)*trip_frcs(jl,3,il) +
-     $              theta0*trip_frcs(jl,2,il))
+            do jl= 1, tripl_npoint(il)
+               tripl_ftrp(jl,il) = tripl_ftrp(jl,il) +
+     $              tripl_tdamp*((1.0-theta0)*tripl_frcs(jl,3,il) +
+     $              theta0*tripl_frcs(jl,2,il))
             enddo
          else
             theta0=theta0+1.0
             theta0=theta0*theta0*(3.0-2.0*theta0)
             !theta0=theta0*theta0*theta0*(10.0+(6.0*theta0-15.0)*theta0)
-            do jl= 1, trip_npoint(il)
-               trip_ftrp(jl,il) = trip_ftrp(jl,il) +
-     $              trip_tdamp*((1.0-theta0)*trip_frcs(jl,4,il) +
-     $              theta0*trip_frcs(jl,3,il))
+            do jl= 1, tripl_npoint(il)
+               tripl_ftrp(jl,il) = tripl_ftrp(jl,il) +
+     $              tripl_tdamp*((1.0-theta0)*tripl_frcs(jl,4,il) +
+     $              theta0*tripl_frcs(jl,3,il))
             enddo
          endif
       enddo
@@ -809,9 +809,9 @@
       write(str2,'(i3.3)') icalldl
       open(unit=iunit,file='trp_fcr.txt'//str1//'i'//str2)
 
-      do il=1,trip_npoint(1)
-         write(iunit,*) il,trip_prj(il,1),trip_ftrp(il,1),
-     $        trip_frcs(il,1:4,1)
+      do il=1,tripl_npoint(1)
+         write(iunit,*) il,tripl_prj(il,1),tripl_ftrp(il,1),
+     $        tripl_frcs(il,1:4,1)
       enddo
 
       close(iunit)

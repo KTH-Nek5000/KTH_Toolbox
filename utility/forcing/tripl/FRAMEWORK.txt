@@ -1,7 +1,7 @@
 #Configuration file for Nek5000 framework developed at KTH
 # Place for short description; doxygen style
 /**
-@defgroup trip_line  Line tripping module
+@defgroup tripl  Line tripping module
 @ingroup forcing
 
 @brief Random volume force along the line
@@ -42,7 +42,7 @@ for the finite line endings. \f$x_{loc}\f$ and \f$y_{loc}\f$ are the point coord
 system, and \f$z_{lrel}\f$ is a third local coordinate relative to the corresponding line ending.
 
 However, the function with limitted support can be easily replaced with simple Gauss profile
-(see commented lines in @ref trip_1dprj and notice factor 4.0 in the Gauss function necessary to 
+(see commented lines in @ref tripl_1dprj and notice factor 4.0 in the Gauss function necessary to 
 make smoothing lenghts consistent with the original function).
 The tripping has both steady and unsteeady parts with amplitudes TIAMP and TDAMP respectively,
 and the forcing is given by:
@@ -70,18 +70,18 @@ restart flag). It is based on a similar implementation in the SIMSON code @cite 
 and is described in detail in @cite Schlatter2012.
 
 This tool can simulate number of lines with different set of parameters for each line. The maximal
-number of lines is given by trip_nline_max in TRIPD include file. In the same way maximal number of 
-Fouries modes per line is given by trip_nmode_max parameter. User has to adjust values of these variables
+number of lines is given by tripl_nline_max in TRIPLD include file. In the same way maximal number of 
+Fouries modes per line is given by tripl_nmode_max parameter. User has to adjust values of these variables
 before compilation of the code.
 
 @mod_interface
 @interface_list Interface provided:
--# @ref trip_register
--# @ref trip_init
--# @ref trip_is_initialised
--# @ref trip_update
--# @ref trip_forcing
--# @ref trip_reset
+-# @ref tripl_register
+-# @ref tripl_init
+-# @ref tripl_is_initialised
+-# @ref tripl_update
+-# @ref tripl_forcing
+-# @ref tripl_reset
 
 @par
 @interface_reqr Interface required:
@@ -106,7 +106,7 @@ before compilation of the code.
       FFZ = 0.0
 
 !     add tripping
-      call trip_forcing(FFX,FFY,FFZ,ix,iy,iz,ieg)
+      call tripl_forcing(FFX,FFY,FFZ,ix,iy,iz,ieg)
 
       return
       end
@@ -124,7 +124,7 @@ before compilation of the code.
       call frame_monitor
 
 !     for tripping
-      call trip_update
+      call tripl_update
 
 !     finalise framework
       if (ISTEP.eq.NSTEPS.or.LASTEP.eq.1) then
@@ -142,7 +142,7 @@ before compilation of the code.
       include 'FRAMELP'
 !-----------------------------------------------------------------------
 !     register modules
-      call trip_register
+      call tripl_register
 
       return
       end subroutine
@@ -156,7 +156,7 @@ before compilation of the code.
       include 'SOLN'
 !-----------------------------------------------------------------------
 !     initialise modules
-      call trip_init
+      call tripl_init
 
       return
       end subroutine
@@ -177,27 +177,27 @@ before compilation of the code.
 @endcode
 
 @mod_param
-@param_list Parameters provided by trip_line module (include file - \a TRIPD):
+@param_list Parameters provided by tripl module (include file - \a TRIPLD):
 |Varaible | Type | Runtime parameter | Default value | Description |
 |---------|------|-------------------|---------------|-------------|
-|trip_nline      | integer | _tripping:nline | 0  | Number of tripping lines |
-|trip_tiamp      | real | _tripping:tiamp   | 0.0 | Time independent amplitude |
-|trip_tdamp      | real | _tripping:tdamp   | 0.0 | Time dependent amplitude   |
-|trip_spos(1,il) | real | _tripping:sposx'il' | 0.0 | Starting point X of 'il' line |
-|trip_spos(2,il) | real | _tripping:sposy'il' | 0.0 | Starting point Y of 'il' line |
-|trip_spos(3,il) | real | _tripping:sposz'il' | 0.0 | Starting point Z of 'il' line |
-|trip_epos(1,il) | real | _tripping:eposx'il' | 0.0 | Ending point X of 'il' line |
-|trip_epos(2,il) | real | _tripping:eposy'il' | 0.0 | Ending point Y of 'il' line |
-|trip_epos(3,il) | real | _tripping:eposz'il' | 0.0 | Ending point Z of 'il' line |
-|trip_smth(1,il) | real | _tripping:smthx'il' | 0.0 | Smoothing length X of 'il' line |
-|trip_smth(2,il) | real | _tripping:smthy'il' | 0.0 | Smoothing length Y of 'il' line |
-|trip_smth(3,il) | real | _tripping:smthz'il' | 0.0 | Smoothing length Z of 'il' line |
-|trip_lext(il)   | logical | _tripping:lext'il' | .F. | Line extension |
-|trip_rota(il)   | real | _tripping:rota'il'  | 0.0 | Rotation angle of 'il' line |
-|trip_nmode(il)  | integer | _tripping:nmode'il' | 0  | Number of Fourier modes of 'il' line |
-|trip_tdt(il)   | real | _tripping:tdt'il'  | 0.0 | Time step for tripping of 'il' line |
+|tripl_nline      | integer | _tripping:nline | 0  | Number of tripping lines |
+|tripl_tiamp      | real | _tripping:tiamp   | 0.0 | Time independent amplitude |
+|tripl_tdamp      | real | _tripping:tdamp   | 0.0 | Time dependent amplitude   |
+|tripl_spos(1,il) | real | _tripping:sposx'il' | 0.0 | Starting point X of 'il' line |
+|tripl_spos(2,il) | real | _tripping:sposy'il' | 0.0 | Starting point Y of 'il' line |
+|tripl_spos(3,il) | real | _tripping:sposz'il' | 0.0 | Starting point Z of 'il' line |
+|tripl_epos(1,il) | real | _tripping:eposx'il' | 0.0 | Ending point X of 'il' line |
+|tripl_epos(2,il) | real | _tripping:eposy'il' | 0.0 | Ending point Y of 'il' line |
+|tripl_epos(3,il) | real | _tripping:eposz'il' | 0.0 | Ending point Z of 'il' line |
+|tripl_smth(1,il) | real | _tripping:smthx'il' | 0.0 | Smoothing length X of 'il' line |
+|tripl_smth(2,il) | real | _tripping:smthy'il' | 0.0 | Smoothing length Y of 'il' line |
+|tripl_smth(3,il) | real | _tripping:smthz'il' | 0.0 | Smoothing length Z of 'il' line |
+|tripl_lext(il)   | logical | _tripping:lext'il' | .F. | Line extension |
+|tripl_rota(il)   | real | _tripping:rota'il'  | 0.0 | Rotation angle of 'il' line |
+|tripl_nmode(il)  | integer | _tripping:nmode'il' | 0  | Number of Fourier modes of 'il' line |
+|tripl_tdt(il)   | real | _tripping:tdt'il'  | 0.0 | Time step for tripping of 'il' line |
 
 @mod_param_example
-@include Toolbox/utility/forcing/trip_line/example.par
+@include Toolbox/utility/forcing/tripl/example.par
 
 */

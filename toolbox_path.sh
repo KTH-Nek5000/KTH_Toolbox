@@ -69,7 +69,7 @@ TOOLBOX_INC+=" -I"${NOISE_BOX_SRC}
 export SPONGE_BOX_SRC=${FORCING_SRC}"/sponge_box"
 TOOLBOX_INC+=" -I"${SPONGE_BOX_SRC}
 # Tripping line include file has to be copied to setup directory
-export TRIP_LINE_SRC=${FORCING_SRC}"/trip_line"
+export TRIPL_SRC=${FORCING_SRC}"/tripl"
 
 export MAP2D_SRC=${GRID_SRC}"/map2D"
 TOOLBOX_INC+=" -I"${MAP2D_SRC}
