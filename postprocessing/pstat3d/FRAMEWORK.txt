@@ -43,11 +43,19 @@ field_list.txt in this folder.
 The interpolated point data is saved to a file called `int_fld`.
 It can be read using the functions in `reader_int_fld.py` Python file.
 
+@include Toolbox/postprocessing/pstat3d/field_list.txt
+
 @mod_interface
 @interface_list
 -# @ref pstat3d_register
 -# @ref pstat3d_init
 -# @ref pstat3d_main
+
+@par
+@interface_reqr Interface required:
+-# multiple interfaces from [runtime parameters] (@ref runparam) and [monitor] (@ref monitor) modules
+-# @ref io_mfo_fname from [Input/output] (@ref io) module 
+-# @ref io_file_freeid from [Input/output] (@ref io) module (debugging only)
 
 @mod_interface_example
 @code{.f}
@@ -122,11 +130,6 @@ It can be read using the functions in `reader_int_fld.py` Python file.
 
 
 @mod_param_example
-@code{.txt}
-[_PSTAT3D]                # Runtime paramere section for pstat module
-STS_NFILE            = 2                      # Number of collected s01-s11 files
-STS_STIME            = 0.69968783E+02         # Statistics starting time
-STS_NSTEP            = 10                     # Number of steps between averaging in collected s01-s11 files 
-@endcode
+@include Toolbox/postprocessing/pstat3d/example.par
 
 */

@@ -48,11 +48,19 @@ The `s2` file will contain the extra derivative fields.
 The interpolated point data is saved to a file called `int_fld`.
 It can be read using the functions in `reader_int_fld.py` Python file.
 
+@include Toolbox/postprocessing/pstat2d/field_list.txt
+
 @mod_interface
 @interface_list
 -# @ref pstat2d_register
 -# @ref pstat2d_init
 -# @ref pstat2d_main
+
+@par
+@interface_reqr Interface required:
+-# multiple interfaces from [runtime parameters] (@ref runparam) and [monitor] (@ref monitor) modules
+-# @ref io_mfo_fname from [Input/output] (@ref io) module
+-# @ref io_file_freeid from [Input/output] (@ref io) module (debugging only)
 
 @mod_interface_example
 @code{.f}
@@ -129,13 +137,6 @@ It can be read using the functions in `reader_int_fld.py` Python file.
 
 
 @mod_param_example
-@code{.txt}
-[_PSTAT2D]                # Runtime paramere section for pstat module
-C2D_FNUM             = 1                      # Redundant, set to 1
-AMR_NREF             = 5                      # Nr. of initial refinemnt (AMR only)
-STS_NFILE            = 1                      # Number of stat files
-STS_STIME            = 0.00000000E+00         # Statistics starting time
-STS_NSTEP            = 10                     # Number of steps between averaging (in sts files)
-@endcode
+@include Toolbox/postprocessing/pstat2d/example.par
 
 */
