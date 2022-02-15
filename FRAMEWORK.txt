@@ -30,6 +30,7 @@ Each module has to contain:
    + example.par including corresponding runtime parameter section
    + example.usr including example of required user defined interfaces (modiffication required)
    + more detailed documentation
+   + additional scripts required by the module
 
 Dependences between modules are described in FRAMEWORK.txt (present in almost every directory) including:
 - documentation section written in a form of doxygen C comment

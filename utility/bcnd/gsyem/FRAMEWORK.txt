@@ -31,7 +31,8 @@ The final step is definition of the vortex orinetation with an integer array.
 @par
 @interface_reqr Interface required:
 -# multiple interfaces from [runtime parameters] (@ref runparam) and [monitor] (@ref monitor) modules
--# @ref math_ran_rng, @ref math_zbqlini, @ref math_etovec and @ref math_rot3Da from @ref math module
+-# @ref io_file_freeid from [Input/output] (@ref io) module (debugging only)
+-# @ref math_ran_rng, @ref math_zbqlini, @ref math_etovec and @ref math_rot3da from @ref math module
 -# (\a usr_gen_eddy); user defined
 
 @mod_interface_example
