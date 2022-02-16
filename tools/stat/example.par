@@ -1,5 +1,6 @@
 [_STAT]             # Runtime parameter section for statistics module
 AVSTEP               = 10 # The frequency, in time-steps, at which the solution is sampled
+SKSTEP               = 2 # Skipped initial steps
 IOSTEP               = 50 # The output frequency, in time-steps, which also defines the averaging window
 
 

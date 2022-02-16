@@ -88,6 +88,9 @@
       call rprm_rp_reg(stat_avstep_id,stat_sec_id,'AVSTEP',
      $     'Frequency of averaging',rpar_int,10,0.0,.false.,' ')
 
+      call rprm_rp_reg(stat_skstep_id,stat_sec_id,'SKSTEP',
+     $     'Skipped initial steps',rpar_int,10,0.0,.false.,' ')
+
       call rprm_rp_reg(stat_IOstep_id,stat_sec_id,'IOSTEP',
      $     'Frequency of filed saving',rpar_int,100,0.0,.false.,' ')
       
@@ -140,6 +143,8 @@
       ! get runtime parameters
       call rprm_rp_get(itmp,rtmp,ltmp,ctmp,stat_avstep_id,rpar_int)
       stat_avstep = itmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,stat_skstep_id,rpar_int)
+      stat_skstep = itmp
       call rprm_rp_get(itmp,rtmp,ltmp,ctmp,stat_IOstep_id,rpar_int)
       stat_IOstep = itmp
 
@@ -236,22 +241,12 @@
       ! simple timing
       real ltim
 
-      ! number of steps to be descarded in the simulation beginning
-      ! This is necessary due to multistep restart scheme as 2-3 first steps
-      ! are in general repeated from the previous simulation.
-      ! It does not produce any problem in case of AMR, as in this case
-      ! those first steps are skept anyway.
-      ! For now the number is simply hard-coded to the max of time integration
-      ! order
-      integer step_skip
-      parameter (step_skip=lorder)
-
       ! functions
       real dnekclock
 !-----------------------------------------------------------------------
       ! skip initial steps
-      if (ISTEP.gt.step_skip) then
-        itmp = ISTEP - step_skip
+      if (ISTEP.gt.stat_skstep) then
+        itmp = ISTEP - stat_skstep
 
         ! average
         if (mod(itmp,stat_avstep).eq.0) then

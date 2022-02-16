@@ -198,7 +198,7 @@
       NZO   = 1
       nxyzo = NXO*NYO*NZO
 
-      ! if this is AMR run, one has to cast 3D mesh to 2D nonconforming counterpart
+      ! Save info regarding element ordering; especially important for AMR run
       call stat_mfo_crd2D
 
       ! open files on i/o nodes
