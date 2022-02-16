@@ -26,6 +26,13 @@ Description of the implementation and performed tests can be found in @cite Pepl
 -# @ref sfd_forcing
 -# @ref sfd_main
 
+@par
+@interface_reqr Interface required:
+-# multiple interfaces from @ref runparam and @ref monitor modules
+-# @ref io_file_freeid, @ref io_mfo_fname, @ref io_mbyte_open, @ref io_mfov, @ref io_mbyte_close and @ref io_mfiv from @ref io module
+-# @ref chkpt_get_fset from @ref chkpoint module
+-# @ref chkpt_map_gll from @ref chkpoint_mstep module
+
 @mod_interface_example
 @code{.f}
 !======================================================================
@@ -125,23 +132,19 @@ the number of the restart file set \a chkpt_main must be called before \a sfd_ma
 | sfd_cnv | integer | _sfd:LogInterval | frequency for logging convegence data |
 | sfd_ifrst | logical | _sfd:SFDReadChkpt | SFD; restat from checkpoint |
 
-@mod_param
+@par
 @param_reqr Parameters required by sfd module:
--# [CHKPOINTD] (@ref chkpoint):
-   + chpt_step - checkpiont dump frequency (number of time steps)
-   + chpt_ifrst - if restart
-   + chpt_fnum - restart set number
-   + chpt_set_o
-
+-# @ref chkpoint :
+   + _chkpoint:readchkpt - start simulation form checkpoint
+   + _chkpoint:chkpFnumber - restart file number
+   + _chkpoint:chkpInterval - checkpiont dump frequency (number of time steps)
+-# Nek5000
+   + PARAM(27)
+   + IFTRAN
+   + IFPERT
 
 @mod_param_example
-@code{.txt}
-[_SFD]
-filterwdth = 1.05
-controlcff = 0.5
-residualtol = 0.1E-06
-loginterval = 50
-sfdreadchkpt = no
-@endcode
+@include Toolbox/tools/baseflow/sfd/example.par
+
 
 */

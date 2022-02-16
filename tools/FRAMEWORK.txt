@@ -7,6 +7,6 @@
 @brief Set of tools for Nek5000 framework
 
 @details 
-This directory contains a number of tools developed at KTH. 
+This directory contains a number of various tools developed for Nek5000. 
 
 */
