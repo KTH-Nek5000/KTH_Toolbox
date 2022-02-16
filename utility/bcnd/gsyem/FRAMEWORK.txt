@@ -1,7 +1,7 @@
 #Configuration file for Nek5000 framework developed at KTH
 # Place for short description; doxygen style
 /**
-@defgroup gsyn_eddy  Generalised synthetic eddy method module
+@defgroup gsyem  Generalised synthetic eddy method module
 @ingroup bcnd
 
 @brief Turbulence at inlet generated with divergence-free synthetic eddy method.
@@ -24,14 +24,15 @@ The final step is definition of the vortex orinetation with an integer array.
 
 @mod_interface
 @interface_list Interface provided:
--# @ref gsem_register
--# @ref gsem_init
--# @ref gsem_main
+-# @ref gsyem_register
+-# @ref gsyem_init
+-# @ref gsyem_main
 
 @par
 @interface_reqr Interface required:
 -# multiple interfaces from [runtime parameters] (@ref runparam) and [monitor] (@ref monitor) modules
 -# @ref io_file_freeid from [Input/output] (@ref io) module (debugging only)
+-# @ref chkpt_get_fset from [Checkpointing routines] (@ref chkpoint) module
 -# @ref math_ran_rng, @ref math_zbqlini, @ref math_etovec and @ref math_rot3da from @ref math module
 -# (\a usr_gen_eddy); user defined
 
@@ -47,8 +48,11 @@ The final step is definition of the vortex orinetation with an integer array.
 !     monitor simulation
       call frame_monitor
 
+!     save/load files for full-restart
+      call chkpt_main
+
 !     add turbulent inflow
-      call gsem_main
+      call gsyem_main
 
 !     finalise framework
       if (ISTEP.ge.NSTEPS.or.LASTEP.eq.1) then
@@ -67,7 +71,7 @@ The final step is definition of the vortex orinetation with an integer array.
 !-----------------------------------------------------------------------
 !     register modules
       call chkpt_register
-      call gsem_register
+      call gsyem_register
 
       return
       end subroutine
@@ -81,7 +85,7 @@ The final step is definition of the vortex orinetation with an integer array.
 !-----------------------------------------------------------------------
 !     initialise modules
       call chkpt_init
-      call gsem_init
+      call gsyem_init
 
       return
       end subroutine
@@ -101,19 +105,29 @@ The final step is definition of the vortex orinetation with an integer array.
 @endcode
 @include Toolbox/utility/bcnd/gsyem/example.usr
 
+@warning This module's restart procedure depends on @ref chkpoint module. 
+
 @mod_param
-@param_list Parameters provided by sponge_box module (include file - \a SPONGRBD):
+@param_list Parameters provided by gsyem module (include file - \a GSYEMD):
 |Varaible | Type | Runtime parameter | Default value | Description |
 |---------|------|-------------------|---------------|-------------|
-|gsem_mode | integer | _gsyem:mode | 1 | gSyEM mode |
-|gsem_nfam | integer | _gsyem:nfam | 1 | Family number |
-|gsem_neddy(il) | integer | _gsyem:neddy'il' | 10 | Numer of eddies of 'il' family |
-|gsem_fambc(il) | integer | _gsyem:fambc'il' | 10 | Boundarry index of 'il' family |
-|gsem_famasig(il) | real | _gsyem:famasig'il' | 0.025 | Max eddy size of 'il' family |
-|gsem_famisig(il) | real | _gsyem:famisig'il' | 0.025 | Min eddy size of 'il' family |
-|gsem_famdirx(il) | real | _gsyem:famdirx'il' | 0.025 | X normal component of 'il' family |
-|gsem_famdiry(il) | real | _gsyem:famdiry'il' | 0.025 | X normal component of 'il' family |
-|gsem_famdirz(il) | real | _gsyem:famdirz'il' | 0.025 | X normal component of 'il' family |
+|gsyem_mode | integer | _gsyem:mode | 1 | gSyEM mode |
+|gsyem_nfam | integer | _gsyem:nfam | 1 | Family number |
+|gsyem_neddy(il) | integer | _gsyem:neddy'il' | 10 | Numer of eddies of 'il' family |
+|gsyem_fambc(il) | integer | _gsyem:fambc'il' | 10 | Boundarry index of 'il' family |
+|gsyem_famasig(il) | real | _gsyem:famasig'il' | 0.025 | Max eddy size of 'il' family |
+|gsyem_famisig(il) | real | _gsyem:famisig'il' | 0.025 | Min eddy size of 'il' family |
+|gsyem_famdirx(il) | real | _gsyem:famdirx'il' | 0.025 | X normal component of 'il' family |
+|gsyem_famdiry(il) | real | _gsyem:famdiry'il' | 0.025 | X normal component of 'il' family |
+|gsyem_famdirz(il) | real | _gsyem:famdirz'il' | 0.025 | X normal component of 'il' family |
+
+@par
+@param_reqr Parameters required by gsyem module:
+-# @ref chkpoint :
+   + _chkpoint:readchkpt - start simulation form checkpoint
+   + _chkpoint:chkpFnumber - restart file number
+-# Nek5000
+   + PARAM(27)
 
 @mod_param_example
 @include Toolbox/utility/bcnd/gsyem/example.par

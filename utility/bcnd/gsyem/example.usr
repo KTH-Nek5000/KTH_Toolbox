@@ -33,14 +33,14 @@
       vrtmp(1) = rho*cos(theta)
       vrtmp(2) = rho*sin(theta)
       if (ifinit) then
-         vrtmp(ldim) = math_ran_rng(-gsem_bext(nfam),gsem_bext(nfam))
+         vrtmp(ldim) = math_ran_rng(-gsyem_bext(nfam),gsyem_bext(nfam))
       else
-         vrtmp(ldim) = -gsem_bext(nfam)
+         vrtmp(ldim) = -gsyem_bext(nfam)
       endif
 
       ! rotate coordinates
       call math_rot3Da(epos,vrtmp,
-     $        gsem_raxs(1,nfam),gsem_rang(nfam))
+     $        gsyem_raxs(1,nfam),gsyem_rang(nfam))
 
       do il=1,ldim
          rho = math_ran_rng(0.0,1.0)
