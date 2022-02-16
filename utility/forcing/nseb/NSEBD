@@ -1,7 +1,7 @@
-!> @file NOISEBXD
-!! @ingroup noise_box
+!> @file NSEBD
+!! @ingroup nseb
 !! @brief Include file with parameter and common block definitions for 
-!! noise_box
+!! noise box
 !! @author Adam Peplinski
 !! @date Feb 2, 2017
 !=======================================================================

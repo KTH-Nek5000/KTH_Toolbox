@@ -1,11 +1,11 @@
-!> @file noisebx.f
-!! @ingroup noise_box
+!> @file nseb.f
+!! @ingroup nseb
 !> @brief Adding white noise in a box
 !! @author Adam Peplinski
 !! @date Feb 2, 2017
 !=======================================================================
-!> @brief Register noise_box module
-!! @ingroup noise_box
+!> @brief Register noise box module
+!! @ingroup nseb
 !! @note This routine should be called in frame_usr_register
       subroutine nseb_register()
       implicit none
@@ -13,7 +13,7 @@
       include 'SIZE'
       include 'INPUT'
       include 'FRAMELP'
-      include 'NOISEBXD'
+      include 'NSEBD'
 
       ! local variables
       integer lpmid, il, jl
@@ -55,7 +55,7 @@
 
       ! register and set active section
       call rprm_sec_reg(nseb_sec_id,nseb_id,'_'//adjustl(nseb_name),
-     $     'Runtime paramere section for noise_box module')
+     $     'Runtime paramere section for nseb module')
       call rprm_sec_set_act(.true.,nseb_sec_id)
 
       ! register parameters
@@ -120,8 +120,8 @@
       return
       end subroutine
 !=======================================================================
-!> @brief Initilise noise_box module
-!! @ingroup noise_box
+!> @brief Initilise noise box module
+!! @ingroup nseb
 !! @note This routine should be called in frame_usr_init
 !! @remark This routine uses global scratch space \a SCRUZ
       subroutine nseb_init()
@@ -130,7 +130,7 @@
       include 'SIZE'
       include 'INPUT'
       include 'FRAMELP'
-      include 'NOISEBXD'
+      include 'NSEBD'
 
       ! local variables
       integer ierr, nhour, nmin, il, jl
@@ -207,13 +207,13 @@
       end subroutine
 !=======================================================================
 !> @brief Check if module was initialised
-!! @ingroup noise_box
+!! @ingroup nseb
 !! @return nseb_is_initialised
       logical function nseb_is_initialised()
       implicit none
 
       include 'SIZE'
-      include 'NOISEBXD'
+      include 'NSEBD'
 !-----------------------------------------------------------------------
       nseb_is_initialised = nseb_ifinit
 
@@ -221,7 +221,7 @@
       end function
 !=======================================================================
 !> @brief Add noise to velocity field in a box
-!! @ingroup noise_box
+!! @ingroup nseb
       subroutine nseb_noise_add()
       implicit none
 
@@ -232,7 +232,7 @@
       include 'SOLN'            ! VX, VY, VZ, VMULT
       include 'GEOM'            ! XM1, YM1, ZM1
       include 'FRAMELP'
-      include 'NOISEBXD'
+      include 'NSEBD'
 
       ! local variables
       integer iel, ieg, il, jl, kl, nl

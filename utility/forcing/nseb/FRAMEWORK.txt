@@ -1,7 +1,7 @@
 #Configuration file for Nek5000 framework developed at KTH
 # Place for short description; doxygen style
 /**
-@defgroup noise_box  Noise_box module
+@defgroup nseb  Noise box module
 @ingroup forcing
 
 @brief Add white noise to velocity field at given time in a box
@@ -18,7 +18,7 @@ a random number ganarator. At the end velocity field is smoothed at the element 
 
 @par
 @interface_reqr Interface required:
--# multiple interfaces from [runtime parameters] (@ref runparam) and [monitor] (@ref monitor) modules
+-# multiple interfaces from @ref runparam and @ref monitor modules
 -# @ref math_ran_dst from @ref math module
 
 @mod_interface_example
@@ -107,7 +107,7 @@ a random number ganarator. At the end velocity field is smoothed at the element 
 |nseb_rfc(3,3)| real | _noisebx:frc3_3  | 3.0e4 | function coefficient for random number gnerator; cf. 3, vel. cmp. VZ |
 
 @mod_param_example
-@include Toolbox/utility/forcing/noise_box/example.par
+@include Toolbox/utility/forcing/nseb/example.par
 
 
 */
