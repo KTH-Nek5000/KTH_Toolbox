@@ -11,7 +11,7 @@ Set of subroutines to wrap MPI communication missing in Nek5000.
 
 @mod_interface
 @interface_list Interface provided:
--# @ref ivgl_running_sum
--# @ref ibcastn
+-# @ref comm_ivglrsum
+-# @ref comm_ibcastn
 
 */

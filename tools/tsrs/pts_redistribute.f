@@ -494,11 +494,11 @@ c$$$      str2=str//'p'
       enddo
  
 !     global communication
-      call ivgl_running_sum(npts_node_r,npts_node_l,nplist)
+      call comm_ivglrsum(npts_node_r,npts_node_l,nplist)
 
 !     last node has global sum; broadcast it
       if (NID.eq.(NP-1)) call icopy(npts_node_g,npts_node_r,nplist)
-      call ibcastn(npts_node_g,nplist,NP-1)
+      call comm_ibcastn(npts_node_g,nplist,NP-1)
 
 !     remove local numbers from the running sum
       do ipr = 1, nplist
@@ -544,7 +544,7 @@ c$$$      str2=str//'p'
             endif
 
 !     broadcast values and get new number of point to collect
-            call ibcastn(idummy,2,nodeid)
+            call comm_ibcastn(idummy,2,nodeid)
             itmp = nptupg - idummy(1)
 
 !     shift points
@@ -834,31 +834,6 @@ c$$$      str2=str//'p'
       enddo
 
  300  continue
-
-      return
-      end
-c-----------------------------------------------------------------------
-!     global scan
-      subroutine ivgl_running_sum(out,in,n)
-c
-      include 'mpif.h'
-      common /nekmpi/ nid,np,nekcomm,nekgroup,nekreal
-      integer status(mpi_status_size)
-      integer n
-      integer out(n),in(n)
-
-      call mpi_scan(in,out,n,mpi_integer,mpi_sum,nekcomm,ierr)
-
-      return
-      end
-c-----------------------------------------------------------------------
-      subroutine ibcastn(buf,len,sid)
-      include 'mpif.h'
-      common /nekmpi/ nid,np,nekcomm,nekgroup,nekreal
-      integer len,sid
-      integer buf(len)
-
-      call mpi_bcast (buf,len,mpi_integer,sid,nekcomm,ierr)
 
       return
       end

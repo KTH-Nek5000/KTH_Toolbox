@@ -147,7 +147,7 @@ to \a frame_usr_register and \a frame_usr_init.
 @include Toolbox/tools/stat/example.usr
 
 @mod_param
-@param_list Parameters provided by sfd module (include file - \a STATD):
+@param_list Parameters provided by stat module (include file - \a STATD):
 |Varaible | Type |Runtime parameter | Description|
 |---------|------|------------------|------------|
 | stat_avstep | integer | _stat:AvStep | frequency of averaging |

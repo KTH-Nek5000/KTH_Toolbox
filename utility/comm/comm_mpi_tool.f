@@ -13,7 +13,7 @@
 !! @param[in]      in     input array
 !! @param[in]      nl     buffer length
 !! @todo Error mark should be exported
-      subroutine ivgl_running_sum(out,in,nl)
+      subroutine comm_ivglrsum(out,in,nl)
       implicit none
 
       include 'mpif.h'
@@ -41,7 +41,7 @@
 !! @param[in]      nl     buffer length
 !! @param[in]      sid    broadcasting process id
 !! @todo Error mark should be exported
-      subroutine ibcastn(buf,nl,sid)
+      subroutine comm_ibcastn(buf,nl,sid)
       implicit none
 
       include 'mpif.h'

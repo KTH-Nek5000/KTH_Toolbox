@@ -78,6 +78,9 @@
       call rprm_rp_reg(tsrs_smpstep_id,tsrs_sec_id,'SMPSTEP',
      $     'Frequency of sampling',rpar_int,10,0.0,.false.,' ')
 
+      call rprm_rp_reg(tsrs_skstep_id,tsrs_sec_id,'SKSTEP',
+     $     'Skipped initial steps',rpar_int,10,0.0,.false.,' ')
+
       ! set initialisation flag
       tsrs_ifinit=.false.
 
@@ -121,7 +124,7 @@
       ! check if the module was already initialised
       if (tsrs_ifinit) then
          call mntr_warn(tsrs_id,
-     $        'module ['//trim(tsrs_name)//'] already initiaised.')
+     $        'module ['//trim(tsrs_name)//'] already initialised.')
          return
       endif
 
@@ -131,6 +134,9 @@
       ! get runtime parameters
       call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tsrs_smpstep_id,rpar_int)
       tsrs_smpstep = itmp
+
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tsrs_skstep_id,rpar_int)
+      tsrs_skstep = itmp
 
       ! initialise findpts
       ntot = lx1*ly1*lz1*lelt 
@@ -218,24 +224,14 @@
       ! simple timing
       real ltim
 
-      ! number of steps to be descarded in the simulation beginning
-      ! This is necessary due to multistep restart scheme as 2-3 first steps
-      ! are in general repeated from the previous simulation.
-      ! It does not produce any problem in case of AMR, as in this case
-      ! those first steps are skept anyway.
-      ! For now the number is simply hard-coded to the max of time integration
-      ! order
-      integer step_skip
-      parameter (step_skip=lorder)
-
       logical ifapp
 
       ! functions
       real dnekclock
 !-----------------------------------------------------------------------
       ! skip initial steps
-      if (ISTEP.gt.step_skip) then
-        itmp = ISTEP - step_skip
+      if (ISTEP.gt.tsrs_skstep) then
+        itmp = ISTEP - tsrs_skstep
 
         ! sample fields
         if (mod(itmp,tsrs_smpstep).eq.0) then
