@@ -1,19 +1,19 @@
-!> @file spongebx.f
-!! @ingroup sponge_box
+!> @file spnb.f
+!! @ingroup spnb
 !! @brief Sponge/fringe for simple box mesh
 !! @author Adam Peplinski
 !! @date Feb 1, 2017
 !=======================================================================
-!> @brief Register sponge_box module
-!! @ingroup sponge_box
+!> @brief Register sponge box module
+!! @ingroup spnb
 !! @note This routine should be called in frame_usr_register
-      subroutine spng_register()
+      subroutine spnb_register()
       implicit none
 
       include 'SIZE'
       include 'INPUT'
       include 'FRAMELP'
-      include 'SPONGEBXD'
+      include 'SPNBD'
 
       ! local variables
       integer lpmid
@@ -26,10 +26,10 @@
       ltim = dnekclock()
 
       ! check if the current module was already registered
-      call mntr_mod_is_name_reg(lpmid,spng_name)
+      call mntr_mod_is_name_reg(lpmid,spnb_name)
       if (lpmid.gt.0) then
          call mntr_warn(lpmid,
-     $        'module ['//trim(spng_name)//'] already registered')
+     $        'module ['//trim(spnb_name)//'] already registered')
          return
       endif
 
@@ -42,91 +42,91 @@
       endif
 
       ! register module
-      call mntr_mod_reg(spng_id,lpmid,spng_name,
+      call mntr_mod_reg(spnb_id,lpmid,spnb_name,
      $          'Sponge/fringe for rectangular domain')
 
       ! register timer
       call mntr_tmr_is_name_reg(lpmid,'FRM_TOT')
-      call mntr_tmr_reg(spng_tmr_id,lpmid,spng_id,
-     $     'SPNG_INI','Sponge calculation initialisation time',.false.)
+      call mntr_tmr_reg(spnb_tmr_id,lpmid,spnb_id,
+     $     'spnb_INI','Sponge calculation initialisation time',.false.)
 
       ! register and set active section
-      call rprm_sec_reg(spng_sec_id,spng_id,'_'//adjustl(spng_name),
-     $     'Runtime paramere section for sponge_box module')
-      call rprm_sec_set_act(.true.,spng_sec_id)
+      call rprm_sec_reg(spnb_sec_id,spnb_id,'_'//adjustl(spnb_name),
+     $     'Runtime paramere section for sponge box module')
+      call rprm_sec_set_act(.true.,spnb_sec_id)
 
       ! register parameters
-      call rprm_rp_reg(spng_str_id,spng_sec_id,'STRENGTH',
+      call rprm_rp_reg(spnb_str_id,spnb_sec_id,'STRENGTH',
      $     'Sponge strength',rpar_real,0,0.0,.false.,' ')
 
-      call rprm_rp_reg(spng_wl_id(1),spng_sec_id,'WIDTHLX',
+      call rprm_rp_reg(spnb_wl_id(1),spnb_sec_id,'WIDTHLX',
      $     'Sponge left section width; dimension X ',
      $     rpar_real,0,0.0,.false.,' ')
 
-      call rprm_rp_reg(spng_wl_id(2),spng_sec_id,'WIDTHLY',
+      call rprm_rp_reg(spnb_wl_id(2),spnb_sec_id,'WIDTHLY',
      $     'Sponge left section width; dimension Y ',
      $     rpar_real,0,0.0,.false.,' ')
 
-      if (IF3D) call rprm_rp_reg(spng_wl_id(ndim),spng_sec_id,
+      if (IF3D) call rprm_rp_reg(spnb_wl_id(ndim),spnb_sec_id,
      $     'WIDTHLZ','Sponge left section width; dimension Z ',
      $     rpar_real,0,0.0,.false.,' ')
 
-      call rprm_rp_reg(spng_wr_id(1),spng_sec_id,'WIDTHRX',
+      call rprm_rp_reg(spnb_wr_id(1),spnb_sec_id,'WIDTHRX',
      $     'Sponge right section width; dimension X ',
      $     rpar_real,0,0.0,.false.,' ')
 
-      call rprm_rp_reg(spng_wr_id(2),spng_sec_id,'WIDTHRY',
+      call rprm_rp_reg(spnb_wr_id(2),spnb_sec_id,'WIDTHRY',
      $     'Sponge right section width; dimension Y ',
      $     rpar_real,0,0.0,.false.,' ')
 
-      if (IF3D) call rprm_rp_reg(spng_wr_id(ndim),spng_sec_id,
+      if (IF3D) call rprm_rp_reg(spnb_wr_id(ndim),spnb_sec_id,
      $     'WIDTHRZ','Sponge right section width; dimension Z ',
      $     rpar_real,0,0.0,.false.,' ')
 
-      call rprm_rp_reg(spng_dl_id(1),spng_sec_id,'DROPLX',
+      call rprm_rp_reg(spnb_dl_id(1),spnb_sec_id,'DROPLX',
      $     'Sponge left drop/rise section width; dimension X ',
      $     rpar_real,0,0.0,.false.,' ')
 
-      call rprm_rp_reg(spng_dl_id(2),spng_sec_id,'DROPLY',
+      call rprm_rp_reg(spnb_dl_id(2),spnb_sec_id,'DROPLY',
      $     'Sponge left drop/rise section width; dimension Y ',
      $     rpar_real,0,0.0,.false.,' ')
 
-      if (IF3D) call rprm_rp_reg(spng_dl_id(ndim),spng_sec_id,
+      if (IF3D) call rprm_rp_reg(spnb_dl_id(ndim),spnb_sec_id,
      $    'DROPLZ','Sponge left drop/rise section width; dimension Z ',
      $    rpar_real,0,0.0,.false.,' ')
 
-      call rprm_rp_reg(spng_dr_id(1),spng_sec_id,'DROPRX',
+      call rprm_rp_reg(spnb_dr_id(1),spnb_sec_id,'DROPRX',
      $     'Sponge right drop/rise section width; dimension X ',
      $     rpar_real,0,0.0,.false.,' ')
 
-      call rprm_rp_reg(spng_dr_id(2),spng_sec_id,'DROPRY',
+      call rprm_rp_reg(spnb_dr_id(2),spnb_sec_id,'DROPRY',
      $     'Sponge right drop/rise section width; dimension Y ',
      $     rpar_real,0,0.0,.false.,' ')
 
-      if (IF3D) call rprm_rp_reg(spng_dr_id(ndim),spng_sec_id,
+      if (IF3D) call rprm_rp_reg(spnb_dr_id(ndim),spnb_sec_id,
      $   'DROPRZ','Sponge right drop/rise section width; dimension Z ',
      $    rpar_real,0,0.0,.false.,' ')
 
       ! timing
       ltim = dnekclock() - ltim
-      call mntr_tmr_add(spng_tmr_id,1,ltim)
+      call mntr_tmr_add(spnb_tmr_id,1,ltim)
 
       return
       end subroutine
 !=======================================================================
-!> @brief Initilise sponge_box module
-!! @ingroup sponge_box
+!> @brief Initilise sponge box module
+!! @ingroup spnb
 !! @param[in] lvx, lvy, lvz   velocity field to be stored as reference field
 !! @note This routine should be called in frame_usr_init
 !! @remark This routine uses global scratch space \a SCRUZ
-      subroutine spng_init(lvx,lvy,lvz)
+      subroutine spnb_init(lvx,lvy,lvz)
       implicit none
 
       include 'SIZE'
       include 'INPUT'
       include 'GEOM'
       include 'FRAMELP'
-      include 'SPONGEBXD'
+      include 'SPNBD'
 
       ! argument list
       real lvx(LX1*LY1*LZ1*LELV),lvy(LX1*LY1*LZ1*LELV),
@@ -150,9 +150,9 @@
       real dnekclock, glmin, glmax, math_stepf
 !-----------------------------------------------------------------------
       ! check if the module was already initialised
-      if (spng_ifinit) then
-         call mntr_warn(spng_id,
-     $        'module ['//trim(spng_name)//'] already initiaised.')
+      if (spnb_ifinit) then
+         call mntr_warn(spnb_id,
+     $        'module ['//trim(spnb_name)//'] already initiaised.')
          return
       endif
 
@@ -160,55 +160,55 @@
       ltim = dnekclock()
 
       ! get runtime parameters
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_str_id,rpar_real)
-      spng_str = rtmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spnb_str_id,rpar_real)
+      spnb_str = rtmp
 
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_wl_id(1),rpar_real)
-      spng_wl(1) = rtmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spnb_wl_id(1),rpar_real)
+      spnb_wl(1) = rtmp
 
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_wl_id(2),rpar_real)
-      spng_wl(2) = rtmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spnb_wl_id(2),rpar_real)
+      spnb_wl(2) = rtmp
 
       if (IF3D) then
-         call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_wl_id(ndim),
+         call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spnb_wl_id(ndim),
      $        rpar_real)
-         spng_wl(ndim) = rtmp
+         spnb_wl(ndim) = rtmp
       endif
 
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_wr_id(1),rpar_real)
-      spng_wr(1) = rtmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spnb_wr_id(1),rpar_real)
+      spnb_wr(1) = rtmp
 
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_wr_id(2),rpar_real)
-      spng_wr(2) = rtmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spnb_wr_id(2),rpar_real)
+      spnb_wr(2) = rtmp
 
       if (IF3D) then
-         call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_wr_id(ndim),
+         call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spnb_wr_id(ndim),
      $        rpar_real)
-         spng_wr(ndim) = rtmp
+         spnb_wr(ndim) = rtmp
       endif
 
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_dl_id(1),rpar_real)
-      spng_dl(1) = rtmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spnb_dl_id(1),rpar_real)
+      spnb_dl(1) = rtmp
 
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_dl_id(2),rpar_real)
-      spng_dl(2) = rtmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spnb_dl_id(2),rpar_real)
+      spnb_dl(2) = rtmp
 
       if (IF3D) then
-         call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_dl_id(ndim),
+         call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spnb_dl_id(ndim),
      $        rpar_real)
-         spng_dl(ndim) = rtmp
+         spnb_dl(ndim) = rtmp
       endif
 
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_dr_id(1),rpar_real)
-      spng_dr(1) = rtmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spnb_dr_id(1),rpar_real)
+      spnb_dr(1) = rtmp
 
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_dr_id(2),rpar_real)
-      spng_dr(2) = rtmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spnb_dr_id(2),rpar_real)
+      spnb_dr(2) = rtmp
 
       if (IF3D) then
-         call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spng_dr_id(ndim),
+         call rprm_rp_get(itmp,rtmp,ltmp,ctmp,spnb_dr_id(ndim),
      $        rpar_real)
-         spng_dr(ndim) = rtmp
+         spnb_dr(ndim) = rtmp
       endif
 
       ! initialise sponge variables
@@ -224,11 +224,11 @@
          bmax(NDIM) = glmax(ZM1,ntot)
       endif
 
-      ! zero spng_fun
-      call rzero(spng_fun,ntot)
+      ! zero spnb_fun
+      call rzero(spnb_fun,ntot)
 
 !
-!                        spng_fun
+!                        spnb_fun
 !                        *********
 !
 !            bmin   xxmin_c         xxmax_c  bmax
@@ -236,42 +236,42 @@
 !              |_____|  |          |    |____|
 !            ^       \                 /
 !            |        \     x->       /
-!    spng_str|         \             /
+!    spnb_str|         \             /
 !            v          \___________/
 !              <-------->           <-------->
 !                  wl                   wr
 !                    <-->           <-->
 !                     dl             dr
 
-      if(spng_str.gt.0.0) then
-         call mntr_log(spng_id,lp_inf,"Sponge turned on")
+      if(spnb_str.gt.0.0) then
+         call mntr_log(spnb_id,lp_inf,"Sponge turned on")
 
          ! save reference field
-         call copy(spng_vr(1,1),lvx, ntot)
-         call copy(spng_vr(1,2),lvy, ntot)
-         if (IF3D) call copy(spng_vr(1,NDIM),lvz, ntot)
+         call copy(spnb_vr(1,1),lvx, ntot)
+         call copy(spnb_vr(1,2),lvy, ntot)
+         if (IF3D) call copy(spnb_vr(1,NDIM),lvz, ntot)
 
          ! for every dimension
          do il=1,NDIM
 
-            if (spng_wl(il).gt.0.0.or.spng_wr(il).gt.0.0) then
-               if (spng_wl(il).lt.spng_dl(il).or.
-     $              spng_wr(il).lt.spng_dr(il)) then
-                  call mntr_abort(spng_id,"Wrong sponge parameters")
+            if (spnb_wl(il).gt.0.0.or.spnb_wr(il).gt.0.0) then
+               if (spnb_wl(il).lt.spnb_dl(il).or.
+     $              spnb_wr(il).lt.spnb_dr(il)) then
+                  call mntr_abort(spnb_id,"Wrong sponge parameters")
                endif
 
                ! sponge beginning (rise at xmax; right)
-               xxmax = bmax(il) - spng_wr(il)
+               xxmax = bmax(il) - spnb_wr(il)
                ! end (drop at xmin; left)
-               xxmin = bmin(il) + spng_wl(il)
+               xxmin = bmin(il) + spnb_wl(il)
                ! beginnign of constant part (right)
-               xxmax_c = xxmax + spng_dr(il)
+               xxmax_c = xxmax + spnb_dr(il)
                ! beginnign of constant part (left)
-               xxmin_c = xxmin - spng_dl(il)
+               xxmin_c = xxmin - spnb_dl(il)
 
-               ! get SPNG_FUN
+               ! get spnb_FUN
                if (xxmax.le.xxmin) then
-                  call mntr_abort(spng_id,"Sponge too wide")
+                  call mntr_abort(spnb_id,"Sponge too wide")
                else
                   ! this should be done by pointers, but for now I avoid it
                   if (il.eq.1) then
@@ -285,24 +285,24 @@
                   do jl=1,ntot
                      rtmp = lcoord(jl)
                      if(rtmp.le.xxmin_c) then ! constant; xmin
-                        rtmp=spng_str
+                        rtmp=spnb_str
                      elseif(rtmp.lt.xxmin) then ! fall; xmin
-                        arg = (xxmin-rtmp)/(spng_wl(il)-spng_dl(il))
-                        rtmp = spng_str*math_stepf(arg)
+                        arg = (xxmin-rtmp)/(spnb_wl(il)-spnb_dl(il))
+                        rtmp = spnb_str*math_stepf(arg)
                      elseif (rtmp.le.xxmax) then ! zero
                         rtmp = 0.0
                      elseif (rtmp.lt.xxmax_c) then ! rise
-                        arg = (rtmp-xxmax)/(spng_wr(il)-spng_dr(il))
-                        rtmp = spng_str*math_stepf(arg)
+                        arg = (rtmp-xxmax)/(spnb_wr(il)-spnb_dr(il))
+                        rtmp = spnb_str*math_stepf(arg)
                      else    ! constant
-                        rtmp = spng_str
+                        rtmp = spnb_str
                      endif
-                     spng_fun(jl)=max(spng_fun(jl),rtmp)
+                     spnb_fun(jl)=max(spnb_fun(jl),rtmp)
                   enddo
 
                endif         ! xxmax.le.xxmin
 
-            endif            ! spng_w(il).gt.0.0
+            endif            ! spnb_w(il).gt.0.0
          enddo
 
 
@@ -312,48 +312,48 @@
       ! for debugging
       ltmp = ifto
       ifto = .TRUE.
-      call outpost2(spng_vr,spng_vr(1,2),spng_vr(1,NDIM),spng_fun,
-     $              spng_fun,1,'spg')
+      call outpost2(spnb_vr,spnb_vr(1,2),spnb_vr(1,NDIM),spnb_fun,
+     $              spnb_fun,1,'spg')
       ifto = ltmp
 #endif
 
       ! is everything initialised
-      spng_ifinit=.true.
+      spnb_ifinit=.true.
 
       ! timing
       ltim = dnekclock() - ltim
-      call mntr_tmr_add(spng_tmr_id,1,ltim)
+      call mntr_tmr_add(spnb_tmr_id,1,ltim)
 
       return
       end subroutine
 !=======================================================================
 !> @brief Check if module was initialised
-!! @ingroup sponge_box
-!! @return spng_is_initialised
-      logical function spng_is_initialised()
+!! @ingroup spnb
+!! @return spnb_is_initialised
+      logical function spnb_is_initialised()
       implicit none
 
       include 'SIZE'
-      include 'SPONGEBXD'
+      include 'SPNBD'
 !-----------------------------------------------------------------------
-      spng_is_initialised = spng_ifinit
+      spnb_is_initialised = spnb_ifinit
 
       return
       end function
 !=======================================================================
 !> @brief Get sponge forcing
-!! @ingroup sponge_box
+!! @ingroup spnb
 !! @param[inout] ffx,ffy,ffz     forcing; x,y,z component
 !! @param[in]    ix,iy,iz        GLL point index
 !! @param[in]    ieg             global element number
-      subroutine spng_forcing(ffx,ffy,ffz,ix,iy,iz,ieg)
+      subroutine spnb_forcing(ffx,ffy,ffz,ix,iy,iz,ieg)
       implicit none
 
       include 'SIZE'            !
       include 'INPUT'           ! IF3D
       include 'PARALLEL'        ! GLLEL
       include 'SOLN'            ! JP
-      include 'SPONGEBXD'
+      include 'SPNBD'
 
       ! argument list
       real ffx, ffy, ffz
@@ -362,21 +362,21 @@
       ! local variables
       integer iel, ip
 !-----------------------------------------------------------------------
-      iel=GLLEL(ieg)
-      if (SPNG_STR.gt.0.0) then
-         ip=ix+NX1*(iy-1+NY1*(iz-1+NZ1*(iel-1)))
+      iel=gllel(ieg)
+      if (spnb_str.gt.0.0) then
+         ip=ix+nx1*(iy-1+ny1*(iz-1+nz1*(iel-1)))
 
-         if (JP.eq.0) then
+         if (jp.eq.0) then
             ! dns
-            ffx = ffx + SPNG_FUN(ip)*(SPNG_VR(ip,1) - VX(ix,iy,iz,iel))
-            ffy = ffy + SPNG_FUN(ip)*(SPNG_VR(ip,2) - VY(ix,iy,iz,iel))
-            if (IF3D) ffz = ffz + SPNG_FUN(ip)*
-     $           (SPNG_VR(ip,NDIM) - VZ(ix,iy,iz,iel))
+            ffx = ffx + spnb_fun(ip)*(spnb_vr(ip,1) - vx(ix,iy,iz,iel))
+            ffy = ffy + spnb_fun(ip)*(spnb_vr(ip,2) - vy(ix,iy,iz,iel))
+            if (if3d) ffz = ffz + spnb_fun(ip)*
+     $           (spnb_vr(ip,ndim) - vz(ix,iy,iz,iel))
          else
             ! perturbation
-            ffx = ffx - SPNG_FUN(ip)*VXP(ip,JP)
-            ffy = ffy - SPNG_FUN(ip)*VYP(ip,JP)
-            if(IF3D) ffz = ffz - SPNG_FUN(ip)*VZP(ip,JP)
+            ffx = ffx - spnb_fun(ip)*vxp(ip,jp)
+            ffy = ffy - spnb_fun(ip)*vyp(ip,jp)
+            if(if3d) ffz = ffz - spnb_fun(ip)*vzp(ip,jp)
          endif
 
       endif

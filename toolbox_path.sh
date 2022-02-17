@@ -66,8 +66,8 @@ export GSYEM_SRC=${BCND_SRC}"/gsyem"
 
 export NSEB_SRC=${FORCING_SRC}"/nseb"
 TOOLBOX_INC+=" -I"${NSEB_SRC}
-export SPONGE_BOX_SRC=${FORCING_SRC}"/sponge_box"
-TOOLBOX_INC+=" -I"${SPONGE_BOX_SRC}
+export SPNB_SRC=${FORCING_SRC}"/spnb"
+TOOLBOX_INC+=" -I"${SPNB_SRC}
 # Tripping line include file has to be copied to setup directory
 export TRIPL_SRC=${FORCING_SRC}"/tripl"
 

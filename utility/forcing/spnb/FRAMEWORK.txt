@@ -1,7 +1,7 @@
 #Configuration file for Nek5000 framework developed at KTH
 # Place for short description; doxygen style
 /**
-@defgroup sponge_box  Sponge_box module
+@defgroup spnb  Sponge box
 @ingroup forcing
 
 @brief Sponge/fringe for simple box mesh
@@ -16,8 +16,8 @@ S\left((x_{min} - x) / \left(\Delta_{wl} - \Delta_{dl} \right)\right) +
 S\left((x - x_{max}) / \left(\Delta_{wr} - \Delta_{dr} \right)\right) \right],\f]
 where:
 - \f$ x \f$ - position along the coordinate \f$X\f$, \f$Y\f$ or \f$Z\f$,
-- \f$ \lambda_{max} \f$ - maximum sponge strength, see parameter  spng_str in SPONGEBXD,
-- \f$ \lambda \f$ - sponge strength, see array spng_fun in SPONGEBXD,
+- \f$ \lambda_{max} \f$ - maximum sponge strength, see parameter  spnb_str in SPNBD,
+- \f$ \lambda \f$ - sponge strength, see array spnb_fun in SPNBD,
 - \f$ S(x) \f$ - step function @ref math_stepf,
 - \f$ x_{min}, x_{max} \f$ - left and right box boundaries,
 - \f$ \Delta_{wl}, \Delta_{wr} \f$ - left and right sponge section width,
@@ -28,14 +28,14 @@ maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta
 
 @mod_interface
 @interface_list Interface provided:
--# @ref spng_register
--# @ref spng_init
--# @ref spng_forcing
--# @ref spng_is_initialised
+-# @ref spnb_register
+-# @ref spnb_init
+-# @ref spnb_forcing
+-# @ref spnb_is_initialised
 
 @par
 @interface_reqr Interface required:
--# multiple interfaces from [runtime parameters] (@ref runparam) and [monitor] (@ref monitor) modules
+-# multiple interfaces from @ref runparam and @ref monitor modules
 -# @ref math_stepf from @ref math module
 
 @mod_interface_example
@@ -49,7 +49,7 @@ maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta
       FFZ = 0.0
 
 !     add sponge
-      call spng_forcing(FFX,FFY,FFZ,ix,iy,iz,ieg)
+      call spnb_forcing(FFX,FFY,FFZ,ix,iy,iz,ieg)
 
       return
       end
@@ -81,7 +81,7 @@ maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta
       include 'FRAMELP'
 !-----------------------------------------------------------------------
 !     register modules
-      call spng_register
+      call spnb_register
 
       return
       end subroutine
@@ -97,7 +97,7 @@ maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta
 !     initialise modules
 !     initialise sponge box module with reference velocities
 !     (in this case initial condition)
-      call spng_init(vx, vy, vz)
+      call spnb_init(vx, vy, vz)
 
       return
       end subroutine
@@ -117,24 +117,24 @@ maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta
 @endcode
 
 @mod_param
-@param_list Parameters provided by sponge_box module (include file - \a SPONGRBD):
+@param_list Parameters provided by sponge box module (include file - \a SPNBD):
 |Varaible | Type | Runtime parameter | Default value | Description |
 |---------|------|-------------------|---------------|-------------|
-|spng_str | real | _spongebx:strenght | 0.0 | sponge strength |
-|spng_wl(1) | real | _spongebx:widthlx | 0.0 | sponge left section width; dimension X |
-|spng_wl(2) | real | _spongebx:widthly | 0.0 | sponge left section width; dimension Y |
-|spng_wl(3) | real | _spongebx:widthlz | 0.0 | sponge left section width; dimension Z |
-|spng_wr(1) | real | _spongebx:widthrx | 0.0 | sponge right section width; dimension X |
-|spng_wr(2) | real | _spongebx:widthry | 0.0 | sponge right section width; dimension Y |
-|spng_wr(3) | real | _spongebx:widthrz | 0.0 | sponge right section width; dimension Z |
-|spng_dl(1) | real | _spongebx:droplx | 0.0 | sponge left drop/rise section width; dimension X |
-|spng_dl(2) | real | _spongebx:droply | 0.0 | sponge left drop/rise section width; dimension Y |
-|spng_dl(3) | real | _spongebx:droplz | 0.0 | sponge left drop/rise section width; dimension Z |
-|spng_dr(1) | real | _spongebx:droprx | 0.0 | sponge right drop/rise section width; dimension X |
-|spng_dr(2) | real | _spongebx:dropry | 0.0 | sponge right drop/rise section width; dimension Y |
-|spng_dr(3) | real | _spongebx:droprz | 0.0 | sponge right drop/rise section width; dimension Z |
+|spnb_str | real | _spongebx:strenght | 0.0 | sponge strength |
+|spnb_wl(1) | real | _spongebx:widthlx | 0.0 | sponge left section width; dimension X |
+|spnb_wl(2) | real | _spongebx:widthly | 0.0 | sponge left section width; dimension Y |
+|spnb_wl(3) | real | _spongebx:widthlz | 0.0 | sponge left section width; dimension Z |
+|spnb_wr(1) | real | _spongebx:widthrx | 0.0 | sponge right section width; dimension X |
+|spnb_wr(2) | real | _spongebx:widthry | 0.0 | sponge right section width; dimension Y |
+|spnb_wr(3) | real | _spongebx:widthrz | 0.0 | sponge right section width; dimension Z |
+|spnb_dl(1) | real | _spongebx:droplx | 0.0 | sponge left drop/rise section width; dimension X |
+|spnb_dl(2) | real | _spongebx:droply | 0.0 | sponge left drop/rise section width; dimension Y |
+|spnb_dl(3) | real | _spongebx:droplz | 0.0 | sponge left drop/rise section width; dimension Z |
+|spnb_dr(1) | real | _spongebx:droprx | 0.0 | sponge right drop/rise section width; dimension X |
+|spnb_dr(2) | real | _spongebx:dropry | 0.0 | sponge right drop/rise section width; dimension Y |
+|spnb_dr(3) | real | _spongebx:droprz | 0.0 | sponge right drop/rise section width; dimension Z |
 
 @mod_param_example
-@include Toolbox/utility/forcing/sponge_box/example.par
+@include Toolbox/utility/forcing/spnb/example.par
 
 */
