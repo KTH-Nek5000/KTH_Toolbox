@@ -8,7 +8,7 @@
 !     module id and name
       integer nseb_id
       character*(*) nseb_name
-      parameter(nseb_name='NOISEBX')
+      parameter(nseb_name='NSEB')
 
 !     timer id
       integer nseb_tmr_id
@@ -33,9 +33,9 @@
       integer nseb_rfc_id(3,LDIM)
 
 !     common block section
-      common /NOISEBXI/ nseb_id, nseb_tmr_id, nseb_sec_id, 
+      common /NSEBI/ nseb_id, nseb_tmr_id, nseb_sec_id, 
      $   nseb_tim_id, nseb_amp_id, nseb_bmin_id, nseb_bmax_id, 
      $   nseb_rfc_id
 
-      common /NOISEBXR/ nseb_tim, nseb_amp, nseb_bmin, nseb_bmax, 
+      common /NSEBR/ nseb_tim, nseb_amp, nseb_bmin, nseb_bmax, 
      $   nseb_rfc

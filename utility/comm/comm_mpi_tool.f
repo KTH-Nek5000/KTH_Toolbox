@@ -1,5 +1,5 @@
-!> @file comm_mpi_wrp.f
-!! @ingroup comm_mpi
+!> @file comm_mpi_tool.f
+!! @ingroup comm
 !! @brief Set of MPI wrappers for toolbox communication.
 !!
 !! @author Adam Peplinski
@@ -8,7 +8,7 @@
 !> @brief Global MPI scan for integer array.
 !! @details This routine is simillar to @ref igl_running_sum and
 !!  @ref i8gl_running_sum from comm_mpi.f
-!! @ingroup comm_mpi
+!! @ingroup comm
 !! @param[inout]  out    output array
 !! @param[in]      in     input array
 !! @param[in]      nl     buffer length
@@ -36,7 +36,7 @@
 !> @brief Broadcast integer array from specified process
 !! @details This routine is simillar to @ref lbcast and @ref bcast
 !!  from comm_mpi.f
-!! @ingroup comm_mpi
+!! @ingroup comm
 !! @param[inout]   buf    array to be broadcased
 !! @param[in]      nl     buffer length
 !! @param[in]      sid    broadcasting process id

@@ -28,7 +28,7 @@ Description of the implementation and performed tests can be found in @cite Pepl
 
 @par
 @interface_reqr Interface required:
--# multiple interfaces from @ref runparam and @ref monitor modules
+-# multiple interfaces from @ref rprm and @ref mntr modules
 -# @ref io_file_freeid, @ref io_mfo_fname, @ref io_mbyte_open, @ref io_mfov, @ref io_mbyte_close and @ref io_mfiv from @ref io module
 -# @ref chkpt_get_fset from @ref chkpoint module
 -# @ref chkpt_map_gll from @ref chkpoint_mstep module

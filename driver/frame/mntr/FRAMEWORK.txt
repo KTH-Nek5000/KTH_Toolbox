@@ -1,7 +1,7 @@
 #Configuration file for Nek5000 framework developed at KTH
 # Place for short description; doxygen style
 /**
-@defgroup monitor  Monitoring module
+@defgroup mntr  Monitoring module
 @ingroup frame
 
 @brief Monitoring routines for toolboxes
@@ -47,11 +47,11 @@ inside (\a frame_usr_register).
 @param_list Parameters provided by monitor module (include file - \a MNTRLOGD): 
 |Varaible | Type | Runtime parameter | Default value | Description |
 |---------|------|-------------------|---------------|-------------|
-| mntr_lp_def | integer | _monitor:loglevel  | lp_inf  | Logging threshold for toolboxes |
-| mntr_iftdsc | logical | _monitor:iftimdscr | .false. | Write timer description in the summary |
-| mntr_wtimes | string  | _monitor:WallTime  | 00:00   | simulation wall time |
+| mntr_lp_def | integer | _mntr:loglevel  | lp_inf  | Logging threshold for toolboxes |
+| mntr_iftdsc | logical | _mntr:iftimdscr | .false. | Write timer description in the summary |
+| mntr_wtimes | string  | _mntr:WallTime  | 00:00   | simulation wall time |
 
 @mod_param_example
-@include Toolbox/driver/frame/monitor/example.par
+@include Toolbox/driver/frame/mntr/example.par
 
 */

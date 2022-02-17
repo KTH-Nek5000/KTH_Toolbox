@@ -1,5 +1,5 @@
 !> @file mntrtmr_block.f
-!! @ingroup monitor
+!! @ingroup mntr
 !! @brief Block data to initialise common blocks in MNTRTMRD
 !! @details Following Nek5000 standard I keep block data in seaprate file.
 !! @author Adam Peplinski

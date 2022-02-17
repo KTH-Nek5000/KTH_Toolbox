@@ -1,7 +1,7 @@
 #Configuration file for Nek5000 framework developed at KTH
 # Place for short description; doxygen style
 /**
-@defgroup comm_mpi   Comunication routines.
+@defgroup comm   Comunication routines.
 @ingroup utility
 
 @brief MPI communication wrappers.

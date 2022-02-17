@@ -1,5 +1,5 @@
 !> @file FRAMELP
-!! @ingroup monitor
+!! @ingroup frame
 !! @brief Include file for monitor module including log priorities and parameter types
 !! @author Adam Peplinski
 !! @date Oct 4, 2017

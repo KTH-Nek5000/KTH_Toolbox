@@ -9,12 +9,12 @@
 @details
 Set of I/O speciffic routines for toolbox.
 
-This module is automatically registered by [framework] (@ref frame) and should not be registered 
+This module is automatically registered by @ref frame and should not be registered 
 inside (\a frame_usr_register).
 
 @mod_interface
 @interface_list Interface provided:
--# @ref io_register (to [frame] (@ref frame))
+-# @ref io_register (to @ref frame)
 -# @ref io_file_freeid
 -# @ref io_file_close
 -# @ref io_mfo_fname

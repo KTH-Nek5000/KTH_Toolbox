@@ -1,5 +1,5 @@
 !> @file MNTRLOGD
-!! @ingroup monitor
+!! @ingroup mntr
 !! @brief Include file for monitor module containing module database 
 !! @author Adam Peplinski
 !! @date Sep 28, 2017
@@ -11,7 +11,7 @@
       parameter(mntr_frame_name='FRAME')
       integer mntr_id
       character*(*) mntr_name
-      parameter(mntr_name='MONITOR')
+      parameter(mntr_name='MNTR')
 
 !     framework timer
       integer mntr_frame_tmr_id

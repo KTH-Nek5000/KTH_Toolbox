@@ -18,7 +18,7 @@ a random number ganarator. At the end velocity field is smoothed at the element 
 
 @par
 @interface_reqr Interface required:
--# multiple interfaces from @ref runparam and @ref monitor modules
+-# multiple interfaces from @ref rprm and @ref mntr modules
 -# @ref math_ran_dst from @ref math module
 
 @mod_interface_example
@@ -85,26 +85,26 @@ a random number ganarator. At the end velocity field is smoothed at the element 
 @endcode
 
 @mod_param
-@param_list Parameters provided by sponge_box module (include file - \a SPONGRBD):
+@param_list Parameters provided by nseb module (include file - \a NSEBD):
 |Varaible | Type | Runtime parameter | Default value | Description |
 |---------|------|-------------------|---------------|-------------|
-|nseb_tim | real | _noisebx:time | 0.0 | time to add noise |
-|nseb_amp | real | _noisebx:amplitude | 0.0 | noise amplitude |
-|nseb_bmin(1) | real | _noisebx:boxminx | 0.0 | position of lower left box corner; dimension X |
-|nseb_bmin(2) | real | _noisebx:boxminy | 0.0 | position of lower left box corner; dimension Y |
-|nseb_bmin(3) | real | _noisebx:boxminz | 0.0 | position of lower left box corner; dimension Z |
-|nseb_bmax(1) | real | _noisebx:boxmaxx | 0.0 | position of upper right box corner; dimension X |
-|nseb_bmax(2) | real | _noisebx:boxmaxy | 0.0 | position of upper right box corner; dimension Z |
-|nseb_bmax(3) | real | _noisebx:boxmaxz | 0.0 | position of upper right box corner; dimension Y |
-|nseb_rfc(1,1)| real | _noisebx:frc1_1  | 3.0e4 | function coefficient for random number gnerator; cf. 1, vel. cmp. VX |
-|nseb_rfc(2,1)| real | _noisebx:frc2_1  | 3.0e4 | function coefficient for random number gnerator; cf. 2, vel. cmp. VX |
-|nseb_rfc(3,1)| real | _noisebx:frc3_1  | 3.0e4 | function coefficient for random number gnerator; cf. 3, vel. cmp. VX |
-|nseb_rfc(1,2)| real | _noisebx:frc1_2  | 3.0e4 | function coefficient for random number gnerator; cf. 1, vel. cmp. VY |
-|nseb_rfc(2,2)| real | _noisebx:frc2_2  | 3.0e4 | function coefficient for random number gnerator; cf. 2, vel. cmp. VY |
-|nseb_rfc(3,2)| real | _noisebx:frc3_2  | 3.0e4 | function coefficient for random number gnerator; cf. 3, vel. cmp. VY |
-|nseb_rfc(1,3)| real | _noisebx:frc1_3  | 3.0e4 | function coefficient for random number gnerator; cf. 1, vel. cmp. VZ |
-|nseb_rfc(2,3)| real | _noisebx:frc2_3  | 3.0e4 | function coefficient for random number gnerator; cf. 2, vel. cmp. VZ |
-|nseb_rfc(3,3)| real | _noisebx:frc3_3  | 3.0e4 | function coefficient for random number gnerator; cf. 3, vel. cmp. VZ |
+|nseb_tim | real | _nseb:time | 0.0 | time to add noise |
+|nseb_amp | real | _nseb:amplitude | 0.0 | noise amplitude |
+|nseb_bmin(1) | real | _nseb:boxminx | 0.0 | position of lower left box corner; dimension X |
+|nseb_bmin(2) | real | _nseb:boxminy | 0.0 | position of lower left box corner; dimension Y |
+|nseb_bmin(3) | real | _nseb:boxminz | 0.0 | position of lower left box corner; dimension Z |
+|nseb_bmax(1) | real | _nseb:boxmaxx | 0.0 | position of upper right box corner; dimension X |
+|nseb_bmax(2) | real | _nseb:boxmaxy | 0.0 | position of upper right box corner; dimension Z |
+|nseb_bmax(3) | real | _nseb:boxmaxz | 0.0 | position of upper right box corner; dimension Y |
+|nseb_rfc(1,1)| real | _nseb:frc1_1  | 3.0e4 | function coefficient for random number gnerator; cf. 1, vel. cmp. VX |
+|nseb_rfc(2,1)| real | _nseb:frc2_1  | 3.0e4 | function coefficient for random number gnerator; cf. 2, vel. cmp. VX |
+|nseb_rfc(3,1)| real | _nseb:frc3_1  | 3.0e4 | function coefficient for random number gnerator; cf. 3, vel. cmp. VX |
+|nseb_rfc(1,2)| real | _nseb:frc1_2  | 3.0e4 | function coefficient for random number gnerator; cf. 1, vel. cmp. VY |
+|nseb_rfc(2,2)| real | _nseb:frc2_2  | 3.0e4 | function coefficient for random number gnerator; cf. 2, vel. cmp. VY |
+|nseb_rfc(3,2)| real | _nseb:frc3_2  | 3.0e4 | function coefficient for random number gnerator; cf. 3, vel. cmp. VY |
+|nseb_rfc(1,3)| real | _nseb:frc1_3  | 3.0e4 | function coefficient for random number gnerator; cf. 1, vel. cmp. VZ |
+|nseb_rfc(2,3)| real | _nseb:frc2_3  | 3.0e4 | function coefficient for random number gnerator; cf. 2, vel. cmp. VZ |
+|nseb_rfc(3,3)| real | _nseb:frc3_3  | 3.0e4 | function coefficient for random number gnerator; cf. 3, vel. cmp. VZ |
 
 @mod_param_example
 @include Toolbox/utility/forcing/nseb/example.par

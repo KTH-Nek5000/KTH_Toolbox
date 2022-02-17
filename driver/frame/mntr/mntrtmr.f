@@ -1,11 +1,11 @@
 !> @file mntrtmr.f
-!! @ingroup monitor
+!! @ingroup mntr
 !! @brief Set of timer database routines for KTH framework
 !! @author Adam Peplinski
 !! @date Oct 13, 2017
 !=======================================================================
 !> @brief Register new timer
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[out] mid      new timer id
 !! @param[in]  pmid     parent timer id
 !! @param[in]  modid    registerring module id
@@ -139,7 +139,7 @@
       end subroutine
 !=======================================================================
 !> @brief Check if timer name is registered and return its id.
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[out] mid      timer id
 !! @param[in]  mname    timer name
       subroutine mntr_tmr_is_name_reg(mid,mname)
@@ -208,7 +208,7 @@
       end subroutine
 !=======================================================================
 !> @brief Check if timer id is registered. This operation is performed locally
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[in] mid      timer id
 !! @return mntr_tmr_is_id_reg
       logical function mntr_tmr_is_id_reg(mid)
@@ -229,7 +229,7 @@
       end function
 !=======================================================================
 !> @brief Check if timer id is registered. This operation is performed locally
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[in] mid       timer id
 !! @param[in] icount    count increase
 !! @param[in] time      time increase
@@ -264,7 +264,7 @@
       end subroutine
 !=======================================================================
 !> @brief Print registered timers showing tree structure
-!! @ingroup monitor
+!! @ingroup mntr
       subroutine mntr_tmr_summary_print()
       implicit none
 
@@ -379,7 +379,7 @@
       end subroutine
 !=======================================================================
 !> @brief Provide ordered list of registered timers for printing.
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[out]   olist    ordered list
 !! @param[out]   ierr     error flag
       subroutine mntr_tmr_get_olist(olist,ierr)

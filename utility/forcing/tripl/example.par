@@ -1,4 +1,4 @@
-[_TRIPPING]             # Runtime paramere section for tripping module
+[_TRIPL]             # Runtime paramere section for tripping module
 NLINE                = 2                      # Number of tripping lines
 TIAMP                = 0.00000000E+00         # Time independent amplitude
 TDAMP                = 1.00000000E+01         # Time dependent amplitude

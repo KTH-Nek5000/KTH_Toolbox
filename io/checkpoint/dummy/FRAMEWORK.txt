@@ -11,7 +11,7 @@ Dummy replacemnt for checkpointing routines. Some toolboxes would have their own
 e.g. checkpointing runtime parameters. In this cas dummy @a chkpt_init, @a chkpt_read and @a chkpt_write can be used.
 
 @mod_interface
-@interface_list Interface provided to [checkpoint] (@ref chkpoint):
+@interface_list Interface provided to @ref chkpoint :
 -# chkpts_register
 -# chkpts_init
 -# chkpts_read

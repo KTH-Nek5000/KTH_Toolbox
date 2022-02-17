@@ -1,11 +1,11 @@
 !> @file rprm.f
-!! @ingroup runparam
+!! @ingroup rprm
 !! @brief Set of subroutines related to module's runtime parameters.
 !! @author Adam Peplinski
 !! @date Feb 5, 2017
 !=======================================================================
 !> @brief Register runtime parameters database
-!! @ingroup runparam
+!! @ingroup rprm
       subroutine rprm_register
       implicit none
 
@@ -58,7 +58,7 @@
       end subroutine
 !=======================================================================
 !> @brief Initialise modules runtime parameters and write summary
-!! @ingroup runparam
+!! @ingroup rprm
       subroutine rprm_init
       implicit none
 
@@ -117,7 +117,7 @@
       end subroutine
 !=======================================================================
 !> @brief Check if module was initialised
-!! @ingroup runparam
+!! @ingroup rprm
 !! @return rprm_is_initialised
       logical function rprm_is_initialised()
       implicit none
@@ -132,7 +132,7 @@
       end function
 !=======================================================================
 !> @brief Register new parameter section
-!! @ingroup runparam
+!! @ingroup rprm
 !! @param[out] rpid     current section id
 !! @param[in]  mid      registering module id
 !! @param[in]  pname    section name
@@ -252,7 +252,7 @@
       end subroutine
 !=======================================================================
 !> @brief Check if section name is registered and return its id. Check mid as well.
-!! @ingroup runparam
+!! @ingroup rprm
 !! @param[out] rpid     section id
 !! @param[in]  mid      registering module id
 !! @param[in]  pname    section name
@@ -331,7 +331,7 @@
       end subroutine
 !=======================================================================
 !> @brief Check if section id is registered. This operation is performed locally
-!! @ingroup runparam
+!! @ingroup rprm
 !! @param[in]  rpid     section id
 !! @return rprm_sec_is_id_reg
       logical function rprm_sec_is_id_reg(rpid)
@@ -350,7 +350,7 @@
       end function
 !=======================================================================
 !> @brief Get section info based on its id. This operation is performed locally
-!! @ingroup runparam
+!! @ingroup rprm
 !! @param[out]    pname    section name
 !! @param[out]    mid      registering module id
 !! @param[out]    ifact    activation flag
@@ -391,7 +391,7 @@
 !!    runtime parameter file. That is why I decided to split registration
 !!    and activation stages. One can register all the possible sections
 !!    and activate those present in .par
-!! @ingroup runparam
+!! @ingroup rprm
 !! @param[in]  ifact    activation flag
 !! @param[in]  rpid     runtime parameter id
       subroutine rprm_sec_set_act(ifact,rpid)
@@ -425,7 +425,7 @@
       end subroutine
 !=======================================================================
 !> @brief Check if section id is registered and activated. This operation is performed locally
-!! @ingroup runparam
+!! @ingroup rprm
 !! @param[in]  rpid     section id
 !! @return rprm_sec_id_id_act
       logical function rprm_sec_is_id_act(rpid)
@@ -445,7 +445,7 @@
       end function
 !=======================================================================
 !> @brief Register new runtime parameter
-!! @ingroup runparam
+!! @ingroup rprm
 !! @param[out] rpid     current runtime parameter id
 !! @param[in]  mid      section id
 !! @param[in]  pname    parameter name
@@ -624,7 +624,7 @@
       end subroutine
 !=======================================================================
 !> @brief Check if parameter name is registered and return its id. Check flags as well.
-!! @ingroup runparam
+!! @ingroup rprm
 !! @param[out] rpid     runtime parameter id
 !! @param[in]  mid      section id
 !! @param[in]  pname    parameter name
@@ -710,7 +710,7 @@
       end subroutine
 !=======================================================================
 !> @brief Check if parameter id is registered and check type consistency. This operation is performed locally
-!! @ingroup runparam
+!! @ingroup rprm
 !! @param[in]  rpid     runtime parameter id
 !! @param[in]  ptype    parameter type
 !! @return rprm_rp_is_id_reg
@@ -731,7 +731,7 @@
       end function
 !=======================================================================
 !> @brief Get parameter info based on its id. This operation is performed locally
-!! @ingroup runparam
+!! @ingroup rprm
 !! @param[out]    pname    parameter name
 !! @param[out]    mid      section id
 !! @param[out]    ptype    parameter type
@@ -765,7 +765,7 @@
       end subroutine
 !=======================================================================
 !> @brief Set runtime parameter of active section. Master value is broadcasted.
-!! @ingroup runparam
+!! @ingroup rprm
 !! @param[in]  rpid     runtime parameter id
 !! @param[in]  ptype    parameter type
 !! @param[in]  ipval    integer value
@@ -847,7 +847,7 @@
       end subroutine
 !=======================================================================
 !> @brief Get runtime parameter form active section. This operation is performed locally
-!! @ingroup runparam
+!! @ingroup rprm
 !! @param[out]  ipval    integer value
 !! @param[out]  rpval    real value
 !! @param[out]  lpval    logical value
@@ -903,7 +903,7 @@
       end subroutine
 !=======================================================================
 !> @brief Get runtime parameter from nek parser dictionary
-!! @ingroup runparam
+!! @ingroup rprm
       subroutine rprm_dict_get()
       implicit none
 
@@ -1021,7 +1021,7 @@
       end subroutine
 !=======================================================================
 !> @brief Print out summary of registered runtime parameters (active sections only)
-!! @ingroup runparam
+!! @ingroup rprm
 !! @param[in]  unit   I/O unit (6 - standard I/O)
       subroutine rprm_rp_summary_print(unit)
       implicit none
@@ -1159,7 +1159,7 @@
       end subroutine
 !=======================================================================
 !> @brief Check consistency of module's runtime parameters
-!! @ingroup runparam
+!! @ingroup rprm
 !! @param[in]    mod_nkeys    number of module's keys
 !! @param[in]    mod_dictkey  module's dictionary keys
 !! @param[in]    mod_n3dkeys  number of keys used for 3D run only

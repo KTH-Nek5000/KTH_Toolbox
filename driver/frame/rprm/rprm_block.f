@@ -1,5 +1,5 @@
 !> @file rprm_block.f
-!! @ingroup runparam
+!! @ingroup rprm
 !! @brief Block data to initialise common block for runtime parameter module
 !! @details Following Nek5000 standard I keep block data in seaprate file.
 !! @author Adam Peplinski

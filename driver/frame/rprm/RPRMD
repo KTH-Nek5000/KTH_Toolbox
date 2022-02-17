@@ -1,5 +1,5 @@
 !> @file RPRMD
-!! @ingroup runparam
+!! @ingroup rprm
 !! @brief Include file for runtime parameter module 
 !! @author Adam Peplinski
 !! @date Sep 28, 2017
@@ -7,7 +7,7 @@
 !     module id and name
       integer rprm_id
       character*(*) rprm_name
-      parameter(rprm_name='RUNPAR')
+      parameter(rprm_name='RPRM')
 
 !     initialisation flag
       logical rprm_ifinit

@@ -85,8 +85,8 @@ before compilation of the code.
 
 @par
 @interface_reqr Interface required:
--# multiple interfaces from [runtime parameters] (@ref runparam) and [monitor] (@ref monitor) modules
--# @ref io_file_freeid from [Input/output] (@ref io) module (debugging only)
+-# multiple interfaces from @ref rprm and @ref mntr modules
+-# @ref io_file_freeid from @ref io module (debugging only)
 -# @ref math_rot3da from @ref math module
 
 
@@ -180,22 +180,22 @@ before compilation of the code.
 @param_list Parameters provided by tripl module (include file - \a TRIPLD):
 |Varaible | Type | Runtime parameter | Default value | Description |
 |---------|------|-------------------|---------------|-------------|
-|tripl_nline      | integer | _tripping:nline | 0  | Number of tripping lines |
-|tripl_tiamp      | real | _tripping:tiamp   | 0.0 | Time independent amplitude |
-|tripl_tdamp      | real | _tripping:tdamp   | 0.0 | Time dependent amplitude   |
-|tripl_spos(1,il) | real | _tripping:sposx'il' | 0.0 | Starting point X of 'il' line |
-|tripl_spos(2,il) | real | _tripping:sposy'il' | 0.0 | Starting point Y of 'il' line |
-|tripl_spos(3,il) | real | _tripping:sposz'il' | 0.0 | Starting point Z of 'il' line |
-|tripl_epos(1,il) | real | _tripping:eposx'il' | 0.0 | Ending point X of 'il' line |
-|tripl_epos(2,il) | real | _tripping:eposy'il' | 0.0 | Ending point Y of 'il' line |
-|tripl_epos(3,il) | real | _tripping:eposz'il' | 0.0 | Ending point Z of 'il' line |
-|tripl_smth(1,il) | real | _tripping:smthx'il' | 0.0 | Smoothing length X of 'il' line |
-|tripl_smth(2,il) | real | _tripping:smthy'il' | 0.0 | Smoothing length Y of 'il' line |
-|tripl_smth(3,il) | real | _tripping:smthz'il' | 0.0 | Smoothing length Z of 'il' line |
-|tripl_lext(il)   | logical | _tripping:lext'il' | .F. | Line extension |
-|tripl_rota(il)   | real | _tripping:rota'il'  | 0.0 | Rotation angle of 'il' line |
-|tripl_nmode(il)  | integer | _tripping:nmode'il' | 0  | Number of Fourier modes of 'il' line |
-|tripl_tdt(il)   | real | _tripping:tdt'il'  | 0.0 | Time step for tripping of 'il' line |
+|tripl_nline      | integer | _tripl:nline | 0  | Number of tripping lines |
+|tripl_tiamp      | real | _tripl:tiamp   | 0.0 | Time independent amplitude |
+|tripl_tdamp      | real | _tripl:tdamp   | 0.0 | Time dependent amplitude   |
+|tripl_spos(1,il) | real | _tripl:sposx'il' | 0.0 | Starting point X of 'il' line |
+|tripl_spos(2,il) | real | _tripl:sposy'il' | 0.0 | Starting point Y of 'il' line |
+|tripl_spos(3,il) | real | _tripl:sposz'il' | 0.0 | Starting point Z of 'il' line |
+|tripl_epos(1,il) | real | _tripl:eposx'il' | 0.0 | Ending point X of 'il' line |
+|tripl_epos(2,il) | real | _tripl:eposy'il' | 0.0 | Ending point Y of 'il' line |
+|tripl_epos(3,il) | real | _tripl:eposz'il' | 0.0 | Ending point Z of 'il' line |
+|tripl_smth(1,il) | real | _tripl:smthx'il' | 0.0 | Smoothing length X of 'il' line |
+|tripl_smth(2,il) | real | _tripl:smthy'il' | 0.0 | Smoothing length Y of 'il' line |
+|tripl_smth(3,il) | real | _tripl:smthz'il' | 0.0 | Smoothing length Z of 'il' line |
+|tripl_lext(il)   | logical | _tripl:lext'il' | .F. | Line extension |
+|tripl_rota(il)   | real | _tripl:rota'il'  | 0.0 | Rotation angle of 'il' line |
+|tripl_nmode(il)  | integer | _tripl:nmode'il' | 0  | Number of Fourier modes of 'il' line |
+|tripl_tdt(il)   | real | _tripl:tdt'il'  | 0.0 | Time step for tripping of 'il' line |
 
 @mod_param_example
 @include Toolbox/utility/forcing/tripl/example.par

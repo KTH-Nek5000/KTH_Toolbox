@@ -17,10 +17,10 @@ export UTILITY_SRC=${TOOLBOX_SRC}"/utility"
 export FRAME_SRC=${DRIVER_SRC}"/frame"
 TOOLBOX_INC=" -I"${FRAME_SRC}
 
-export MONITOR_SRC=${FRAME_SRC}"/monitor"
-TOOLBOX_INC+=" -I"${MONITOR_SRC}
-export RUNPARAM_SRC=${FRAME_SRC}"/runparam"
-TOOLBOX_INC+=" -I"${RUNPARAM_SRC}
+export MNTR_SRC=${FRAME_SRC}"/mntr"
+TOOLBOX_INC+=" -I"${MNTR_SRC}
+export RPRM_SRC=${FRAME_SRC}"/rprm"
+TOOLBOX_INC+=" -I"${RPRM_SRC}
 
 export CHKPT_SRC=${IO_SRC}"/checkpoint"
 TOOLBOX_INC+=" -I"${CHKPT_SRC}

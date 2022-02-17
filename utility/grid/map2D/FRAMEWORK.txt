@@ -17,9 +17,9 @@
 
 @par
 @interface_reqr Interface required:
--# multiple interfaces from [frame] (@ref frame), [runtime parameters] (@ref runparam) and [monitor] (@ref monitor) modules
--# @ref io_file_freeid from [Input/output] (@ref io) module (debugging only)
--# (\a user_map2d_get); user defined
+-# multiple interfaces from @ref frame, @ref rprm and @ref mntr modules
+-# @ref io_file_freeid from @ref io module (debugging only)
+-# \a user_map2d_get; user defined
 
 @mod_interface_example
 @code{.f}

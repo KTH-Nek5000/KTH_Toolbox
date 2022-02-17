@@ -1,5 +1,5 @@
 !> @file MNTRTMRD
-!! @ingroup monitor
+!! @ingroup mntr
 !! @brief Include file for monitor module containing timer database
 !! @author Adam Peplinski
 !! @date Oct 13, 2017

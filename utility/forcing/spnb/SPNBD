@@ -7,7 +7,7 @@
 !     module id and name
       integer spnb_id
       character*(*) spnb_name
-      parameter(spnb_name='SPONGEBX')
+      parameter(spnb_name='SPNB')
 
 !     timer id
       integer spnb_tmr_id

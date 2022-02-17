@@ -1,11 +1,11 @@
 !> @file mntrlog.f
-!! @ingroup monitor
+!! @ingroup mntr
 !! @brief Set of module register and logging routines for KTH framework
 !! @author Adam Peplinski
 !! @date Sep 28, 2017
 !=======================================================================
 !> @brief Initialise monitor by registering framework and monitor
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[in]  log_thr   initial log threshold
       subroutine mntr_register_mod(log_thr)
       implicit none
@@ -72,7 +72,7 @@
       end subroutine
 !=======================================================================
 !> @brief Register monitor runtime parameters
-!! @ingroup monitor
+!! @ingroup mntr
       subroutine mntr_register_par
       implicit none
 
@@ -107,7 +107,7 @@
       end subroutine
 !=======================================================================
 !> @brief Initialise monitor module
-!! @ingroup monitor
+!! @ingroup mntr
       subroutine mntr_init
       implicit none
 
@@ -163,7 +163,7 @@
       end subroutine
 !=======================================================================
 !> @brief Monitor simulation wall clock
-!! @ingroup monitor
+!! @ingroup mntr
       subroutine mntr_wclock
       implicit none
 
@@ -225,7 +225,7 @@
       end subroutine
 !=======================================================================
 !> @brief Set number of steps necessary to write proper checkpointing
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[in] dstep   step delay
       subroutine mntr_set_step_delay(dstep)
       implicit none
@@ -248,7 +248,7 @@
       end subroutine
 !=======================================================================
 !> @brief Get step delay
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[out] dstep   step delay
       subroutine mntr_get_step_delay(dstep)
       implicit none
@@ -266,7 +266,7 @@
       end subroutine
 !=======================================================================
 !> @brief Set convergence flag to shorten simulation
-!! @ingroup monitor
+!! @ingroup mntr
       subroutine mntr_set_conv(ifconv)
       implicit none
 
@@ -284,7 +284,7 @@
       end subroutine
 !=======================================================================
 !> @brief Check if module was initialised
-!! @ingroup monitor
+!! @ingroup mntr
 !! @return mntr_is_initialised
       logical function mntr_is_initialised()
       implicit none
@@ -299,7 +299,7 @@
       end function
 !=======================================================================
 !> @brief Get logging threashold
-!! @ingroup monitor
+!! @ingroup mntr
 !! @return mntr_lp_def_get
       integer function mntr_lp_def_get()
       implicit none
@@ -314,7 +314,7 @@
       end function
 !=======================================================================
 !> @brief Register new module
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[out] mid      current module id
 !! @param[in]  pmid     parent module id
 !! @param[in]  mname    module name
@@ -429,7 +429,7 @@
       end subroutine
 !=======================================================================
 !> @brief Check if module name is registered and return its id.
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[out] mid      module id
 !! @param[in]  mname    module name
       subroutine mntr_mod_is_name_reg(mid,mname)
@@ -497,7 +497,7 @@
       end subroutine
 !=======================================================================
 !> @brief Check if module id is registered. This operation is performed locally
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[in] mid      module id
 !! @return mntr_mod_is_id_reg
       logical function mntr_mod_is_id_reg(mid)
@@ -517,7 +517,7 @@
       end function
 !=======================================================================
 !> @brief Get number of registered modules. This operation is performed locally
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[out]    nmod     module number
 !! @param[out]    mmod     max module id
       subroutine mntr_mod_get_number(nmod,mmod)
@@ -537,7 +537,7 @@
       end subroutine
 !=======================================================================
 !> @brief Get module name an parent id for given module id. This operation is performed locally
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[out]    pmid     parent module id
 !! @param[out]    mname    module name
 !! @param[inout]  mid      module id
@@ -569,7 +569,7 @@
       end subroutine
 !=======================================================================
 !> @brief Write log message
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[in] mid       module id
 !! @param[in] priority  log priority
 !! @param[in] logs      log body
@@ -623,7 +623,7 @@
       end subroutine
 !=======================================================================
 !> @brief Write log message from given process
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[in] mid       module id
 !! @param[in] priority  log priority
 !! @param[in] logs      log body
@@ -677,7 +677,7 @@
       end subroutine
 !=======================================================================
 !> @brief Write log message adding single integer
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[in] mid       module id
 !! @param[in] priority  log priority
 !! @param[in] logs      log body
@@ -699,7 +699,7 @@
       end subroutine
 !=======================================================================
 !> @brief Write log message adding single real
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[in] mid       module id
 !! @param[in] priority  log priority
 !! @param[in] logs      log body
@@ -722,7 +722,7 @@
       end subroutine
 !=======================================================================
 !> @brief Write log message adding real vector of length n
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[in] mid       module id
 !! @param[in] priority  log priority
 !! @param[in] logs      log body
@@ -750,7 +750,7 @@
       end subroutine
 !=======================================================================
 !> @brief Write log message adding single logical
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[in] mid       module id
 !! @param[in] priority  log priority
 !! @param[in] logs      log body
@@ -773,7 +773,7 @@
       end subroutine
 !=======================================================================
 !> @brief Write warning message
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[in] mid       module id
 !! @param[in] logs      log body
       subroutine mntr_warn(mid,logs)
@@ -790,7 +790,7 @@
       end subroutine
 !=======================================================================
 !> @brief Write error message
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[in] mid       module id
 !! @param[in] logs      log body
       subroutine mntr_error(mid,logs)
@@ -807,7 +807,7 @@
       end subroutine
 !=======================================================================
 !> @brief Abort simulation
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[in] mid       module id
 !! @param[in] logs      log body
       subroutine mntr_abort(mid,logs)
@@ -825,7 +825,7 @@
       end subroutine
 !=======================================================================
 !> @brief Abort simulation
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[in] mid       module id
 !! @param[in] ierr      error flag
 !! @param[in] logs      log body
@@ -862,7 +862,7 @@
       end subroutine
 !=======================================================================
 !> @brief Print registered modules showing tree structure
-!! @ingroup monitor
+!! @ingroup mntr
       subroutine mntr_mod_summary_print()
       implicit none
 
@@ -899,7 +899,7 @@
       end subroutine
 !=======================================================================
 !> @brief Provide ordered list of registered modules for printing.
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[out]   olist    ordered list
 !! @param[out]   ierr     error flag
       subroutine mntr_mod_get_olist(olist,ierr)
@@ -979,7 +979,7 @@
       end subroutine
 !=======================================================================
 !> @brief Build ordered list reflecting graph structure
-!! @ingroup monitor
+!! @ingroup mntr
 !! @param[out]   olist    ordered list
 !! @param[inout] slist    list sorted with respect to parent
 !! @param[in]    nlist    lists length

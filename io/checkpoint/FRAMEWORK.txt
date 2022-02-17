@@ -18,7 +18,7 @@
 
 @par
 @interface_reqr Interface required:
--# multiple interfaces from [frame] (@ref frame), [runtime parameters] (@ref runparam) and [monitor] (@ref monitor) modules
+-# multiple interfaces from @ref frame, @ref rprm and @ref mntr modules
 -# (\a chkpts_register); provided by submodule
 -# (\a chkpts_init); provided by submodule
 -# (\a chkpts_read); provided by submodule

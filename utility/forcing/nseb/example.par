@@ -1,4 +1,4 @@
-[_NOISEBX]              # Runtime paramere section for noise box module
+[_NSEB]              # Runtime paramere section for noise box module
 TIME                 = 0.20000000E+01         # Time to add noise
 AMPLITUDE            = 0.10000000E-02         # Noise amplitude
 BOXMINX              = -0.50000000E+01        # Position of lower left box corner; dimension X

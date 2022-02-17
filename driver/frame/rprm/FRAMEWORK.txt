@@ -1,7 +1,7 @@
 #Configuration file for Nek5000 framework developed at KTH
 # Place for short description; doxygen style
 /**
-@defgroup runparam Runtime parameters
+@defgroup rprm Runtime parameters
 @ingroup frame
 
 @brief Routines related to module's runtime parameters.
@@ -39,10 +39,10 @@ inside (\a frame_usr_register).
 @param_list Parameters provided by runtime parameter module (include file - \a RPRMD): 
 |Varaible | Type | Runtime parameter | Default value | Description |
 |---------|------|-------------------|---------------|-------------|
-| rprm_ifpar | logical | _runpar:parfwrite | .false. | Do we write runtime parameter file |
-| rprm_parfnm | string | _runpar:parfname | outparfile | Runtime parameter file name for output (without .par) |
+| rprm_ifpar | logical | _rprm:parfwrite | .false. | Do we write runtime parameter file |
+| rprm_parfnm | string | _rprm:parfname | outparfile | Runtime parameter file name for output (without .par) |
 
 @mod_param_example
-@include Toolbox/driver/frame/runparam/example.par
+@include Toolbox/driver/frame/rprm/example.par
 
 */

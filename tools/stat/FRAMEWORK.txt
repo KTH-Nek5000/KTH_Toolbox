@@ -68,7 +68,7 @@ Post-processing of the produced fields can also be performed with the
 
 @par
 @interface_reqr Interface required:
--# multiple interfaces from @ref runparam and @ref monitor modules
+-# multiple interfaces from @ref rprm and @ref mntr modules
 -# @ref map2d_register , @ref map2d_init and @ref map2d_get from @ref map2d module
 -# \a user_stat_trnsv; user defined
 
@@ -77,7 +77,7 @@ average being performed or not. In case only the time average is performed (stat
 be empty, but stil present. However, @ref map2d is automatically registered by statistics tool, so there is no need to add it 
 to \a frame_usr_register and \a frame_usr_init. 
 
-@notice \a user_stat_trnsv is a user provided interface for both statistics and @ref tsrs modules.
+@note \a user_stat_trnsv is a user provided interface for both statistics and @ref tsrs modules.
 
 @mod_interface_example
 @code{.f}
