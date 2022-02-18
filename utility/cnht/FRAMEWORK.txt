@@ -1,0 +1,60 @@
+#Configuration file for Nek5000 framework developed at KTH
+# Place for short description; doxygen style
+/**
+@defgroup cnht Conjugated heat transfer tools
+@ingroup utility
+
+@brief Conjugated heat transfer tools
+
+@details
+Set of utilities related to conjugated heat transfer to build single scalar product for velocity nad temperature.
+This module is automatically registered by @ref tstpr module.
+
+@todo Complete documentation
+
+@mod_interface
+@interface_list Interface provided:
+-# @ref cnht_register
+-# @ref cnht_init
+-# @ref cnht_is_initialised
+-# @ref cnht_forcing
+-# @ref cnht_cpfld_set
+-# @ref cnht_oprzero
+-# @ref cnht_opcopy
+-# @ref cnht_opadd2
+-# @ref cnht_opsub2
+-# @ref cnht_opsub3
+-# @ref cnht_opcmult
+-# @ref cnht_opcmult2c
+-# @ref cnht_opadd2cm
+-# @ref cnht_opsub2cm
+-# @ref cnht_weight_fun
+-# @ref cnht_glsc2_wt
+
+@par
+@interface_reqr Interface required:
+-# multiple interfaces from @ref rprm and @ref mntr modules
+
+
+
+@mod_param
+@param_list Parameters provided by time snht module (include file - \a CNHTD):
+|Varaible | Type | Runtime parameter | Description |
+|---------|------|-------------------|-------------|
+| cnht_sc | real | _cnht:scln | norm scaling factor |
+| cnht_sv | real | _cnht:sclv | velocity scaling factor (Pareto curve) |
+| cnht_st | real | _cnht:sclt | temperature scaling factor (Pareto curve) |  
+| cnht_gx | real | _cnht:grx | X component of gravitational field |
+| cnht_gy | real | _cnht:gry | Y component of gravitational field |
+| cnht_gz | real | _cnht:grz | Z component of gravitational field |
+
+@mod_param
+@param_reqr Parameters required by time stepper module:
+-# Nek5000 \a PARAM array
+   + PARAM(1)
+   + PARAM(2)
+
+@mod_param_example
+@include Toolbox/utility/cnht/example.par
+
+*/

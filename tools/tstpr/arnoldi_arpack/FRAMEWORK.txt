@@ -2,7 +2,7 @@
 # Place for short description; doxygen style
 /**
 @defgroup arn_arp Arnoldi algorithm using parpack
-@ingroup tstepper
+@ingroup tstpr
 
 @brief Arnoldi algorithm with PARPACK
 
@@ -12,9 +12,9 @@
 Description of the method can be found in @cite Peplinski2014 @cite Peplinski2015
 
 @mod_interface
-@interface_list Interface provided to tstepper:
-   + stepper_param_in
-   + stepper_param_out
+@interface_list Interface provided to tstpr:
+   + stepper_register
+   + stepper_init
    + stepper_vinit
    + stepper_solve
 
@@ -30,15 +30,15 @@ Description of the method can be found in @cite Peplinski2014 @cite Peplinski201
 -# [CHKPOINTD] (@ref chkpoint):
    + IFCHKPTRST : if restart
    + CHKPTSTEP - checkpiont dump frequency (number of time steps)
--# [TIME_STEPPERD] (@ref tstepper):
-   + tst_mode :
+-# [TSTPRD] (@ref tstpr):
+   + tstpr_mode :
      - 0 : no arnoldi
      - 1 : direct mode
      - 2 : adjoint mode
      - 3 : initial optimal condition
-   + tst_step : frequency of calling arn_vsolve (number of time steps)
-   + tst_cmax : maximal number of arnoldi cycles
-   + tst_tol : PARPACK tolerance for Ritz values
+   + tstpr_step : frequency of calling arn_vsolve (number of time steps)
+   + tstpr_cmax : maximal number of arnoldi cycles
+   + tstpr_tol : PARPACK tolerance for Ritz values
 -# CONHT (for conjugated heat transfer):
    + CHCST_SC, CHCFF_V, CHCFF_T : velocity and temperature scaling factors
    + CHGRX, CHGRY, CHGRZ : gravitational acceleration

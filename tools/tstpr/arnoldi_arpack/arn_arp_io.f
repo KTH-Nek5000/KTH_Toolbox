@@ -10,7 +10,7 @@
       include 'SIZE'            ! NIO
       include 'TSTEP'           ! LASTEP
       include 'FRAMELP'
-      include 'TSTEPPERD'
+      include 'TSTPRD'
       include 'ARN_ARPD'
 
       ! local variables
@@ -42,7 +42,7 @@
 
       include 'SIZE'            ! NIO
       include 'FRAMELP'
-      include 'TSTEPPERD'
+      include 'TSTPRD'
       include 'ARN_ARPD'
 !-----------------------------------------------------------------------
       call mntr_log(arna_id,lp_prd,
@@ -68,7 +68,7 @@
       include 'RESTART'
       include 'TSTEP'
       include 'FRAMELP'
-      include 'TSTEPPERD'
+      include 'TSTPRD'
       include 'ARN_ARPD'
 
       ! argument list
@@ -133,7 +133,7 @@
 
       include 'SIZE'
       include 'TSTEP'
-      include 'TSTEPPERD'
+      include 'TSTPRD'
       include 'ARN_ARPD'
 
       ! local variables
@@ -153,7 +153,7 @@
       ! write idoarp and character varialbes
       call blank(hdr,ahdsize)
 
-      write(hdr,1) idoarp,bmatarp,whicharp,tst_mode! 14
+      write(hdr,1) idoarp,bmatarp,whicharp,tstpr_mode! 14
  1    format('#arp',1x,i2,1x,a1,1x,a2,1x,i1)
 
       call byte_write(hdr,ahdsize/4,ierr)
@@ -171,7 +171,7 @@
       itmp(5) = infarp
       itmp(6) = nparp
       itmp(7) = ncarp
-      itmp(8) = tst_step
+      itmp(8) = tstpr_step
       do il=1,11
          itmp(8+il) = iparp(il)
       enddo
@@ -182,7 +182,7 @@
       call byte_write(itmp,33,ierr)
 
       ! collect and write real variables
-      rtmp8(1) = tst_tol
+      rtmp8(1) = tstpr_tol
       rtmp8(2) = RNMARP
       rtmp8(3) = DT
 
@@ -208,7 +208,7 @@
       include 'TSTEP'
       include 'PARALLEL'
       include 'FRAMELP'
-      include 'TSTEPPERD'
+      include 'TSTPRD'
       include 'ARN_ARPD'
 
       ! argument list
@@ -288,11 +288,11 @@
          endif
 
          ! is it the same integration mode
-         if (tst_mode0.ne.tst_mode) then
+         if (tstpr_mode0.ne.tstpr_mode) then
             call mntr_error(arna_id,
      $           'arn_read_par, wrong simulation mode')
-            call mntr_logi(arna_id,lp_err,'tst_mode0 = ', tst_mode0)
-            call mntr_logi(arna_id,lp_err,'tst_mode  = ', tst_mode)
+            call mntr_logi(arna_id,lp_err,'tstpr_mode0 = ', tstpr_mode0)
+            call mntr_logi(arna_id,lp_err,'tstpr_mode  = ', tstpr_mode)
             ierr=1
          endif
 
@@ -326,11 +326,11 @@
          endif
 
          ! stopping criterion
-         if (tst_tol0.ne.tst_tol) then
+         if (tstpr_tol0.ne.tstpr_tol) then
             call mntr_warn(arna_id,
      $       'arn_read_par, different stopping criterion')
-            call mntr_logi(arna_id,lp_err,'tst_tol0 = ', tst_tol0)
-            call mntr_logi(arna_id,lp_err,'tst_tol  = ', tst_tol)
+            call mntr_logi(arna_id,lp_err,'tstpr_tol0 = ', tstpr_tol0)
+            call mntr_logi(arna_id,lp_err,'tstpr_tol  = ', tstpr_tol)
          endif
 
          ! number of eigenvalues
@@ -349,11 +349,11 @@
             call mntr_logi(arna_id,lp_err,'dt     = ', DT)
          endif
 
-         if (tst_step0.ne.tst_step) then
+         if (tstpr_step0.ne.tstpr_step) then
             call mntr_warn(arna_id,
      $       'arn_read_par, different number of steps instepper phase')
-            call mntr_logi(arna_id,lp_err,'tst_step0 = ', tst_step0)
-            call mntr_logi(arna_id,lp_err,'tst_step  = ', tst_step)
+            call mntr_logi(arna_id,lp_err,'tstpr_step0 = ', tstpr_step0)
+            call mntr_logi(arna_id,lp_err,'tstpr_step  = ', tstpr_step)
          endif
 
          ! check IPARP
@@ -426,7 +426,7 @@
       include 'RESTART'
       include 'TSTEP'
       include 'FRAMELP'
-      include 'TSTEPPERD'
+      include 'TSTPRD'
       INCLUDE 'ARN_ARPD'
 
       ! local variables
@@ -455,7 +455,7 @@
       call byte_read(hdr,ahdsize/4,ierr)
 
       if (indx2(hdr,132,'#arp',4).eq.1) then
-         read(hdr,*) dummy,idoarp0,bmatarp0,whicharp0,tst_mode0! 14
+         read(hdr,*) dummy,idoarp0,bmatarp0,whicharp0,tstpr_mode0! 14
       else
          call  mntr_abort(arna_id,
      $       'mfi_arnp; Error reading header')
@@ -477,7 +477,7 @@
       infarp0 = itmp(5)
       nparp0  = itmp(6)
       ncarp0  = itmp(7)
-      tst_step0 = itmp(8)
+      tstpr_step0 = itmp(8)
       do il=1,11
          iparp0(il) = itmp(8+il)
       enddo
@@ -489,7 +489,7 @@
       call byte_read(rtmp4,6,ierr)
       if (if_byte_sw) call byte_reverse(rtmp4,6,ierr)
 
-      tst_tol0 = rtmp8(1)
+      tstpr_tol0 = rtmp8(1)
       rnmarp0 = rtmp8(2)
       dtarp0  = rtmp8(3)
 
@@ -519,7 +519,7 @@
       include 'TSTEP'
       include 'RESTART'
       include 'FRAMELP'
-      include 'TSTEPPERD'
+      include 'TSTPRD'
       include 'ARN_ARPD'
 
       ! argument list
@@ -660,7 +660,7 @@
       include 'TSTEP'
       include 'RESTART'
       include 'FRAMELP'
-      include 'TSTEPPERD'
+      include 'TSTPRD'
       INCLUDE 'ARN_ARPD'
 
       ! argument list
@@ -772,7 +772,7 @@
       include 'SIZE'
       include 'INPUT'           ! IF3D, IFHEAT
       include 'RESTART'
-      include 'TSTEPPERD'
+      include 'TSTPRD'
       INCLUDE 'ARN_ARPD'
 
       ! argument list
@@ -788,9 +788,9 @@
       offs = offs0 + ioflds*stride + NDIM*strideB
       call byte_set_view(offs,ifh_mbyte)
 
-      call copy(UR1,VECT(1),tst_nv)
-      call copy(UR2,VECT(1+tst_nv),tst_nv)
-      if (IF3D) call copy(UR3,VECT(1+2*tst_nv),tst_nv)
+      call copy(UR1,VECT(1),tstpr_nv)
+      call copy(UR2,VECT(1+tstpr_nv),tstpr_nv)
+      if (IF3D) call copy(UR3,VECT(1+2*tstpr_nv),tstpr_nv)
 
       call mfo_outv(UR1,UR2,UR3,nout,NXO,NYO,NZO)
       ioflds = ioflds + NDIM
@@ -798,7 +798,7 @@
       if (IFHEAT) then
          offs = offs0 + ioflds*stride + strideB
          call byte_set_view(offs,ifh_mbyte)
-         call copy(UR1,VECT(1+NDIM*tst_nv),tst_nt)
+         call copy(UR1,VECT(1+NDIM*tstpr_nv),tstpr_nt)
 
          call mfo_outs(UR1,nout,NXO,NYO,NZO)
          ioflds = ioflds + 1
@@ -823,7 +823,7 @@
       include 'SIZE'
       include 'INPUT'           ! IF3D, IFHEAT
       include 'RESTART'
-      include 'TSTEPPERD'
+      include 'TSTPRD'
       INCLUDE 'ARN_ARPD'
 
       ! argument list
@@ -845,9 +845,9 @@
       call byte_set_view(offs,ifh_mbyte)
       call mfi_getv(UR1,UR2,UR3,wk,lwk,.false.)
 
-      call copy(VECT(1),UR1,tst_nv)
-      call copy(VECT(1+tst_nv),UR2,tst_nv)
-      if (IF3D) call copy(VECT(1+2*tst_nv),UR3,tst_nv)
+      call copy(VECT(1),UR1,tstpr_nv)
+      call copy(VECT(1+tstpr_nv),UR2,tstpr_nv)
+      if (IF3D) call copy(VECT(1+2*tstpr_nv),UR3,tstpr_nv)
       iofldr = iofldr + NDIM
 
       if (IFHEAT) then
@@ -855,7 +855,7 @@
          call byte_set_view(offs,ifh_mbyte)
          call mfi_gets(UR1,wk,lwk,.false.)
 
-         call copy(VECT(1+NDIM*tst_nv),UR1,tst_nt)
+         call copy(VECT(1+NDIM*tstpr_nv),UR1,tstpr_nt)
          iofldr = iofldr + 1
       endif
 

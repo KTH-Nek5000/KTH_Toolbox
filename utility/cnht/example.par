@@ -1,4 +1,4 @@
-[_CONJHT]               # Runtime paramere section for conj. heat trans. tool module
+[_CNHT]               # Runtime paramere section for conj. heat trans. tool module
 SCLN                 = 0.33655800E+01         # Norm scaling factor
 SCLV                 = 0.50000000E+00         # Velocity scaling factor (Pareto curve)
 SCLT                 = 0.50000000E+00         # Temperature scaling factor (Pareto curve)

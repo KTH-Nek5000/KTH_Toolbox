@@ -6,14 +6,14 @@
 !=======================================================================
 !> @brief Register power iteration module
 !! @ingroup powerit
-!! @note This interface is called by @ref tst_register
+!! @note This interface is called by @ref tstpr_register
       subroutine stepper_register()
       implicit none
 
       include 'SIZE'
       include 'INPUT'
       include 'FRAMELP'
-      include 'TSTEPPERD'
+      include 'TSTPRD'
       include 'POWERITD'
 
       ! local variables
@@ -36,11 +36,11 @@
       endif
 
       ! find parent module
-      call mntr_mod_is_name_reg(lpmid,tst_name)
+      call mntr_mod_is_name_reg(lpmid,tstpr_name)
       if (lpmid.le.0) then
          lpmid = 1
          call mntr_abort(lpmid,
-     $        'parent module ['//trim(tst_name)//'] not registered')
+     $        'parent module ['//trim(tstpr_name)//'] not registered')
       endif
 
       ! register module
@@ -49,10 +49,10 @@
 
       ! register timers
       ! initialisation
-      call mntr_tmr_reg(pwi_tmr_ini_id,tst_tmr_ini_id,pwi_id,
+      call mntr_tmr_reg(pwi_tmr_ini_id,tstpr_tmr_ini_id,pwi_id,
      $     'PWI_INI','Power iteration initialisation time',.true.)
       ! submodule operation
-      call mntr_tmr_reg(pwi_tmr_evl_id,tst_tmr_evl_id,pwi_id,
+      call mntr_tmr_reg(pwi_tmr_evl_id,tstpr_tmr_evl_id,pwi_id,
      $     'PWI_EVL','Power iteration evolution time',.true.)
 
       ! register and set active section
@@ -76,7 +76,7 @@
 !=======================================================================
 !> @brief Initilise power iteration module
 !! @ingroup powerit
-!! @note This interface is called by @ref tst_init
+!! @note This interface is called by @ref tstpr_init
       subroutine stepper_init()
       implicit none
 
@@ -85,7 +85,7 @@
       include 'MASS'            ! BM1
       include 'FRAMELP'
       include 'CHKPOINTD'
-      include 'TSTEPPERD'
+      include 'TSTPRD'
       include 'POWERITD'
 
       ! local variables
@@ -95,7 +95,7 @@
       character*20 ctmp
 
       ! functions
-      real dnekclock, cht_glsc2_wt
+      real dnekclock, cnht_glsc2_wt
       logical chkpts_is_initialised
 !-----------------------------------------------------------------------
       ! check if the module was already initialised
@@ -131,16 +131,16 @@
       endif
 
       ! normalise vector
-      lnorm = cht_glsc2_wt(VXP,VYP,VZP,TP,VXP,VYP,VZP,TP,BM1)
+      lnorm = cnht_glsc2_wt(VXP,VYP,VZP,TP,VXP,VYP,VZP,TP,BM1)
       lnorm = sqrt(pwi_l2n/lnorm)
-      call cht_opcmult (VXP,VYP,VZP,TP,lnorm)
+      call cnht_opcmult (VXP,VYP,VZP,TP,lnorm)
 
       ! make sure the velocity and temperature fields are continuous at
       ! element faces and edges
-      call tst_dssum
+      call tstpr_dssum
 
       ! save intial vector
-      call cht_opcopy (pwi_vx,pwi_vy,pwi_vz,pwi_t,VXP,VYP,VZP,TP)
+      call cnht_opcopy (pwi_vx,pwi_vy,pwi_vz,pwi_t,VXP,VYP,VZP,TP)
 
       ! stamp log file
       call mntr_log(pwi_id,lp_prd,'POWER ITERATIONS initialised')
@@ -172,7 +172,7 @@
 !=======================================================================
 !> @brief Renormalise vector and check convergence.
 !! @ingroup powerit
-!! @note This interface is defined in @ref tstpr_solve
+!! @note This interface is defined in @ref tstpr_main
 !! @remarks This routine uses global scratch space SCRUZ
       subroutine stepper_vsolve
       implicit none
@@ -184,7 +184,7 @@
       include 'SOLN'            ! V[XYZ]P, TP
       include 'FRAMELP'
       include 'CHKPOINTD'
-      include 'TSTEPPERD'
+      include 'TSTPRD'
       include 'POWERITD'
 
       ! scratch space
@@ -197,19 +197,19 @@
       real lnorm, grth_old, ltim
 
       ! functions
-      real dnekclock, cht_glsc2_wt
+      real dnekclock, cnht_glsc2_wt
 !-----------------------------------------------------------------------
       ! timing
       ltim=dnekclock()
 
       ! normalise vector
-      lnorm = cht_glsc2_wt(VXP,VYP,VZP,TP,VXP,VYP,VZP,TP,BM1)
+      lnorm = cnht_glsc2_wt(VXP,VYP,VZP,TP,VXP,VYP,VZP,TP,BM1)
       lnorm = sqrt(pwi_l2n/lnorm)
-      call cht_opcmult (VXP,VYP,VZP,TP,lnorm)
+      call cnht_opcmult (VXP,VYP,VZP,TP,lnorm)
 
       ! make sure the velocity and temperature fields are continuous at
       ! element faces and edges
-      call tst_dssum
+      call tstpr_dssum
 
       ! compare current and prevoius growth rate
       grth_old = pwi_grw
@@ -217,9 +217,9 @@
       grth_old = pwi_grw - grth_old
 
       ! get L2 norm of the update
-      call cht_opsub3 (TA1,TA2,TA3,TAT,pwi_vx,pwi_vy,pwi_vz,pwi_t,
+      call cnht_opsub3 (TA1,TA2,TA3,TAT,pwi_vx,pwi_vy,pwi_vz,pwi_t,
      $     VXP,VYP,VZP,TP)
-      lnorm = cht_glsc2_wt(TA1,TA2,TA3,TAT,TA1,TA2,TA3,TAT,BM1)
+      lnorm = cnht_glsc2_wt(TA1,TA2,TA3,TAT,TA1,TA2,TA3,TAT,BM1)
       lnorm = sqrt(lnorm)
 
       ! log stamp
@@ -237,17 +237,17 @@
       call outpost2(TA1,TA2,TA3,PRP,TAT,itmp,'VDF')
 
       ! check convergence
-      if(lnorm.lt.tst_tol.and.grth_old.lt.tst_tol) then
+      if(lnorm.lt.tstpr_tol.and.grth_old.lt.tstpr_tol) then
          call mntr_log(pwi_id,lp_prd,'Reached stopping criteria')
          ! mark the last step
          LASTEP = 1
       else
          ! save current vector and restart stepper
-         call cht_opcopy (pwi_vx,pwi_vy,pwi_vz,pwi_t,VXP,VYP,VZP,TP)
+         call cnht_opcopy (pwi_vx,pwi_vy,pwi_vz,pwi_t,VXP,VYP,VZP,TP)
       endif
 
       ! save checkpoint
-      if (LASTEP.eq.1.or.tst_cmax.eq.tst_vstep) then
+      if (LASTEP.eq.1.or.tstpr_cmax.eq.tstpr_vstep) then
          call stepper_write()
 
          ! mark the last step

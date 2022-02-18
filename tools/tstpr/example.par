@@ -1,4 +1,4 @@
-[_TSTEPPER]             # Runtime paramere section for time stepper module
+[_TSTPR]             # Runtime paramere section for time stepper module
 MODE                 = DIR                    # Simulation mode
 STEPS                = 40                     # Length of stepper phase
 MAXCYC               = 10                     # Max number of stepper cycles

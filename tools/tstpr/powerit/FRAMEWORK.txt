@@ -2,7 +2,7 @@
 # Place for short description; doxygen style
 /**
 @defgroup powerit Power itertion routines
-@ingroup tstepper
+@ingroup tstpr
 
 @brief Power iteration submodule
 
@@ -11,7 +11,7 @@
 @details 
 
 @mod_interface
-@interface_list Interface provided to tstepper:
+@interface_list Interface provided to tstpr:
 + stepper_param_in
 + stepper_param_out
 + stepper_vinit

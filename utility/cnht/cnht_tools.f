@@ -1,30 +1,30 @@
-!> @file conht_tools.f
-!! @ingroup conht
+!> @file cnht_tools.f
+!! @ingroup cnht
 !! @brief Set of utilities related to conjugated heat transfer to build
 !!    single scalar product for velocity nad temperature.
 !! @author Clio Saglietti, Adam Peplinski
 !! @date Mar 4, 2019
 !=======================================================================
 !> @brief Register conjugated heat transfer tools module
-!! @ingroup conht
+!! @ingroup cnht
 !! @note This routine should be called in frame_usr_register
-      subroutine cht_register()
+      subroutine cnht_register()
       implicit none
 
       include 'SIZE'
       include 'INPUT'
       include 'FRAMELP'
-      include 'CONHTD'
+      include 'CNHTD'
 
       ! local variables
       integer lpmid, il
       character*2 str
 !-----------------------------------------------------------------------
       ! check if the current module was already registered
-      call mntr_mod_is_name_reg(lpmid,cht_name)
+      call mntr_mod_is_name_reg(lpmid,cnht_name)
       if (lpmid.gt.0) then
          call mntr_warn(lpmid,
-     $        'module ['//trim(cht_name)//'] already registered')
+     $        'module ['//trim(cnht_name)//'] already registered')
          return
       endif
 
@@ -37,48 +37,48 @@
       endif
 
       ! register module
-      call mntr_mod_reg(cht_id,lpmid,cht_name,
+      call mntr_mod_reg(cnht_id,lpmid,cnht_name,
      $      'Conjugated heat transfer tools')
 
       ! register and set active section
-      call rprm_sec_reg(cht_sec_id,cht_id,'_'//adjustl(cht_name),
+      call rprm_sec_reg(cnht_sec_id,cnht_id,'_'//adjustl(cnht_name),
      $     'Runtime paramere section for conj. heat trans. tool module')
-      call rprm_sec_set_act(.true.,cht_sec_id)
+      call rprm_sec_set_act(.true.,cnht_sec_id)
 
       ! register parameters
-      call rprm_rp_reg(cht_sc_id,cht_sec_id,'SCLN',
+      call rprm_rp_reg(cnht_sc_id,cnht_sec_id,'SCLN',
      $     'Norm scaling factor',rpar_real,0,3.36558,.false.,' ')
 
-      call rprm_rp_reg(cht_sv_id,cht_sec_id,'SCLV',
+      call rprm_rp_reg(cnht_sv_id,cnht_sec_id,'SCLV',
      $     'Velocity scaling factor (Pareto curve)',
      $     rpar_real,0,0.5,.false.,' ')
 
-      call rprm_rp_reg(cht_st_id,cht_sec_id,'SCLT',
+      call rprm_rp_reg(cnht_st_id,cnht_sec_id,'SCLT',
      $     'Temperature scaling factor (Pareto curve)',
      $     rpar_real,0,0.5,.false.,' ')
 
-      call rprm_rp_reg(cht_gx_id,cht_sec_id,'GRX',
+      call rprm_rp_reg(cnht_gx_id,cnht_sec_id,'GRX',
      $     'X component of gravitational field',
      $     rpar_real,0,0.0,.false.,' ')
 
-      call rprm_rp_reg(cht_gy_id,cht_sec_id,'GRY',
+      call rprm_rp_reg(cnht_gy_id,cnht_sec_id,'GRY',
      $     'Y component of gravitational field',
      $     rpar_real,0,1.0,.false.,' ')
 
-      if (IF3D) call rprm_rp_reg(cht_gz_id,cht_sec_id,'GRZ',
+      if (IF3D) call rprm_rp_reg(cnht_gz_id,cnht_sec_id,'GRZ',
      $     'Z component of gravitational field',
      $     rpar_real,0,0.0,.false.,' ')
 
       ! set initialisation flag
-      cht_ifinit=.false.
+      cnht_ifinit=.false.
 
       return
       end subroutine
 !=======================================================================
 !> @brief Initilise conjugated heat transfer tools  module
-!! @ingroup conht
+!! @ingroup cnht
 !! @note This routine should be called in frame_usr_init
-      subroutine cht_init()
+      subroutine cnht_init()
       implicit none
 
       include 'SIZE'
@@ -86,7 +86,7 @@
       include 'INPUT'
       include 'SOLN'
       include 'ADJOINT'
-      include 'CONHTD'
+      include 'CNHTD'
 
       ! local variables
       integer itmp, il
@@ -95,68 +95,68 @@
       character*20 ctmp
 !-----------------------------------------------------------------------
       ! check if the module was already initialised
-      if (cht_ifinit) then
-         call mntr_warn(cht_id,
-     $        'module ['//trim(cht_name)//'] already initiaised.')
+      if (cnht_ifinit) then
+         call mntr_warn(cnht_id,
+     $        'module ['//trim(cnht_name)//'] already initiaised.')
          return
       endif
 
       ! get runtime parameters
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,cht_sc_id,rpar_real)
-      cht_sc = rtmp
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,cht_sv_id,rpar_real)
-      cht_sv = rtmp
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,cht_st_id,rpar_real)
-      cht_st = rtmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,cnht_sc_id,rpar_real)
+      cnht_sc = rtmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,cnht_sv_id,rpar_real)
+      cnht_sv = rtmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,cnht_st_id,rpar_real)
+      cnht_st = rtmp
 
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,cht_gx_id,rpar_real)
-      cht_gx = rtmp
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,cht_gy_id,rpar_real)
-      cht_gz = rtmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,cnht_gx_id,rpar_real)
+      cnht_gx = rtmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,cnht_gy_id,rpar_real)
+      cnht_gz = rtmp
       if (IF3D) then
-         call rprm_rp_get(itmp,rtmp,ltmp,ctmp,cht_gz_id,rpar_real)
-         cht_gz = rtmp
+         call rprm_rp_get(itmp,rtmp,ltmp,ctmp,cnht_gz_id,rpar_real)
+         cnht_gz = rtmp
       endif
 
       ! Rayleight and Prandtl numbers
-      cht_Ra = abs(PARAM(2))
-      cht_Ra = abs(PARAM(1))
-      BETA_B = cht_Ra
+      cnht_Ra = abs(PARAM(2))
+      cnht_Ra = abs(PARAM(1))
+      BETA_B = cnht_Ra
 
       ! gravity
-      G_ADJ(1) = cht_gx
-      G_ADJ(2) = cht_gy
-      G_ADJ(3) = cht_gz
+      G_ADJ(1) = cnht_gx
+      G_ADJ(2) = cnht_gy
+      G_ADJ(3) = cnht_gz
 
       ! temperature gradient
       call gradm1(DTDX,DTDY,DTDZ,T)
 
       ! everything is initialised
-      cht_ifinit=.true.
+      cnht_ifinit=.true.
 
       return
       end subroutine
 !=======================================================================
 !> @brief Check if module was initialised
-!! @ingroup conht
-!! @return cht_is_initialised
-      logical function cht_is_initialised()
+!! @ingroup cnht
+!! @return cnht_is_initialised
+      logical function cnht_is_initialised()
       implicit none
 
       include 'SIZE'
-      include 'CONHTD'
+      include 'CNHTD'
 !-----------------------------------------------------------------------
-      cht_is_initialised = cht_ifinit
+      cnht_is_initialised = cnht_ifinit
 
       return
       end function
 !=======================================================================
 !> @brief Calcualte forcing ralted to conjugated heat transfer
-!! @ingroup conht
+!! @ingroup cnht
 !! @param[inout] ffx,ffy,ffz     forcing; x,y,z component
 !! @param[in]    ix,iy,iz        GLL point index
 !! @param[in]    ieg             global element number
-      subroutine cht_forcing(ffx,ffy,ffz,ix,iy,iz,ieg)
+      subroutine cnht_forcing(ffx,ffy,ffz,ix,iy,iz,ieg)
       implicit none
 
       include 'SIZE'            !
@@ -165,7 +165,7 @@
       include 'TSTEP'           ! IFIELD
       include 'SOLN'            ! JP, T, TP
       include 'ADJOINT'         ! IFADJ, G_ADJ, DTD[XYZ]
-      include 'CONHTD'           ! CHGR[XYZ]
+      include 'CNHTD'           ! CHGR[XYZ]
 
 !     argument list
       real ffx, ffy, ffz
@@ -179,9 +179,9 @@
          iel=GLLEL(ieg)
          if (JP.eq.0) then
             rtmp = T(ix,iy,iz,iel,IFIELD)/CPFLD(1,2)
-            ffx = ffx + cht_gx*rtmp
-            ffy = ffy + cht_gy*rtmp
-            if (IF3D) ffz = ffz + cht_gz*rtmp
+            ffx = ffx + cnht_gx*rtmp
+            ffy = ffy + cnht_gy*rtmp
+            if (IF3D) ffz = ffz + cnht_gz*rtmp
          else
             ip=ix+NX1*(iy-1+NY1*(iz-1+NZ1*(iel-1)))
             if (.not.IFADJ) then
@@ -201,27 +201,27 @@
       end subroutine
 !=======================================================================
 !> @brief Set cpfld coefficient for given type of simulation
-!! @ingroup conht
-      subroutine cht_cpfld_set()
+!! @ingroup cnht
+      subroutine cnht_cpfld_set()
       implicit none
 
       include 'SIZE'            !
       include 'INPUT'           ! CPFLD, PARAM
       include 'ADJOINT'         ! IFADJ
-      include 'CONHTD'          ! cht_Ra, cht_Ra
+      include 'CNHTD'          ! cnht_Ra, cnht_Ra
 !-----------------------------------------------------------------------
       if (IFHEAT) then
          if (IFADJ) then
-            CPFLD(1,1)=cht_Ra/sqrt(cht_Ra)
+            CPFLD(1,1)=cnht_Ra/sqrt(cnht_Ra)
             CPFLD(1,2)=1.0
 
-            CPFLD(2,1)=1.0/sqrt(cht_Ra)
+            CPFLD(2,1)=1.0/sqrt(cnht_Ra)
             CPFLD(2,2)=1.0
          else
-            CPFLD(1,1)=1.0/sqrt(cht_Ra)
-            CPFLD(1,2)=1.0/cht_Ra
+            CPFLD(1,1)=1.0/sqrt(cnht_Ra)
+            CPFLD(1,2)=1.0/cnht_Ra
 
-            CPFLD(2,1)=1.0/sqrt(cht_Ra)
+            CPFLD(2,1)=1.0/sqrt(cnht_Ra)
             CPFLD(2,2)=1.0
          endif
       else
@@ -242,10 +242,10 @@
       end subroutine
 !=======================================================================
 !> @brief Zero velocity and temperature vectors
-!! @ingroup conht
+!! @ingroup cnht
 !! @param[inout] a1, a2, a3    vlocity field 1
 !! @param[inout] a4            temperature field 1
-      subroutine cht_oprzero (a1,a2,a3,a4)
+      subroutine cnht_oprzero (a1,a2,a3,a4)
       implicit none
 
       include 'SIZE'            ! N[XYZ]1, NEL[VT]
@@ -270,12 +270,12 @@
       end subroutine
 !=======================================================================
 !> @brief Copy vectors A=B (velocity and temperature)
-!! @ingroup conht
+!! @ingroup cnht
 !! @param[out] a1, a2, a3    vlocity field 1
 !! @param[out] a4            temperature field 1
 !! @param[in]  b1, b2, b3    vlocity field 2
 !! @param[in]  b4            temperature field 2
-      subroutine cht_opcopy (a1,a2,a3,a4,b1,b2,b3,b4)
+      subroutine cnht_opcopy (a1,a2,a3,a4,b1,b2,b3,b4)
       implicit none
 
       include 'SIZE'            ! N[XYZ]1, NEL[VT]
@@ -301,12 +301,12 @@
       end subroutine
 !=======================================================================
 !> @brief Add velocity and temperature vectors A = A+B
-!! @ingroup conht
+!! @ingroup cnht
 !! @param[inout] a1, a2, a3    vlocity field 1
 !! @param[inout] a4            temperature field 1
 !! @param[in]    b1, b2, b3    vlocity field 2
 !! @param[in]    b4            temperature field 2
-      subroutine cht_opadd2 (a1,a2,a3,a4,b1,b2,b3,b4)
+      subroutine cnht_opadd2 (a1,a2,a3,a4,b1,b2,b3,b4)
       implicit none
 
       include 'SIZE'            ! N[XYZ]1, NEL[VT]
@@ -332,12 +332,12 @@
       end subroutine
 !=======================================================================
 !> @brief Subtract vectors A = A-B (velocity and temperature)
-!! @ingroup conht
+!! @ingroup cnht
 !! @param[inout] a1, a2, a3    vlocity field 1
 !! @param[inout] a4            temperature field 1
 !! @param[in]    b1, b2, b3    vlocity field 2
 !! @param[in]    b4            temperature field 2
-      subroutine cht_opsub2 (a1,a2,a3,a4,b1,b2,b3,b4)
+      subroutine cnht_opsub2 (a1,a2,a3,a4,b1,b2,b3,b4)
       implicit none
 
       include 'SIZE'            ! N[XYZ]1, NEL[VT]
@@ -363,14 +363,14 @@
       end subroutine
 !=======================================================================
 !> @brief Subtract vectors A = B-C (velocity and temperature)
-!! @ingroup conht
+!! @ingroup cnht
 !! @param[out] a1, a2, a3    vlocity field 1
 !! @param[out] a4            temperature field 1
 !! @param[in]  b1, b2, b3    vlocity field 2
 !! @param[in]  b4            temperature field 2
 !! @param[in]  c1, c2, c3    vlocity field 3
 !! @param[in]  c4            temperature field 3
-      subroutine cht_opsub3 (a1,a2,a3,a4,b1,b2,b3,b4,c1,c2,c3,c4)
+      subroutine cnht_opsub3 (a1,a2,a3,a4,b1,b2,b3,b4,c1,c2,c3,c4)
       implicit none
 
       include 'SIZE'            ! N[XYZ]1, NEL[VT]
@@ -397,11 +397,11 @@
 !=======================================================================
 !> @brief Multiply vector by constant A = c*A (single coeff. for velocity
 !!    and temperature)
-!! @ingroup conht
+!! @ingroup cnht
 !! @param[inout] a1, a2, a3    vlocity fields
 !! @param[inout] a4            temperature field
 !! @param[in]    const         coefficient
-      subroutine cht_opcmult (a1,a2,a3,a4,const)
+      subroutine cnht_opcmult (a1,a2,a3,a4,const)
       implicit none
 
       include 'SIZE'            ! N[XYZ]1, NEL[VT]
@@ -428,12 +428,12 @@
 !=======================================================================
 !> @brief Multiply vector by constant A = c*A with separate const. for
 !!    velocity and temperature
-!! @ingroup conht
+!! @ingroup cnht
 !! @param[inout] a1, a2, a3    vlocity fields
 !! @param[inout] a4            temperature field
 !! @param[in]    const1        velocity coefficient
 !! @param[in]    const2        temperature coefficient
-      subroutine cht_opcmult2c (a1,a2,a3,a4,const1, const2)
+      subroutine cnht_opcmult2c (a1,a2,a3,a4,const1, const2)
       implicit none
 
       include 'SIZE'            ! N[XYZ]1, NEL[VT]
@@ -459,13 +459,13 @@
       end subroutine
 !=======================================================================
 !> @brief  Vector summation with scaling A = A+c*B (velocity and temperature)
-!! @ingroup conht
+!! @ingroup cnht
 !! @param[inout] a1, a2, a3    vlocity field 1
 !! @param[inout] a4            temperature field 1
 !! @param[in]    b1, b2, b3    vlocity field 2
 !! @param[in]    b4            temperature field 2
 !! @param[in]    coeff         scaling coefficient
-      subroutine cht_opadd2cm (a1,a2,a3,a4,b1,b2,b3,b4,coeff)
+      subroutine cnht_opadd2cm (a1,a2,a3,a4,b1,b2,b3,b4,coeff)
       implicit none
 
       include 'SIZE'            ! N[XYZ]1, NEL[VT]
@@ -505,13 +505,13 @@
       end subroutine
 !=======================================================================
 !> @brief  Vector subtraction with scaling A = A-c*B (velocity and temperature)
-!! @ingroup conht
+!! @ingroup cnht
 !! @param[inout] a1, a2, a3    vlocity field 1
 !! @param[inout] a4            temperature field 1
 !! @param[in]    b1, b2, b3    vlocity field 2
 !! @param[in]    b4            temperature field 2
 !! @param[in]    coeff         scaling coefficient
-      subroutine cht_opsub2cm (a1,a2,a3,a4,b1,b2,b3,b4,coeff)
+      subroutine cnht_opsub2cm (a1,a2,a3,a4,b1,b2,b3,b4,coeff)
       implicit none
 
       include 'SIZE'            ! N[XYZ]1, NEL[VT]
@@ -551,16 +551,16 @@
       end subroutine
 !=======================================================================
 !> @brief Weigth velocity and temperature fields
-!! @ingroup conht
+!! @ingroup cnht
 !! @param[inout] lvx, lvy, lvz    vlocity fields
 !! @param[inout] lt               temperature field
 !! @param[in]    coeff            scaling coefficient
-      subroutine cht_weight_fun (lvx,lvy,lvz,lt,coeff)
+      subroutine cnht_weight_fun (lvx,lvy,lvz,lt,coeff)
       implicit none
 
       include 'SIZE'            ! N[XYZ]1, NEL[VT]
       include 'MASS'            ! VOLVM1, VOLTM1
-      include 'CONHTD'           ! cht_sc,cht_sv,cht_st
+      include 'CNHTD'           ! cnht_sc,cnht_sv,cnht_st
 
       ! argument list
       real lvx(1),lvy(1),lvz(1),lt(1)
@@ -569,30 +569,30 @@
       ! local variables
       real f1, f2
 !-----------------------------------------------------------------------
-      f1=cht_sv/VOLVM1/coeff
-      f2=cht_st*cht_sc/VOLTM1/coeff
+      f1=cnht_sv/VOLVM1/coeff
+      f2=cnht_st*cnht_sc/VOLTM1/coeff
 
       !rescale
-      call cht_opcmult2c (lvx,lvy,lvz,lt,f1,f2)
+      call cnht_opcmult2c (lvx,lvy,lvz,lt,f1,f2)
 
       return
       end subroutine
 !=======================================================================
 !> @brief Global inner product of velocity and temperature fields
-!! @ingroup conht
+!! @ingroup cnht
 !! @param[in] b1, b2, b3    vlocity field 1
 !! @param[in] b4            temperature field 1
 !! @param[in] x1, x2, x3    vlocity field 2
 !! @param[in] x4            temperature field 2
 !! @param[in] wt            mass matrix
-!! @return cht_glsc2_wt
-      real function cht_glsc2_wt (b1,b2,b3,b4,x1,x2,x3,x4,wt)
+!! @return cnht_glsc2_wt
+      real function cnht_glsc2_wt (b1,b2,b3,b4,x1,x2,x3,x4,wt)
       implicit none
 
       include 'SIZE'            ! N[XYZ]1, NEL[VT]
       include 'INPUT'           ! IFFLOW, IFHEAT, IF3D
       include 'MASS'            ! VOLVM1, VOLTM1
-      include 'CONHTD'           ! cht_sc,cht_sv,cht_st
+      include 'CNHTD'           ! cnht_sc,cnht_sv,cnht_st
 
 !     argument list
       real b1(1),b2(1),b3(1),b4(1),x1(1),x2(1),x3(1),x4(1),wt(1)
@@ -612,8 +612,8 @@
       !  f1 = coeff_v
       !  f2 = coeff_T
       ! version for oic
-      f1=cht_sv/VOLVM1
-      f2=cht_st*cht_sc/VOLTM1
+      f1=cnht_sv/VOLVM1
+      f2=cnht_st*cnht_sc/VOLTM1
 
       sum = 0.
       if (IFFLOW) then          !if vel
@@ -656,7 +656,7 @@
          end if
       end if
       
-      cht_glsc2_wt = glsum(sum,1)
+      cnht_glsc2_wt = glsum(sum,1)
       
       return
       end function

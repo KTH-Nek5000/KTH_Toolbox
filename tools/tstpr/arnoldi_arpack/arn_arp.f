@@ -19,14 +19,14 @@
 !=======================================================================
 !> @brief Register Arnoldi ARPACK module
 !! @ingroup arn_arp
-!! @note This interface is called by @ref tst_register
+!! @note This interface is called by @ref tstpr_register
       subroutine stepper_register()
       implicit none
 
       include 'SIZE'
       include 'INPUT'
       include 'FRAMELP'
-      include 'TSTEPPERD'
+      include 'TSTPRD'
       include 'ARN_ARPD'
 
       ! local variables
@@ -49,11 +49,11 @@
       endif
 
       ! find parent module
-      call mntr_mod_is_name_reg(lpmid,tst_name)
+      call mntr_mod_is_name_reg(lpmid,tstpr_name)
       if (lpmid.le.0) then
          lpmid = 1
          call mntr_abort(lpmid,
-     $        'parent module ['//trim(tst_name)//'] not registered')
+     $        'parent module ['//trim(tstpr_name)//'] not registered')
       endif
 
       ! register module
@@ -62,10 +62,10 @@
 
       ! register timers
       ! initialisation
-      call mntr_tmr_reg(arna_tmr_ini_id,tst_tmr_ini_id,arna_id,
+      call mntr_tmr_reg(arna_tmr_ini_id,tstpr_tmr_ini_id,arna_id,
      $     'ARNA_INI','Arnoldi ARPACK initialisation time',.true.)
       ! submodule operation
-      call mntr_tmr_reg(arna_tmr_evl_id,tst_tmr_evl_id,arna_id,
+      call mntr_tmr_reg(arna_tmr_evl_id,tstpr_tmr_evl_id,arna_id,
      $     'ARNA_EVL','Arnoldi ARPACK evolution time',.true.)
 
       ! register and set active section
@@ -92,7 +92,7 @@
 !=======================================================================
 !> @brief Initilise Arnoldi ARPACK module
 !! @ingroup arn_arp
-!! @note This interface is called by @ref tst_init
+!! @note This interface is called by @ref tstpr_init
       subroutine stepper_init()
       implicit none
 
@@ -102,7 +102,7 @@
       include 'SOLN'            ! V?MASK, TMASK, V[XYZ]P, TP
       include 'FRAMELP'
       include 'CHKPOINTD'
-      include 'TSTEPPERD'
+      include 'TSTPRD'
       include 'ARN_ARPD'
 
       ! ARPACK include file
@@ -156,7 +156,7 @@
 
       ! make sure NSTEPS is bigger than the possible number of iteration in arnoldi
       ! multiplication by 2 for OIC
-      NSTEPS = max(NSTEPS,tst_step*arna_nkrl*tst_cmax*2+10)
+      NSTEPS = max(NSTEPS,tstpr_step*arna_nkrl*tstpr_cmax*2+10)
 
       ! related to restart
       nparp = 0
@@ -179,7 +179,7 @@
       ! exact shifts with respect to the current Hessenberg matrix
       iparp(1)=1
       ! maximum number of Arnoldi update iterations allowed
-      iparp(3)=tst_cmax
+      iparp(3)=tstpr_cmax
 #ifdef ARPACK_DIRECT
       ! A*x = lambda*x
       iparp(7)=1
@@ -206,10 +206,10 @@
       ! vector lengths
       ! single vector length in Krylov space
       ! velocity
-      arna_ns = tst_nv*NDIM
+      arna_ns = tstpr_nv*NDIM
       ! temperature
       if(IFHEAT) then
-         arna_ns = arna_ns + tst_nt
+         arna_ns = arna_ns + tstpr_nt
       endif
       if (arna_ns.gt.arna_ls) call mntr_abort(arna_id,
      $   'arna_ns too big; arna_ns > arna_ls')
@@ -242,18 +242,18 @@
 #ifdef ARPACK_DIRECT
          ! A*x = lambda*x
          ! velocity
-         call col3(resida(1),VXP,V1MASK,tst_nv)
-         call col3(resida(1+tst_nv),VYP,V2MASK,tst_nv)
-         if (IF3D) call col3(resida(1+2*tst_nv),VZP,V3MASK,tst_nv)
+         call col3(resida(1),VXP,V1MASK,tstpr_nv)
+         call col3(resida(1+tstpr_nv),VYP,V2MASK,tstpr_nv)
+         if (IF3D) call col3(resida(1+2*tstpr_nv),VZP,V3MASK,tstpr_nv)
          ! no temperature here
 #else
          ! A*x = lambda*M*x
          ! velocity
-         call copy(resida(1),VXP,tst_nv)
-         call copy(resida(1+tst_nv),VYP,tst_nv)
-         if (IF3D) call copy(resida(1+2*tst_nv),VZP,tst_nv)
+         call copy(resida(1),VXP,tstpr_nv)
+         call copy(resida(1+tstpr_nv),VYP,tstpr_nv)
+         if (IF3D) call copy(resida(1+2*tstpr_nv),VZP,tstpr_nv)
          ! temperature
-         if(IFHEAT) call copy(resida(1+NDIM*tst_nv),TP,tst_nt)
+         if(IFHEAT) call copy(resida(1+NDIM*tstpr_nv),TP,tstpr_nt)
 #endif
 
          ! initialise rest of variables
@@ -276,7 +276,7 @@
       call mntr_log(arna_id,lp_prd,'Parameters:')
       call mntr_log(arna_id,lp_prd,'BMAT = '//trim(bmatarp))
       call mntr_log(arna_id,lp_prd,'WHICH = '//trim(whicharp))
-      call mntr_logr(arna_id,lp_prd,'TOL = ',tst_tol)
+      call mntr_logr(arna_id,lp_prd,'TOL = ',tstpr_tol)
       call mntr_logi(arna_id,lp_prd,'NEV = ',arna_negv)
       call mntr_logi(arna_id,lp_prd,'NCV = ',arna_nkrl)
       call mntr_logi(arna_id,lp_prd,'IPARAM(1) = ',iparp(1))
@@ -312,7 +312,7 @@
 !> @brief Create Krylov space, get Ritz values and restart
 !!  stepper phase.
 !! @ingroup arn_arp
-!! @note This interface is called by @ref tst_solve
+!! @note This interface is called by @ref tstpr_main
       subroutine stepper_vsolve
       implicit none
 
@@ -321,7 +321,7 @@
       include 'SOLN'            ! V[XYZ]P, TP, V?MASK
       include 'MASS'            ! BM1
       include 'FRAMELP'
-      include 'TSTEPPERD'
+      include 'TSTPRD'
       include 'ARN_ARPD'
 
       ! local variables
@@ -339,22 +339,23 @@
 #ifdef ARPACK_DIRECT
       ! A*x = lambda*x
       ! velocity
-      call col3(workda(ipntarp(2)),VXP,V1MASK,tst_nv)
-      call col3(workda(ipntarp(2)+tst_nv),VYP,V2MASK,tst_nv)
-      if (IF3D) call col3(workda(ipntarp(2)+2*tst_nv),VZP,V3MASK,tst_nv)
+      call col3(workda(ipntarp(2)),VXP,V1MASK,tstpr_nv)
+      call col3(workda(ipntarp(2)+tstpr_nv),VYP,V2MASK,tstpr_nv)
+      if(IF3D) call col3(workda(ipntarp(2)+2*tstpr_nv),VZP,
+     $              V3MASK,tstpr_nv)
       ! no temperature here
 #else
       ! velocity
       ! A*x = lambda*M*x
-      call copy(workda(ipntarp(2)),VXP,tst_nv)
-      call copy(workda(ipntarp(2)+tst_nv),VYP,tst_nv)
-      if (IF3D) call copy(workda(ipntarp(2)+2*tst_nv),VZP,tst_nv)
+      call copy(workda(ipntarp(2)),VXP,tstpr_nv)
+      call copy(workda(ipntarp(2)+tstpr_nv),VYP,tstpr_nv)
+      if (IF3D) call copy(workda(ipntarp(2)+2*tstpr_nv),VZP,tstpr_nv)
       ! temperature
-      if(IFHEAT) call copy(workda(ipntarp(2)+NDIM*tst_nv),TP,tst_nt)
+      if(IFHEAT) call copy(workda(ipntarp(2)+NDIM*tstpr_nv),TP,tstpr_nt)
       ! this may be not necessary, but ARPACK manual is not clear about it
-      !call col3(workda(ipntarp(1)),VXP,BM1,tst_nv)
-      !call col3(workda(ipntarp(1)+tst_nv),VYP,BM1,tst_nv)
-      !if (IF3D) call col3(workda(ipntarp(1)+2*tst_nv),VZP,BM1,tst_nv)
+      !call col3(workda(ipntarp(1)),VXP,BM1,tstpr_nv)
+      !call col3(workda(ipntarp(1)+tstpr_nv),VYP,BM1,tstpr_nv)
+      !if (IF3D) call col3(workda(ipntarp(1)+2*tstpr_nv),VZP,BM1,tstpr_nv)
 #endif
 
       ! ARPACK interface
@@ -391,7 +392,7 @@
       include 'SOLN'            ! VX, VY, VZ, VMULT, V?MASK
       include 'INPUT'           ! IFXYO,IFPO,IFVO,IFTO,IFPSO,IF3D,IFHEAT
       include 'FRAMELP'
-      include 'TSTEPPERD'
+      include 'TSTPRD'
       include 'ARN_ARPD'
 
       ! local variables
@@ -412,12 +413,12 @@
 #ifdef MPI
          call pdneupd(NEKCOMM,rvarp,howarp,selarp,driarp,driarp(1,2),
      $     vbasea,arna_ls,sigarp(1),sigarp(2),workea,bmatarp,arna_ns,
-     $     whicharp,arna_negv,tst_tol,resida,arna_nkrl,vbasea,
+     $     whicharp,arna_negv,tstpr_tol,resida,arna_nkrl,vbasea,
      $     arna_ls,iparp,ipntarp,workda,workla,nwlarp,ierrarp)
 #else
          call dneupd(rvarp,howarp,selarp,driarp,driarp(1,2),
      $     vbasea,arna_ls,sigarp(1),sigarp(2),workea,bmatarp,arna_ns,
-     $     whicharp,arna_negv,tst_tol,resida,arna_nkrl,vbasea,
+     $     whicharp,arna_negv,tstpr_tol,resida,arna_nkrl,vbasea,
      $     arna_ls,iparp,ipntarp,workda,workla,nwlarp,ierrarp)
 #endif
 
@@ -442,7 +443,7 @@
      $       'Error opening eigenvalue file.')
 
             ! integration time
-            dumm = DT*tst_step
+            dumm = DT*tstpr_step
             dumm = 1.0/dumm
 
             ! copy and set output parameters
@@ -476,11 +477,11 @@
             ierror=0
             do il=1,IPARP(5)
                !copy eigenvectors to perturbation variables
-               call copy(VXP,vbasea(1,il),tst_nv)
-               call copy(VYP,vbasea(1+tst_nv,il),tst_nv)
-               if (IF3D) call copy(VZP,vbasea(1+2*tst_nv,il),tst_nv)
+               call copy(VXP,vbasea(1,il),tstpr_nv)
+               call copy(VYP,vbasea(1+tstpr_nv,il),tstpr_nv)
+               if (IF3D) call copy(VZP,vbasea(1+2*tstpr_nv,il),tstpr_nv)
                if(IFHEAT) then
-                  call copy(TP,vbasea(1+NDIM*tst_nv,il),tst_nt)
+                  call copy(TP,vbasea(1+NDIM*tstpr_nv,il),tstpr_nt)
                   call outpost2(VXP,VYP,VZP,PRP,TP,1,'egv')
                else
                   call outpost2(VXP,VYP,VZP,PRP,TP,0,'egv')
@@ -534,7 +535,7 @@
       include 'SOLN'            ! V?MASK, TMASK, V[XYZ]P, TP
       include 'MASS'            ! BM1
       include 'FRAMELP'
-      include 'TSTEPPERD'
+      include 'TSTPRD'
       include 'ARN_ARPD'
 
       ! local variables
@@ -546,11 +547,11 @@
 !-----------------------------------------------------------------------
 #ifdef MPI
       call pdnaupd(NEKCOMM,idoarp,bmatarp,arna_ns,whicharp,arna_negv,
-     $  tst_tol,resida,arna_nkrl,vbasea,arna_ls,iparp,ipntarp,workda,
+     $  tstpr_tol,resida,arna_nkrl,vbasea,arna_ls,iparp,ipntarp,workda,
      $  workla,nwlarp,infarp,nparp,rnmarp,ncarp)
 #else
       call dnaupd(Idoarp,bmatarp,arna_ns,whicharp,arna_negv,
-     $  tst_tol,resida,arna_nkrl,vbasea,arna_ls,iparp,ipntarp,workda,
+     $  tstpr_tol,resida,arna_nkrl,vbasea,arna_ls,iparp,ipntarp,workda,
      $  workla,nwlarp,infarp)
 #endif
 
@@ -566,33 +567,33 @@
             ! A*x = lambda*M*x
             ! multiply by weights and masks
             ! velocity
-            call col3(workda(ipntarp(2)),BM1,V1MASK,tst_nv)
-            call col3(workda(ipntarp(2)+tst_nv),BM1,V2MASK,tst_nv)
-            if (IF3D) call col3(workda(ipntarp(2)+2*tst_nv),
-     $           BM1,V3MASK,tst_nv)
+            call col3(workda(ipntarp(2)),BM1,V1MASK,tstpr_nv)
+            call col3(workda(ipntarp(2)+tstpr_nv),BM1,V2MASK,tstpr_nv)
+            if (IF3D) call col3(workda(ipntarp(2)+2*tstpr_nv),
+     $           BM1,V3MASK,tstpr_nv)
 
             ! temperature
             if(IFHEAT) then
-               call col3(workda(ipntarp(2)+NDIM*tst_nv),
-     $              BM1,TMASK,tst_nt)
+               call col3(workda(ipntarp(2)+NDIM*tstpr_nv),
+     $              BM1,TMASK,tstpr_nt)
 
                !coefficients
-               call cht_weight_fun (workda(ipntarp(2)),
-     $              workda(ipntarp(2)+tst_nv),
-     $              workda(ipntarp(2)+2*tst_nv),
-     $              workda(ipntarp(2)+NDIM*tst_nv),1.0)
+               call cnht_weight_fun (workda(ipntarp(2)),
+     $              workda(ipntarp(2)+tstpr_nv),
+     $              workda(ipntarp(2)+2*tstpr_nv),
+     $              workda(ipntarp(2)+NDIM*tstpr_nv),1.0)
             endif
 
             call col2(workda(ipntarp(2)),workda(ipntarp(1)),arna_ns)
 
 #ifdef MPI
             call pdnaupd(NEKCOMM,idoarp,bmatarp,arna_ns,whicharp,
-     $        arna_negv,tst_tol,resida,arna_nkrl,vbasea,arna_ls,
+     $        arna_negv,tstpr_tol,resida,arna_nkrl,vbasea,arna_ls,
      $        iparp,ipntarp,workda,workla,nwlarp,infarp,nparp,rnmarp,
      $        ncarp)
 #else
             call dnaupd(idoarp,bmatarp,arna_ns,whicharp,arna_negv,
-     $        tst_tol,resida,arna_nkrl,vbasea,arna_ls,iparp,ipntarp,
+     $        tstpr_tol,resida,arna_nkrl,vbasea,arna_ls,iparp,ipntarp,
      $        workda,workla,nwlarp,infarp)
 #endif
 
@@ -612,15 +613,16 @@
 
          ! move renormed data back to nekton
          ! velocity
-         call copy(VXP,workda(ipntarp(1)),tst_nv)
-         call copy(VYP,workda(ipntarp(1)+tst_nv),tst_nv)
-         if (IF3D) call copy(VZP,workda(ipntarp(1)+2*tst_nv),tst_nv)
+         call copy(VXP,workda(ipntarp(1)),tstpr_nv)
+         call copy(VYP,workda(ipntarp(1)+tstpr_nv),tstpr_nv)
+         if (IF3D) call copy(VZP,workda(ipntarp(1)+2*tstpr_nv),tstpr_nv)
          ! temperature
-         if(IFHEAT) call copy(TP,workda(ipntarp(1)+NDIM*tst_nv),tst_nt)
+         if(IFHEAT) call copy(TP,workda(ipntarp(1)+NDIM*tstpr_nv),
+     $                   tstpr_nt)
 
          ! make sure the velocity and temperature fields are continuous at
          ! element faces and edges
-         call tst_dssum
+         call tstpr_dssum
       endif                     ! idoarp.eq.-1.or.idoarp.eq.1
 
       return

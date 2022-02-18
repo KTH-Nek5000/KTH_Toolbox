@@ -1,20 +1,20 @@
-!> @file tstepper.f
-!! @ingroup tstepper
+!> @file tstpr.f
+!! @ingroup tstpr
 !! @brief Set of subroutines to use time steppers for e.g. power
 !!    iterations or solution of eigenvalue problem with Arnoldi algorithm
 !! @author Adam Peplinski
 !! @date Mar 7, 2016
 !=======================================================================
 !> @brief Register time stepper module
-!! @ingroup tstepper
+!! @ingroup tstpr
 !! @note This routine should be called in frame_usr_register
-      subroutine tst_register()
+      subroutine tstpr_register()
       implicit none
 
       include 'SIZE'
       include 'INPUT'
       include 'FRAMELP'
-      include 'TSTEPPERD'
+      include 'TSTPRD'
 
       ! local variables
       integer lpmid, il
@@ -28,10 +28,10 @@
       ltim = dnekclock()
 
       ! check if the current module was already registered
-      call mntr_mod_is_name_reg(lpmid,tst_name)
+      call mntr_mod_is_name_reg(lpmid,tstpr_name)
       if (lpmid.gt.0) then
          call mntr_warn(lpmid,
-     $        'module ['//trim(tst_name)//'] already registered')
+     $        'module ['//trim(tstpr_name)//'] already registered')
          return
       endif
 
@@ -41,7 +41,7 @@
          call mntr_warn(lpmid,
      $        'module ['//'CONJHT'//'] already registered')
       else
-         call cht_register()
+         call cnht_register()
       endif
 
       ! find parent module
@@ -53,38 +53,38 @@
       endif
 
       ! register module
-      call mntr_mod_reg(tst_id,lpmid,tst_name,
+      call mntr_mod_reg(tstpr_id,lpmid,tstpr_name,
      $      'Time stepper')
 
       ! register timers
       call mntr_tmr_is_name_reg(lpmid,'FRM_TOT')
       ! total time
-      call mntr_tmr_reg(tst_tmr_tot_id,lpmid,tst_id,
-     $     'TST_TOT','Time stepper total time',.false.)
-      lpmid = tst_tmr_tot_id
+      call mntr_tmr_reg(tstpr_tmr_tot_id,lpmid,tstpr_id,
+     $     'TSTPR_TOT','Time stepper total time',.false.)
+      lpmid = tstpr_tmr_tot_id
       ! initialisation
-      call mntr_tmr_reg(tst_tmr_ini_id,lpmid,tst_id,
-     $     'TST_INI','Time stepper initialisation time',.true.)
+      call mntr_tmr_reg(tstpr_tmr_ini_id,lpmid,tstpr_id,
+     $     'TSTPR_INI','Time stepper initialisation time',.true.)
       ! submodule operation
-      call mntr_tmr_reg(tst_tmr_evl_id,lpmid,tst_id,
-     $     'TST_EVL','Time stepper evolution time',.true.)
+      call mntr_tmr_reg(tstpr_tmr_evl_id,lpmid,tstpr_id,
+     $     'TSTPR_EVL','Time stepper evolution time',.true.)
 
       ! register and set active section
-      call rprm_sec_reg(tst_sec_id,tst_id,'_'//adjustl(tst_name),
+      call rprm_sec_reg(tstpr_sec_id,tstpr_id,'_'//adjustl(tstpr_name),
      $     'Runtime paramere section for time stepper module')
-      call rprm_sec_set_act(.true.,tst_sec_id)
+      call rprm_sec_set_act(.true.,tstpr_sec_id)
 
       ! register parameters
-      call rprm_rp_reg(tst_mode_id,tst_sec_id,'MODE',
+      call rprm_rp_reg(tstpr_mode_id,tstpr_sec_id,'MODE',
      $     'Simulation mode',rpar_str,10,0.0,.false.,'DIR')
 
-      call rprm_rp_reg(tst_step_id,tst_sec_id,'STEPS',
+      call rprm_rp_reg(tstpr_step_id,tstpr_sec_id,'STEPS',
      $     'Length of stepper phase',rpar_int,40,0.0,.false.,' ')
 
-      call rprm_rp_reg(tst_cmax_id,tst_sec_id,'MAXCYC',
+      call rprm_rp_reg(tstpr_cmax_id,tstpr_sec_id,'MAXCYC',
      $     'Max number of stepper cycles',rpar_int,10,0.0,.false.,' ')
 
-      call rprm_rp_reg(tst_tol_id,tst_sec_id,'TOL',
+      call rprm_rp_reg(tstpr_tol_id,tstpr_sec_id,'TOL',
      $    'Convergence threshold',rpar_real,0,1.0d-6,.false.,' ')
 
       ! place for submodule registration
@@ -92,19 +92,19 @@
       call stepper_register()
 
       ! set initialisation flag
-      tst_ifinit=.false.
+      tstpr_ifinit=.false.
 
       ! timing
       ltim = dnekclock() - ltim
-      call mntr_tmr_add(tst_tmr_ini_id,1,ltim)
+      call mntr_tmr_add(tstpr_tmr_ini_id,1,ltim)
 
       return
       end subroutine
 !=======================================================================
 !> @brief Initilise time stepper module
-!! @ingroup tstepper
+!! @ingroup tstpr
 !! @note This routine should be called in frame_usr_init
-      subroutine tst_init()
+      subroutine tstpr_init()
       implicit none
 
       include 'SIZE'
@@ -114,7 +114,7 @@
       include 'MASS'
       include 'SOLN'
       include 'ADJOINT'
-      include 'TSTEPPERD'
+      include 'TSTPRD'
 
       ! local variables
       integer itmp, il
@@ -123,13 +123,13 @@
       character*20 ctmp
 
       ! functions
-      real dnekclock, cht_glsc2_wt
-      logical cht_is_initialised
+      real dnekclock, cnht_glsc2_wt
+      logical cnht_is_initialised
 !-----------------------------------------------------------------------
       ! check if the module was already initialised
-      if (tst_ifinit) then
-         call mntr_warn(tst_id,
-     $        'module ['//trim(tst_name)//'] already initiaised.')
+      if (tstpr_ifinit) then
+         call mntr_warn(tstpr_id,
+     $        'module ['//trim(tstpr_name)//'] already initiaised.')
          return
       endif
 
@@ -137,126 +137,126 @@
       ltim = dnekclock()
 
       ! intialise conjugated heat transfer
-      if (.not.cht_is_initialised()) call cht_init
+      if (.not.cnht_is_initialised()) call cnht_init
 
       ! get runtime parameters
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tst_mode_id,rpar_str)
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tstpr_mode_id,rpar_str)
       if (trim(ctmp).eq.'DIR') then
-        tst_mode = 1
+        tstpr_mode = 1
       else if (trim(ctmp).eq.'ADJ') then
-        tst_mode = 2
+        tstpr_mode = 2
       else if (trim(ctmp).eq.'OIC') then
-        tst_mode = 3
+        tstpr_mode = 3
       else
-        call mntr_abort(tst_id,
+        call mntr_abort(tstpr_id,
      $        'wrong simulation mode; possible values: DIR, ADJ, OIC')
       endif
 
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tst_step_id,rpar_int)
-      tst_step = itmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tstpr_step_id,rpar_int)
+      tstpr_step = itmp
 
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tst_cmax_id,rpar_int)
-      tst_cmax = itmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tstpr_cmax_id,rpar_int)
+      tstpr_cmax = itmp
 
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tst_tol_id,rpar_real)
-      tst_tol = rtmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tstpr_tol_id,rpar_real)
+      tstpr_tol = rtmp
 
       ! check simulation parameters
-      if (.not.IFTRAN) call mntr_abort(tst_id,
+      if (.not.IFTRAN) call mntr_abort(tstpr_id,
      $   'time stepper requres transient simulation; IFTRAN=.T.')
 
-      if (NSTEPS.eq.0) call mntr_abort(tst_id,
+      if (NSTEPS.eq.0) call mntr_abort(tstpr_id,
      $   'time stepper requres NSTEPS>0')
 
-      if (PARAM(12).ge.0) call mntr_abort(tst_id,
+      if (PARAM(12).ge.0) call mntr_abort(tstpr_id,
      $   'time stepper assumes constant dt')
 
-      if (.not.IFPERT) call mntr_abort(tst_id,
+      if (.not.IFPERT) call mntr_abort(tstpr_id,
      $   'time stepper has to be run in perturbation mode')
 
-      if (IFBASE)  call mntr_abort(tst_id,
+      if (IFBASE)  call mntr_abort(tstpr_id,
      $   'time stepper assumes constatnt base flow')
 
-      if (NPERT.ne.1) call mntr_abort(tst_id,
+      if (NPERT.ne.1) call mntr_abort(tstpr_id,
      $   'time stepper requires NPERT=1')
 
       ! initialise cycle counters
-      tst_istep = 0
-      tst_vstep = 0
+      tstpr_istep = 0
+      tstpr_vstep = 0
 
       ! vector length
-      tst_nv  = NX1*NY1*NZ1*NELV ! velocity single component
+      tstpr_nv  = NX1*NY1*NZ1*NELV ! velocity single component
       if (IFHEAT) then        !temperature
-         tst_nt  = NX1*NY1*NZ1*NELT
+         tstpr_nt  = NX1*NY1*NZ1*NELT
       else
-         tst_nt  = 0
+         tstpr_nt  = 0
       endif
-      tst_np  = NX2*NY2*NZ2*NELV ! presure
+      tstpr_np  = NX2*NY2*NZ2*NELV ! presure
 
       ! place for submodule initialisation
       ! arnoldi or power iterations
       call stepper_init
 
       ! zero presure
-      call rzero(PRP,tst_np)
+      call rzero(PRP,tstpr_np)
 
       ! set initial time
       TIME=0.0
 
       ! make sure NSTEPS is bigger than the possible number of iterations
       ! in time stepper phase; multiplication by 2 for OIC
-      NSTEPS = max(NSTEPS,tst_step*tst_cmax*2+10)
+      NSTEPS = max(NSTEPS,tstpr_step*tstpr_cmax*2+10)
 
       IFADJ = .FALSE.
-      if (tst_mode.eq.2) then
+      if (tstpr_mode.eq.2) then
          ! Is it adjoint mode
          IFADJ = .TRUE.
-      elseif  (tst_mode.eq.3) then
+      elseif  (tstpr_mode.eq.3) then
          ! If it is optimal initial condition save initial L2 norm
-         tst_L2ini = cht_glsc2_wt(VXP,VYP,VZP,TP,VXP,VYP,VZP,TP,BM1)
+         tstpr_L2ini = cnht_glsc2_wt(VXP,VYP,VZP,TP,VXP,VYP,VZP,TP,BM1)
 
-         if (tst_L2ini.eq.0.0) call mntr_abort(tst_id,
-     $   'tst_init, tst_L2ini = 0')
+         if (tstpr_L2ini.eq.0.0) call mntr_abort(tstpr_id,
+     $   'tstpr_init, tstpr_L2ini = 0')
 
-         call mntr_log(tst_id,lp_prd,
+         call mntr_log(tstpr_id,lp_prd,
      $  'Optimal initial condition; direct phase start')
       endif
 
       ! set cpfld for conjugated heat transfer
-      if (IFHEAT) call cht_cpfld_set
+      if (IFHEAT) call cnht_cpfld_set
 
 !     should be the first step of every cycle performed with Uzawa
 !     turned on?
-!         IFUZAWA = tst_ifuz
+!         IFUZAWA = tstpr_ifuz
 
       ! everything is initialised
-      tst_ifinit=.true.
+      tstpr_ifinit=.true.
 
       ! timing
       ltim = dnekclock() - ltim
-      call mntr_tmr_add(tst_tmr_ini_id,1,ltim)
+      call mntr_tmr_add(tstpr_tmr_ini_id,1,ltim)
 
       return
       end subroutine
 !=======================================================================
 !> @brief Check if module was initialised
-!! @ingroup tstepper
-!! @return tst_is_initialised
-      logical function tst_is_initialised()
+!! @ingroup tstpr
+!! @return tstpr_is_initialised
+      logical function tstpr_is_initialised()
       implicit none
 
       include 'SIZE'
-      include 'TSTEPPERD'
+      include 'TSTPRD'
 !-----------------------------------------------------------------------
-      tst_is_initialised = tst_ifinit
+      tstpr_is_initialised = tstpr_ifinit
 
       return
       end function
 !=======================================================================
 !> @brief Control time stepper after every nek5000 step and call suitable
 !! stepper_vsolve of required submodule
-!! @ingroup tstepper
-      subroutine tst_solve()
+!! @ingroup tstpr
+      subroutine tstpr_main()
       implicit none
 
       include 'SIZE'            ! NIO
@@ -266,7 +266,7 @@
       include 'SOLN'            ! V[XYZ]P, PRP, TP, VMULT, V?MASK
       include 'ADJOINT'         ! IFADJ
       include 'FRAMELP'
-      include 'TSTEPPERD'
+      include 'TSTPRD'
 
       ! global comunication in nekton
       integer NIDD,NPP,NEKCOMM,NEKGROUP,NEKREAL
@@ -277,7 +277,7 @@
       real ltim        ! timing
 
       ! functions
-      real dnekclock, cht_glsc2_wt
+      real dnekclock, cnht_glsc2_wt
 !-----------------------------------------------------------------------
       if (ISTEP.eq.0) return
 
@@ -288,61 +288,61 @@
 !         IFUZAWA = .FALSE.
 
       ! step counting
-      tst_istep = tst_istep + 1
+      tstpr_istep = tstpr_istep + 1
 
       ! stepper phase end
-      if (mod(tst_istep,tst_step).eq.0) then
+      if (mod(tstpr_istep,tstpr_step).eq.0) then
          ! check for the calculation mode
-         if (tst_mode.eq.3.and.(.not.IFADJ)) then
+         if (tstpr_mode.eq.3.and.(.not.IFADJ)) then
             ! optimal initial condition
 
-            call mntr_log(tst_id,lp_prd,
+            call mntr_log(tstpr_id,lp_prd,
      $      'Optimal initial condition; adjoint phase start')
 
             IFADJ = .TRUE.
 
             ! itaration count
-            tst_istep = 0
+            tstpr_istep = 0
 
 !           ! should be the first step of every cycle performed with Uzawa
 !     turned on?
-!               IFUZAWA = tst_ifuz
+!               IFUZAWA = tstpr_ifuz
 
             ! set time and iteration number
             TIME=0.0
             ISTEP=0
 
             ! get L2 norm after direct phase
-            tst_L2dir = cht_glsc2_wt(VXP,VYP,VZP,TP,
+            tstpr_L2dir = cnht_glsc2_wt(VXP,VYP,VZP,TP,
      $         VXP,VYP,VZP,TP,BM1)
              ! normalise vector
-             grw = sqrt(tst_L2ini/tst_L2dir)
-             call cht_opcmult (VXP,VYP,VZP,TP,grw)
+             grw = sqrt(tstpr_L2ini/tstpr_L2dir)
+             call cnht_opcmult (VXP,VYP,VZP,TP,grw)
 
             ! zero presure
-            call rzero(PRP,tst_np)
+            call rzero(PRP,tstpr_np)
 
             ! set cpfld for conjugated heat transfer
-               if (IFHEAT) call cht_cpfld_set
+               if (IFHEAT) call cnht_cpfld_set
          else
             !stepper phase counting
-            tst_istep = 0
-            tst_vstep = tst_vstep +1
+            tstpr_istep = 0
+            tstpr_vstep = tstpr_vstep +1
 
-            call mntr_logi(tst_id,lp_prd,'Finished stepper phase:',
-     $           tst_vstep)
+            call mntr_logi(tstpr_id,lp_prd,'Finished stepper phase:',
+     $           tstpr_vstep)
 
-            if (tst_mode.eq.3) then
+            if (tstpr_mode.eq.3) then
                ! optimal initial condition
-               call mntr_log(tst_id,lp_prd,
+               call mntr_log(tstpr_id,lp_prd,
      $         'Optimal initial condition; rescaling solution')
 
                ! get L2 norm after direct phase
-               tst_L2adj = cht_glsc2_wt(VXP,VYP,VZP,TP,
+               tstpr_L2adj = cnht_glsc2_wt(VXP,VYP,VZP,TP,
      $                 VXP,VYP,VZP,TP,BM1)
                ! normalise vector after whole cycle
-               grw = sqrt(tst_L2dir/tst_L2ini)! add direct growth
-               call cht_opcmult (VXP,VYP,VZP,TP,grw)
+               grw = sqrt(tstpr_L2dir/tstpr_L2ini)! add direct growth
+               call cnht_opcmult (VXP,VYP,VZP,TP,grw)
 
             endif
 
@@ -357,47 +357,47 @@
 
 !     should be the first step of every cycle performed with Uzawa 
 !     turned on?
-!               IFUZAWA = tst_ifuz
+!               IFUZAWA = tstpr_ifuz
 
                ! zero presure
-               call rzero(PRP,tst_np)
+               call rzero(PRP,tstpr_np)
 
-               if (tst_mode.eq.3) then
+               if (tstpr_mode.eq.3) then
                   ! optimal initial condition
-                  call mntr_log(tst_id,lp_prd,
+                  call mntr_log(tstpr_id,lp_prd,
      $            'Optimal initial condition; direct phase start')
 
                   IFADJ = .FALSE.
 
                   ! get initial L2 norm
-                  tst_L2ini = cht_glsc2_wt(VXP,VYP,VZP,TP,
+                  tstpr_L2ini = cnht_glsc2_wt(VXP,VYP,VZP,TP,
      $                    VXP,VYP,VZP,TP,BM1)
                   ! set cpfld for conjugated heat transfer
-                  if (IFHEAT) call cht_cpfld_set
+                  if (IFHEAT) call cnht_cpfld_set
 
                endif
             endif
 
-         endif               ! tst_mode.eq.3.and.(.not.IFADJ)
-      endif                  ! mod(tst_istep,tst_step).eq.0
+         endif               ! tstpr_mode.eq.3.and.(.not.IFADJ)
+      endif                  ! mod(tstpr_istep,tstpr_step).eq.0
 
       ! timing
       ltim = dnekclock() - ltim
-      call mntr_tmr_add(tst_tmr_evl_id,1,ltim)
+      call mntr_tmr_add(tstpr_tmr_evl_id,1,ltim)
 
       return
       end subroutine
 !=======================================================================
 !> @brief Average velocity and temperature at element faces.
-!! @ingroup tstepper
-      subroutine tst_dssum
+!! @ingroup tstpr
+      subroutine tstpr_dssum
       implicit none
 
       include 'SIZE'            ! N[XYZ]1
       include 'INPUT'           ! IFHEAT
       include 'SOLN'            ! V[XYZ]P, TP, [VT]MULT
       include 'TSTEP'           ! IFIELD
-      include 'TSTEPPERD'       ! tst_nt
+      include 'TSTPRD'       ! tstpr_nt
 
       ! local variables
       integer ifield_tmp
@@ -419,7 +419,7 @@
          call h1_proj(tp,nx1,ny1,nz1)
 #else
          call dssum(TP,NX1,NY1,NZ1)
-         call col2 (TP,TMULT,tst_nt)
+         call col2 (TP,TMULT,tstpr_nt)
 #endif
       endif
       IFIELD = ifield_tmp

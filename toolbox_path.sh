@@ -40,22 +40,22 @@ export BASEFLOW_SRC=${TOOLS_SRC}"/baseflow"
 export STAT_SRC=${TOOLS_SRC}"/stat"
 # Time series include file has to be copied to setup directory
 export TSRS_SRC=${TOOLS_SRC}"/tsrs"
-export TSTEPPER_SRC=${TOOLS_SRC}"/tstepper"
-TOOLBOX_INC+=" -I"${TSTEPPER_SRC}
+export TSTPR_SRC=${TOOLS_SRC}"/tstpr"
+TOOLBOX_INC+=" -I"${TSTPR_SRC}
 
 export SFD_SRC=${BASEFLOW_SRC}"/sfd"
 TOOLBOX_INC+=" -I"${SFD_SRC}
 
 # Arnoldi include file has to be copied to setup directory
-export ARNARP_SRC=${TSTEPPER_SRC}"/arnoldi_arpack"
-export POWERIT_SRC=${TSTEPPER_SRC}"/powerit"
+export ARNARP_SRC=${TSTPR_SRC}"/arnoldi_arpack"
+export POWERIT_SRC=${TSTPR_SRC}"/powerit"
 TOOLBOX_INC+=" -I"${POWERIT_SRC}
 
 export BCND_SRC=${UTILITY_SRC}"/bcnd"
 export COMM_SRC=${UTILITY_SRC}"/comm"
 TOOLBOX_INC+=" -I"${COMM_SRC}
-export CONHT_SRC=${UTILITY_SRC}"/conht"
-TOOLBOX_INC+=" -I"${CONHT_SRC}
+export CNHT_SRC=${UTILITY_SRC}"/cnht"
+TOOLBOX_INC+=" -I"${CNHT_SRC}
 export FORCING_SRC=${UTILITY_SRC}"/forcing"
 export GRID_SRC=${UTILITY_SRC}"/grid"
 export MATH_SRC=${UTILITY_SRC}"/math"

@@ -69,7 +69,7 @@ Post-processing of the produced fields can also be performed with the
 @par
 @interface_reqr Interface required:
 -# multiple interfaces from @ref rprm and @ref mntr modules
--# @ref map2d_register , @ref map2d_init and @ref map2d_get from @ref map2d module
+-# @ref map2d_register , @ref map2d_init and @ref map2d_get from @ref map2d module (automatically registered)
 -# \a user_stat_trnsv; user defined
 
 @warning This module depends on @ref map2d module and (\a user_map2d_get) has to be provided irrespective of the spanwise

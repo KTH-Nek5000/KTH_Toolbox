@@ -1,0 +1,45 @@
+!> @file CNHTD
+!! @ingroup cnht
+!! @brief Include file for utilities related to conjugated heat transfer
+!! @author Clio Saglietti, Adam Peplinski
+!! @date Mar 4, 2019
+!=======================================================================
+!     module id and name
+      integer cnht_id
+      character*(*) cnht_name
+      parameter(cnht_name='CNHT')
+      
+!     this is set of simple utilities, sot there are no timers
+      
+!     initialisation flag
+      logical cnht_ifinit
+
+!     runtime parameter part
+!     section id
+      integer cnht_sec_id
+
+!     parameter section
+      real cnht_sc                !< @var scaling factors for the norm --> m2/(s2K2)
+      integer cnht_sc_id
+      real cnht_sv                !< @var scaling factors for velocity for the Pareto curve
+      integer cnht_sv_id
+      real cnht_st                !< @var scaling factors for temperature for the Pareto curve
+      integer cnht_st_id
+      real cnht_gx                !< @var x component of gravitational field
+      integer cnht_gx_id
+      real cnht_gy                !< @var y component of gravitational field
+      integer cnht_gy_id
+      real cnht_gz                !< @var z component of gravitational field
+      integer cnht_gz_id
+      
+!     Rayleight and Prandtl numbers
+      real cnht_Ra, cnht_Pr
+
+!     common block section
+      common /cnhti/ cnht_id, cnht_sec_id, cnht_sc_id, cnht_sv_id,
+     $              cnht_st_id, cnht_gx_id, cnht_gy_id, cnht_gz_id
+
+      common /cnhtr/ cnht_sc, cnht_sv, cnht_st, cnht_gx, cnht_gy, 
+     $               cnht_gz, cnht_Ra, cnht_Pr
+      
+      common /cnhtl/ cnht_ifinit
