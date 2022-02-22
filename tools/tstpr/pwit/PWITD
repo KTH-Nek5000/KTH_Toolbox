@@ -1,0 +1,48 @@
+!> @file PWITD
+!! @ingroup pwit
+!! @brief Include file for power iteration modue
+!! @author Adam Peplinski
+!! @date Mar 7, 2016
+!=======================================================================
+!     module id and name
+      integer pwit_id
+      character*(*) pwit_name
+      parameter(pwit_name='PWIT')
+
+!     timer id
+      integer pwit_tmr_ini_id   ! initialisation itme
+      integer pwit_tmr_evl_id   ! evolution time
+
+!     initialisation flag
+      logical pwit_ifinit
+
+!     runtime parameter part
+!     section id
+      integer pwit_sec_id
+
+!     parameter section
+      real pwit_l2n                  !< initial L2 norm of the vector
+      integer pwit_l2n_id
+
+      ! restart options; restart flag and file number
+      logical pwit_ifrst
+      integer pwit_fnum
+      
+      ! growth rate
+      real pwit_grw
+
+!     reference vector
+      real pwit_vx(LPX1*LPY1*LPZ1*LPELV),
+     $     pwit_vy(LPX1*LPY1*LPZ1*LPELV),
+     $     pwit_vz(LPX1*LPY1*LPZ1*LPELV),
+     $     pwit_t(LPX1*LPY1*LPZ1*LPELT)
+
+!     common block section
+      common /pwiti/ pwit_id, pwit_tmr_ini_id, pwit_tmr_evl_id, 
+     $     pwit_sec_id, pwit_l2n_id, pwit_fnum
+      
+      common /pwitr/ pwit_l2n, pwit_grw
+      
+      common /pwitrv/ pwit_vx, pwit_vy, pwit_vz, pwit_t
+      
+      common /pwitl/ pwit_ifinit, pwit_ifrst

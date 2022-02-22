@@ -26,9 +26,9 @@ cycle is provided by the submodule. Three stepper modes are supported: direct, a
 @interface_reqr Interface required:
 -# multiple interfaces from @ref rprm and @ref mntr modules
 -# @ref cnht_register, @ref cnht_init, @ref cnht_is_initialised, @ref cnht_glsc2_wt, @ref cnht_cpfld_set and @ref cnht_opcmult from @ref cnht module (automatically registered)
--# stepper_register; provided by a submodule
--# stepper_init; provided by a submodule
--# stepper_vsolve; provided by a submodule
+-# \a stepper_register; provided by a submodule
+-# \a stepper_init; provided by a submodule
+-# \a stepper_vsolve; provided by a submodule
 
 @mod_interface_example
 @code{.f}
@@ -107,12 +107,9 @@ cycle is provided by the submodule. Three stepper modes are supported: direct, a
 
 @mod_param
 @param_reqr Parameters required by time stepper module:
--# CONHT (for conjugated heat transfer):
-   + CHCST_SC, CHCFF_V, CHCFF_T : velocity and temperature scaling factors
-   + CHGRX, CHGRY, CHGRZ : gravitational acceleration
-   + CHRA, CHPR : Rayleight and Prandtl numbers
 -# Nek5000 \a PARAM array
    + PARAM(12) - time step dt
+   + IFTRAN, IFPERT, IFBASE, IFHEAT, NSTEPS, NPERT
 
 @mod_param_example
 @include Toolbox/tools/tstpr/example.par

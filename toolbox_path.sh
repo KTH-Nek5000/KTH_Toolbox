@@ -47,9 +47,9 @@ export SFD_SRC=${BASEFLOW_SRC}"/sfd"
 TOOLBOX_INC+=" -I"${SFD_SRC}
 
 # Arnoldi include file has to be copied to setup directory
-export ARNARP_SRC=${TSTPR_SRC}"/arnoldi_arpack"
-export POWERIT_SRC=${TSTPR_SRC}"/powerit"
-TOOLBOX_INC+=" -I"${POWERIT_SRC}
+export ARNA_SRC=${TSTPR_SRC}"/arna"
+export PWIT_SRC=${TSTPR_SRC}"/pwit"
+TOOLBOX_INC+=" -I"${PWIT_SRC}
 
 export BCND_SRC=${UTILITY_SRC}"/bcnd"
 export COMM_SRC=${UTILITY_SRC}"/comm"

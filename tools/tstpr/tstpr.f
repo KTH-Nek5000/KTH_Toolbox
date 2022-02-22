@@ -4,6 +4,9 @@
 !!    iterations or solution of eigenvalue problem with Arnoldi algorithm
 !! @author Adam Peplinski
 !! @date Mar 7, 2016
+! preprocessing flag for pressure reconstruction
+!#define PRS_REC
+#undef PRS_REC
 !=======================================================================
 !> @brief Register time stepper module
 !! @ingroup tstpr
@@ -36,10 +39,10 @@
       endif
 
       ! check if conjugated heat transfer module was registered
-      call mntr_mod_is_name_reg(lpmid,'CONJHT')
+      call mntr_mod_is_name_reg(lpmid,'CNHT')
       if (lpmid.gt.0)  then
          call mntr_warn(lpmid,
-     $        'module ['//'CONJHT'//'] already registered')
+     $        'module ['//'CNHT'//'] already registered')
       else
          call cnht_register()
       endif
@@ -225,10 +228,6 @@
       ! set cpfld for conjugated heat transfer
       if (IFHEAT) call cnht_cpfld_set
 
-!     should be the first step of every cycle performed with Uzawa
-!     turned on?
-!         IFUZAWA = tstpr_ifuz
-
       ! everything is initialised
       tstpr_ifinit=.true.
 
@@ -261,7 +260,7 @@
 
       include 'SIZE'            ! NIO
       include 'TSTEP'           ! ISTEP, TIME
-      include 'INPUT'           ! IFHEAT, IF3D, IFUZAWA ????????
+      include 'INPUT'           ! IFHEAT, IF3D
       include 'MASS'            ! BM1
       include 'SOLN'            ! V[XYZ]P, PRP, TP, VMULT, V?MASK
       include 'ADJOINT'         ! IFADJ
@@ -269,8 +268,8 @@
       include 'TSTPRD'
 
       ! global comunication in nekton
-      integer NIDD,NPP,NEKCOMM,NEKGROUP,NEKREAL
-      common /nekmpi/ NIDD,NPP,NEKCOMM,NEKGROUP,NEKREAL
+      integer nidd,npp,nekcomm,nekgroup,nekreal
+      common /nekmpi/ nidd,npp,nekcomm,nekgroup,nekreal
 
       ! local variables
       real grw         ! growth rate
@@ -281,17 +280,13 @@
 !-----------------------------------------------------------------------
       if (ISTEP.eq.0) return
 
-      ! timing
-      ltim = dnekclock()
-
-!     turn off Uzawa after first step
-!         IFUZAWA = .FALSE.
-
       ! step counting
       tstpr_istep = tstpr_istep + 1
 
       ! stepper phase end
       if (mod(tstpr_istep,tstpr_step).eq.0) then
+         ! timing
+         ltim = dnekclock()
          ! check for the calculation mode
          if (tstpr_mode.eq.3.and.(.not.IFADJ)) then
             ! optimal initial condition
@@ -301,12 +296,8 @@
 
             IFADJ = .TRUE.
 
-            ! itaration count
+            ! iteration count
             tstpr_istep = 0
-
-!           ! should be the first step of every cycle performed with Uzawa
-!     turned on?
-!               IFUZAWA = tstpr_ifuz
 
             ! set time and iteration number
             TIME=0.0
@@ -315,15 +306,19 @@
             ! get L2 norm after direct phase
             tstpr_L2dir = cnht_glsc2_wt(VXP,VYP,VZP,TP,
      $         VXP,VYP,VZP,TP,BM1)
-             ! normalise vector
-             grw = sqrt(tstpr_L2ini/tstpr_L2dir)
-             call cnht_opcmult (VXP,VYP,VZP,TP,grw)
+            ! normalise vector
+            grw = sqrt(tstpr_L2ini/tstpr_L2dir)
+            call cnht_opcmult (VXP,VYP,VZP,TP,grw)
 
+#ifdef PRS_REC
+            ! normalise pressure ???????????????????????????
+            call cmult(PRP,grw,tstpr_np)
+#else
             ! zero presure
             call rzero(PRP,tstpr_np)
-
+#endif
             ! set cpfld for conjugated heat transfer
-               if (IFHEAT) call cnht_cpfld_set
+            if (IFHEAT) call cnht_cpfld_set
          else
             !stepper phase counting
             tstpr_istep = 0
@@ -343,7 +338,10 @@
                ! normalise vector after whole cycle
                grw = sqrt(tstpr_L2dir/tstpr_L2ini)! add direct growth
                call cnht_opcmult (VXP,VYP,VZP,TP,grw)
-
+#ifdef PRS_REC
+               ! normalise pressure ???????????????????????????
+               call cmult(PRP,grw,tstpr_np)
+#endif
             endif
 
             ! run vector solver (arpack, power iteration)
@@ -354,14 +352,10 @@
                ! set time and iteration number
                TIME=0.0
                ISTEP=0
-
-!     should be the first step of every cycle performed with Uzawa 
-!     turned on?
-!               IFUZAWA = tstpr_ifuz
-
-               ! zero presure
+#ifndef PRS_REC
+               ! zero presure ?????????????????????????????????????
                call rzero(PRP,tstpr_np)
-
+#endif
                if (tstpr_mode.eq.3) then
                   ! optimal initial condition
                   call mntr_log(tstpr_id,lp_prd,
@@ -379,11 +373,10 @@
             endif
 
          endif               ! tstpr_mode.eq.3.and.(.not.IFADJ)
+         ! timing
+         ltim = dnekclock() - ltim
+         call mntr_tmr_add(tstpr_tmr_evl_id,1,ltim)
       endif                  ! mod(tstpr_istep,tstpr_step).eq.0
-
-      ! timing
-      ltim = dnekclock() - ltim
-      call mntr_tmr_add(tstpr_tmr_evl_id,1,ltim)
 
       return
       end subroutine
@@ -409,8 +402,8 @@
 #ifdef AMR
       call amr_oph1_proj(vxp,vyp,vzp,nx1,ny1,nz1,nelv)
 #else
-      call opdssum(VXP,VYP,VZP)
-      call opcolv (VXP,VYP,VZP,VMULT)
+      call opdssum(vxp,vyp,vzp)
+      call opcolv (vxp,vyp,vzp,vmult)
 #endif
 
       if(IFHEAT) then
@@ -418,8 +411,8 @@
 #ifdef AMR
          call h1_proj(tp,nx1,ny1,nz1)
 #else
-         call dssum(TP,NX1,NY1,NZ1)
-         call col2 (TP,TMULT,tstpr_nt)
+         call dssum(tp,nx1,ny1,nz1)
+         call col2 (tp,tmult,tstpr_nt)
 #endif
       endif
       IFIELD = ifield_tmp
