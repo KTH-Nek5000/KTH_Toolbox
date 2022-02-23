@@ -1,1 +1,1 @@
-$(OBJDIR)/pwit.o            :$(PWIT_SRC)/pwet.f;                     $(F77) -c $(FL2) $< -o $@
+$(OBJDIR)/pwit.o            :$(PWIT_SRC)/pwit.f ./TSTPRD;            $(F77) -c $(FL2) $< -o $@

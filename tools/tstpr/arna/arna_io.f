@@ -1,17 +1,17 @@
-!> @file arn_arp_io.f
-!! @ingroup arn_arp
-!! @brief Set of checkpointing routines for arn_arp module.
+!> @file arna_io.f
+!! @ingroup arna
+!! @brief Set of checkpointing routines for arna module.
 !=======================================================================
 !> @brief Write restart files
-!! @ingroup arn_arp
-      subroutine arn_rst_save
+!! @ingroup arna
+      subroutine arna_rst_save
       implicit none
 
       include 'SIZE'            ! NIO
       include 'TSTEP'           ! LASTEP
       include 'FRAMELP'
       include 'TSTPRD'
-      include 'ARN_ARPD'
+      include 'ARNAD'
 
       ! local variables
       character(20) str
@@ -23,10 +23,10 @@
 
          ! save parameters and workla; independent on processor;
          ! serial output
-         call arn_write_par('ARP')
+         call arna_write_par('ARP')
 
          ! save big arrays; parallel output
-         call mfo_arnv('ARV')
+         call arna_mfov('ARV')
 
          ! this is the last step
          LASTEP=1
@@ -36,31 +36,31 @@
       end
 !=======================================================================
 !> @brief Read from checkpoints
-!! @ingroup arn_arp
-      subroutine arn_rst_read
+!! @ingroup arna
+      subroutine arna_rst_read
       implicit none
 
       include 'SIZE'            ! NIO
       include 'FRAMELP'
       include 'TSTPRD'
-      include 'ARN_ARPD'
+      include 'ARNAD'
 !-----------------------------------------------------------------------
       call mntr_log(arna_id,lp_prd,
      $       'Reading checkpoint.')
 
       ! read parameters and WORKLA; independent on processor; serial input
-      call arn_read_par('ARP')
+      call arna_read_par('ARP')
 
       ! read big arrays; parallel input
-      call mfi_arnv('ARV')
+      call arna_mfiv('ARV')
 
       return
       end
 !=======================================================================
 !> @brief Write procesor independent data
-!! @ingroup arn_arp
+!! @ingroup arna
 !! @param[in]   prefix    prefix
-      subroutine arn_write_par(prefix)
+      subroutine arna_write_par(prefix)
       implicit none
 
       include 'SIZE'
@@ -69,7 +69,7 @@
       include 'TSTEP'
       include 'FRAMELP'
       include 'TSTPRD'
-      include 'ARN_ARPD'
+      include 'ARNAD'
 
       ! argument list
       character*3 prefix
@@ -108,14 +108,14 @@
          endif
 
          if (ierr.eq.0) then
-            call mfo_arnp
+            call arna_mfop
             ! close the file; only serial
             call byte_close(ierr)
          endif
       endif
 
       call  mntr_check_abort(arna_id,ierr,
-     $       'arn_write_par: Error writing par file.')
+     $       'arna_write_par: Error writing par file.')
 
       ! put output variables back
       WDSIZO = lwdsizo
@@ -127,14 +127,14 @@
       end
 !=======================================================================
 !> @brief Write procesor independent variables
-!! @ingroup arn_arp
-      subroutine mfo_arnp
+!! @ingroup arna
+      subroutine arna_mfop
       implicit none
 
       include 'SIZE'
       include 'TSTEP'
       include 'TSTPRD'
-      include 'ARN_ARPD'
+      include 'ARNAD'
 
       ! local variables
       character*16 hdr
@@ -197,9 +197,9 @@
       end
 !=======================================================================
 !> @brief Read procesor independent data
-!! @ingroup arn_arp
+!! @ingroup arna
 !! @param[in]   prefix    prefix
-      subroutine arn_read_par(prefix)
+      subroutine arna_read_par(prefix)
       implicit none
 
       include 'SIZE'
@@ -209,7 +209,7 @@
       include 'PARALLEL'
       include 'FRAMELP'
       include 'TSTPRD'
-      include 'ARN_ARPD'
+      include 'ARNAD'
 
       ! argument list
       character*3 prefix
@@ -249,14 +249,14 @@
 
          if (ierr.eq.0) then
             ! read parameters
-            call mfi_arnp
+            call arna_mfip
             ! close the file
             call byte_close(ierr)
          endif
       endif
 
       call  mntr_check_abort(arna_id,ierr,
-     $       'arn_read_par: Error opening par file.')
+     $       'arna_read_par: Error opening par file.')
 
       ierr = 0
       if (NID.eq.0) then
@@ -264,7 +264,7 @@
          ! is it correct restart
          if (idoarp0.ne.-2) then
             call mntr_error(arna_id,
-     $           'arn_read_par, wrong idoarp0')
+     $           'arna_read_par, wrong idoarp0')
             call mntr_logi(arna_id,lp_err,'idoarp0 = ', idoarp0)
             ierr=1
          endif
@@ -272,7 +272,7 @@
          ! is it the same ARPACK mode
          if (bmatarp0.ne.bmatarp) then
             call mntr_error(arna_id,
-     $           'arn_read_par, different ARPACK modes')
+     $           'arna_read_par, different ARPACK modes')
             call mntr_logi(arna_id,lp_err,'bmatarp0 = ', bmatarp0)
             call mntr_logi(arna_id,lp_err,'bmatarp  = ', bmatarp)
             ierr=1
@@ -281,7 +281,7 @@
          ! do we look for the same eigenvectors
          if (whicharp0.ne.whicharp) then
             call mntr_error(arna_id,
-     $           'arn_read_par, different mode selsction')
+     $           'arna_read_par, different mode selsction')
             call mntr_logi(arna_id,lp_err,'whicharp0 = ', whicharp0)
             call mntr_logi(arna_id,lp_err,'whicharp  = ', whicharp)
             ierr=1
@@ -290,9 +290,9 @@
          ! is it the same integration mode
          if (tstpr_mode0.ne.tstpr_mode) then
             call mntr_error(arna_id,
-     $           'arn_read_par, wrong simulation mode')
-            call mntr_logi(arna_id,lp_err,'tstpr_mode0 = ', tstpr_mode0)
-            call mntr_logi(arna_id,lp_err,'tstpr_mode  = ', tstpr_mode)
+     $           'arna_read_par, wrong simulation mode')
+            call mntr_logi(arna_id,lp_err,'tstpr_mode0 = ',tstpr_mode0)
+            call mntr_logi(arna_id,lp_err,'tstpr_mode  = ',tstpr_mode)
             ierr=1
          endif
 
@@ -300,7 +300,7 @@
          ! is the length of the vector the same
          if (arna_ns0.ne.arna_ns) then
             call mntr_error(arna_id,
-     $           'arn_read_par, different vector length (IFHEAT?)')
+     $           'arna_read_par, different vector length (IFHEAT?)')
             call mntr_logi(arna_id,lp_err,'arna_ns0 = ', arna_ns0)
             call mntr_logi(arna_id,lp_err,'arna_ns  = ', arna_ns)
             ierr=1
@@ -311,7 +311,7 @@
          ! ipntarp
          if (arna_nkrl0.ne.arna_nkrl) then
             call mntr_error(arna_id,
-     $           'arn_read_par, different Krylov space size')
+     $           'arna_read_par, different Krylov space size')
             call mntr_logi(arna_id,lp_err,'arna_nkrl0 = ', arna_nkrl0)
             call mntr_logi(arna_id,lp_err,'arna_nkrl  = ', arna_nkrl)
             ierr=1
@@ -319,7 +319,7 @@
 
          if (nwlarp0.ne.nwlarp) then
             call mntr_error(arna_id,
-     $           'arn_read_par, different size of work array')
+     $           'arna_read_par, different size of work array')
             call mntr_logi(arna_id,lp_err,'nwlarp0 = ', nwlarp0)
             call mntr_logi(arna_id,lp_err,'nwlarp  = ', nwlarp)
             ierr=1
@@ -328,7 +328,7 @@
          ! stopping criterion
          if (tstpr_tol0.ne.tstpr_tol) then
             call mntr_warn(arna_id,
-     $       'arn_read_par, different stopping criterion')
+     $       'arna_read_par, different stopping criterion')
             call mntr_logi(arna_id,lp_err,'tstpr_tol0 = ', tstpr_tol0)
             call mntr_logi(arna_id,lp_err,'tstpr_tol  = ', tstpr_tol)
          endif
@@ -336,7 +336,7 @@
          ! number of eigenvalues
          if (arna_negv0.ne.arna_negv) then
             call mntr_warn(arna_id,
-     $       'arn_read_par, different number of eigenvalues')
+     $       'arna_read_par, different number of eigenvalues')
             call mntr_logi(arna_id,lp_err,'arna_negv0 = ', arna_negv0)
             call mntr_logi(arna_id,lp_err,'arna_negv  = ', arna_negv)
          endif
@@ -344,22 +344,22 @@
          ! stepper phase length
          if (dtarp0.ne.DT) then
             call mntr_warn(arna_id,
-     $       'arn_read_par, different time step')
+     $       'arna_read_par, different time step')
             call mntr_logi(arna_id,lp_err,'dtarp0 = ', dtarp0)
             call mntr_logi(arna_id,lp_err,'dt     = ', DT)
          endif
 
          if (tstpr_step0.ne.tstpr_step) then
             call mntr_warn(arna_id,
-     $       'arn_read_par, different number of steps instepper phase')
-            call mntr_logi(arna_id,lp_err,'tstpr_step0 = ', tstpr_step0)
-            call mntr_logi(arna_id,lp_err,'tstpr_step  = ', tstpr_step)
+     $      'arna_read_par, different number of steps instepper phase')
+            call mntr_logi(arna_id,lp_err,'tstpr_step0 = ',tstpr_step0)
+            call mntr_logi(arna_id,lp_err,'tstpr_step  = ',tstpr_step)
          endif
 
          ! check IPARP
          if (iparp0(1).ne.iparp(1)) then
             call mntr_error(arna_id,
-     $           'arn_read_par, different shift in ARPACK')
+     $           'arna_read_par, different shift in ARPACK')
             call mntr_logi(arna_id,lp_err,'iparp0(1) = ', iparp0(1))
             call mntr_logi(arna_id,lp_err,'iparp(1)  = ', iparp(1))
             ierr=1
@@ -367,14 +367,14 @@
 
          if (iparp0(3).ne.iparp(3)) then
             call mntr_warn(arna_id,
-     $           'arn_read_par, different cycle number')
+     $           'arna_read_par, different cycle number')
             call mntr_logi(arna_id,lp_err,'iparp0(3) = ', iparp0(3))
             call mntr_logi(arna_id,lp_err,'iparp(3)  = ', iparp(3))
          endif
 
          if (IPARP0(7).ne.IPARP(7)) then
             call mntr_error(arna_id,
-     $           'arn_read_par, different ARPACK modes')
+     $           'arna_read_par, different ARPACK modes')
             call mntr_logi(arna_id,lp_err,'iparp0(7) = ', iparp0(7))
             call mntr_logi(arna_id,lp_err,'iparp(7)  = ', iparp(7))
             ierr=1
@@ -395,7 +395,7 @@
       endif                     ! NID
 
       call  mntr_check_abort(arna_id,ierr,
-     $       'arn_read_par: Error reading par file.')
+     $       'arna_read_par: Error reading par file.')
 
       idoarp = -2
       ! broadcast
@@ -416,8 +416,8 @@
       end
 !=======================================================================
 !> @brief Read procesor independent variables
-!! @ingroup arn_arp
-      subroutine mfi_arnp
+!! @ingroup arna
+      subroutine arna_mfip
       implicit none
 
       include 'SIZE'
@@ -427,7 +427,7 @@
       include 'TSTEP'
       include 'FRAMELP'
       include 'TSTPRD'
-      INCLUDE 'ARN_ARPD'
+      INCLUDE 'ARNAD'
 
       ! local variables
       character*16 hdr
@@ -458,7 +458,7 @@
          read(hdr,*) dummy,idoarp0,bmatarp0,whicharp0,tstpr_mode0! 14
       else
          call  mntr_abort(arna_id,
-     $       'mfi_arnp; Error reading header')
+     $       'arna_mfip; Error reading header')
       endif
 
       ! read test pattern for byte swap
@@ -500,17 +500,17 @@
          call copy(workla,workla8,nwlarp0)
       else
          call  mntr_abort(arna_id,
-     $       'mfi_arnp; Wrong work array size nwlarp0.le.wldima')
+     $       'arna_mfip; Wrong work array size nwlarp0.le.wldima')
       endif
 
       return
       end subroutine
 !=======================================================================
 !> @brief Write procesor dependent data (long vectors)
-!! @ingroup arn_arp
+!! @ingroup arna
 !! @param[in]   prefix    prefix
 !! @remark This routine uses global scratch space SCRUZ
-      subroutine mfo_arnv(prefix)  ! muti-file output
+      subroutine arna_mfov(prefix)  ! muti-file output
       implicit none
 
       include 'SIZE'
@@ -520,7 +520,7 @@
       include 'RESTART'
       include 'FRAMELP'
       include 'TSTPRD'
-      include 'ARN_ARPD'
+      include 'ARNAD'
 
       ! argument list
       character*3 prefix
@@ -582,7 +582,7 @@
          endif
       endif
 
-      call mntr_check_abort(arna_id,ierr,'mfo_arnv; file not opened.')
+      call mntr_check_abort(arna_id,ierr,'arna_mfov; file not opened.')
 
       ! write a header and create element mapping
       call mfo_write_hdr
@@ -598,18 +598,18 @@
       ! topologies in the post-processor
 
       ! resid array
-      call  mfo_singlev(ioflds,nout,offs0,stride,strideB,
+      call  arna_mfosv(ioflds,nout,offs0,stride,strideB,
      $     UR1,UR2,UR3,RESIDA)
 
       ! workd array
       do il=0,2
-         call  mfo_singlev(ioflds,nout,offs0,stride,strideB,
+         call  arna_mfosv(ioflds,nout,offs0,stride,strideB,
      $     UR1,UR2,UR3,WORKDA(1+arna_ns*il))
       enddo
 
       ! krylov space
       do il=1,arna_nkrl
-         call  mfo_singlev(ioflds,nout,offs0,stride,strideB,
+         call  arna_mfosv(ioflds,nout,offs0,stride,strideB,
      $     UR1,UR2,UR3,VBASEA(1,il))
       enddo
 
@@ -628,7 +628,7 @@
       enddo
 
       call io_mbyte_close(ierr)
-      call mntr_check_abort(arna_id,ierr,'mfo_arnv; file not closed.')
+      call mntr_check_abort(arna_id,ierr,'arna_mfov; file not closed.')
 
       ! stamp the log
       tio = dnekclock_sync()-tiostart
@@ -648,10 +648,10 @@
       end
 !=======================================================================
 !> @brief Read procesor dependent data (long vectors)
-!! @ingroup arn_arp
+!! @ingroup arna
 !! @param[in]   prefix    prefix
 !! @remark This routine uses global scratch space SCRNS, SCRUZ
-      subroutine mfi_arnv(prefix)
+      subroutine arna_mfiv(prefix)
       implicit none
 
       include 'SIZE'
@@ -661,7 +661,7 @@
       include 'RESTART'
       include 'FRAMELP'
       include 'TSTPRD'
-      INCLUDE 'ARN_ARPD'
+      INCLUDE 'ARNAD'
 
       ! argument list
       character*3 prefix
@@ -701,7 +701,7 @@
          endif
       endif
 
-      call mntr_check_abort(arna_id,ierr,'mfi_arnv; file not opened.')
+      call mntr_check_abort(arna_id,ierr,'arna_mfiv; file not opened.')
 
       call mfi_prepare(fname)       ! determine reader nodes +
                                     ! read hdr + element mapping
@@ -715,24 +715,24 @@
       iofldsr = 0
 
       ! resid array
-      call mfi_singlev(iofldsr,offs0,stride,strideB,
+      call arna_mfisv(iofldsr,offs0,stride,strideB,
      $     UR1,UR2,UR3,RESIDA(1))
 
       ! workd array
       do il=0,2
-         call mfi_singlev(iofldsr,offs0,stride,strideB,
+         call arna_mfisv(iofldsr,offs0,stride,strideB,
      $        UR1,UR2,UR3,WORKDA(1+arna_ns*il))
       enddo
 
       ! krylov space
       do il=1,arna_nkrl
-         call mfi_singlev(iofldsr,offs0,stride,strideB,
+         call arna_mfisv(iofldsr,offs0,stride,strideB,
      $        UR1,UR2,UR3,VBASEA(1,il))
       enddo
 
       ! close files
       call io_mbyte_close(ierr)
-      call mntr_check_abort(arna_id,ierr,'mfi_arnv; file not closed.')
+      call mntr_check_abort(arna_id,ierr,'arna_mfiv; file not closed.')
 
       ! stamp the log
       tio = dnekclock_sync()-tiostart
@@ -757,7 +757,7 @@
       end subroutine
 !=======================================================================
 !> @brief Write single Krylov vector to the file
-!! @ingroup arn_arp
+!! @ingroup arna
 !! @param[inout] ioflds         Vector counter
 !! @param[in]    nout           local number of elements to write
 !! @param[in]    offs0          global file offset (header +...)
@@ -765,7 +765,7 @@
 !! @param[in]    strideB        space saved for processes with lower nid
 !! @param[in]    ur1,ur2,ur3    output arrays
 !! @param[in]    vect           Krylov vector
-      subroutine mfo_singlev(ioflds,nout,offs0,stride,strideB,
+      subroutine arna_mfosv(ioflds,nout,offs0,stride,strideB,
      $     ur1,ur2,ur3,vect)
       implicit none
 
@@ -773,7 +773,7 @@
       include 'INPUT'           ! IF3D, IFHEAT
       include 'RESTART'
       include 'TSTPRD'
-      INCLUDE 'ARN_ARPD'
+      INCLUDE 'ARNAD'
 
       ! argument list
       integer ioflds,nout
@@ -808,7 +808,7 @@
       end subroutine
 !=======================================================================
 !> @brief Read single Krylov vector from the file
-!! @ingroup arn_arp
+!! @ingroup arna
 !! @param[inout] iofldr         Vector counter
 !! @param[in]    offs0          global file offset (header +...)
 !! @param[in]    stride         single vector length
@@ -816,7 +816,7 @@
 !! @param[in]    ur1,ur2,ur3    input arrays
 !! @param[out]   vect           Krylov vector
 !! @remark This routine uses global scratch space SCRNS
-      subroutine mfi_singlev(iofldr,offs0,stride,strideB,
+      subroutine arna_mfisv(iofldr,offs0,stride,strideB,
      $     ur1,ur2,ur3,vect)
       implicit none
 
@@ -824,7 +824,7 @@
       include 'INPUT'           ! IF3D, IFHEAT
       include 'RESTART'
       include 'TSTPRD'
-      INCLUDE 'ARN_ARPD'
+      INCLUDE 'ARNAD'
 
       ! argument list
       integer iofldr

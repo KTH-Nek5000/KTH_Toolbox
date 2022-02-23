@@ -1,5 +1,5 @@
-!> @file arn_arp.f
-!! @ingroup arn_arp
+!> @file arna.f
+!! @ingroup arna
 !! @brief Set of subroutines to solve eigenvalue problem with Arnoldi
 !!   algorithm using PARPACK/ARPACK
 !! @warning There is no restart option for serial ARPACK version. It is
@@ -18,7 +18,7 @@
 #undef ARPACK_DIRECT
 !=======================================================================
 !> @brief Register Arnoldi ARPACK module
-!! @ingroup arn_arp
+!! @ingroup arna
 !! @note This interface is called by @ref tstpr_register
       subroutine stepper_register()
       implicit none
@@ -27,7 +27,7 @@
       include 'INPUT'
       include 'FRAMELP'
       include 'TSTPRD'
-      include 'ARN_ARPD'
+      include 'ARNAD'
 
       ! local variables
       integer lpmid, il
@@ -91,7 +91,7 @@
       end subroutine
 !=======================================================================
 !> @brief Initilise Arnoldi ARPACK module
-!! @ingroup arn_arp
+!! @ingroup arna
 !! @note This interface is called by @ref tstpr_init
       subroutine stepper_init()
       implicit none
@@ -101,9 +101,8 @@
       include 'INPUT'           ! IF3D, IFHEAT
       include 'SOLN'            ! V?MASK, TMASK, V[XYZ]P, TP
       include 'FRAMELP'
-      include 'CHKPOINTD'
       include 'TSTPRD'
-      include 'ARN_ARPD'
+      include 'ARNAD'
 
       ! ARPACK include file
       INCLUDE 'debug.h'
@@ -113,6 +112,9 @@
       real rtmp, ltim
       logical ltmp
       character*20 ctmp
+
+      ! to get checkpoint runtime parameters
+      integer ierr, lmid, lsid, lrpid
 
       ! functions
       real dnekclock
@@ -134,12 +136,46 @@
       call rprm_rp_get(itmp,rtmp,ltmp,ctmp,arna_negv_id,rpar_int)
       arna_negv = itmp
 
-      ! get restart options
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,chpt_ifrst_id,rpar_log)
-      arna_ifrst = ltmp
+      ! check the restart flag
+      ! check if checkpointing module was registered and take parameters
+      ierr = 0
+      call mntr_mod_is_name_reg(lmid,'CHKPOINT')
+      if (lmid.gt.0) then
+         call rprm_sec_is_name_reg(lsid,lmid,'_CHKPOINT')
+         if (lsid.gt.0) then
+            ! restart flag
+            call rprm_rp_is_name_reg(lrpid,lsid,'READCHKPT',rpar_log)
+            if (lrpid.gt.0) then
+               call rprm_rp_get(itmp,rtmp,ltmp,ctmp,lrpid,rpar_log)
+               arna_ifrst = ltmp
+            else
+               ierr = 1
+               goto 30
+            endif
+            if (arna_ifrst) then
+               ! checkpoint set number
+               call rprm_rp_is_name_reg(lrpid,lsid,'CHKPFNUMBER',
+     $              rpar_int)
+               if (lrpid.gt.0) then
+                  call rprm_rp_get(itmp,rtmp,ltmp,ctmp,lrpid,rpar_int)
+                  arna_fnum = itmp
+               else
+                  ierr = 1
+                  goto 30
+               endif
+            endif
+         else
+            ierr = 1
+         endif
+      else
+         ierr = 1
+      endif
 
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,chpt_fnum_id,rpar_int)
-      arna_fnum = itmp
+ 30   continue
+
+      ! check for errors
+      call mntr_check_abort(arna_id,ierr,
+     $            'Error reading checkpoint parameters')
 
       ! check simulation parameters
 #ifdef ARPACK_DIRECT
@@ -235,7 +271,7 @@
       ! restart
       if (arna_ifrst) then
          ! read checkpoint
-         call arn_rst_read
+         call arna_rst_read
       else
          ! if no restatrt fill RESIDA with initial conditions
          ! V?MASK removes points at the wall and inflow
@@ -262,13 +298,13 @@
       endif
 
       ! ARPACK interface
-      call arn_naupd
+      call arna_naupd
 
       ! we should start stepper here
       if (idoarp.ne.-1.and.idoarp.ne.1) then
          write(ctmp,*) idoarp
          call mntr_abort(arna_id,
-     $   'stepper_init; error with arn_naupd, ido = '//trim(ctmp))
+     $   'stepper_init; error with arna_naupd, ido = '//trim(ctmp))
       endif
 
       ! print info
@@ -296,13 +332,14 @@
       end subroutine
 !=======================================================================
 !> @brief Check if module was initialised
-!! @ingroup arn_arp
+!! @ingroup arna
 !! @return stepper_is_initialised
       logical function stepper_is_initialised()
       implicit none
 
       include 'SIZE'
-      include 'ARN_ARPD'
+      include 'TSTPRD'
+      include 'ARNAD'
 !-----------------------------------------------------------------------
       stepper_is_initialised = arna_ifinit
 
@@ -311,7 +348,7 @@
 !=======================================================================
 !> @brief Create Krylov space, get Ritz values and restart
 !!  stepper phase.
-!! @ingroup arn_arp
+!! @ingroup arna
 !! @note This interface is called by @ref tstpr_main
       subroutine stepper_vsolve
       implicit none
@@ -322,7 +359,7 @@
       include 'MASS'            ! BM1
       include 'FRAMELP'
       include 'TSTPRD'
-      include 'ARN_ARPD'
+      include 'ARNAD'
 
       ! local variables
       real  ltim        ! timing
@@ -359,20 +396,20 @@
 #endif
 
       ! ARPACK interface
-      call arn_naupd
+      call arna_naupd
 
       if (idoarp.eq.-2) then
          ! checkpoint
-         call arn_rst_save
+         call arna_rst_save
       elseif (idoarp.eq.99) then
          ! finalise
-         call arn_esolve
+         call arna_esolve
       elseif (idoarp.eq.-1.or.idoarp.eq.1) then
          ! stepper restart, nothing to do
       else
          write(str,*) idoarp
          call mntr_abort(arna_id,
-     $    'stepper_vsolve; error with arn_naupd, ido = '//trim(str))
+     $    'stepper_vsolve; error with arna_naupd, ido = '//trim(str))
       endif
 
       ! timing
@@ -383,8 +420,8 @@
       end
 !=======================================================================
 !> @brief ARPACK postprocessing
-!! @ingroup arn_arp
-      subroutine arn_esolve
+!! @ingroup arna
+      subroutine arna_esolve
       implicit none
 
       include 'SIZE'            ! NIO, NID, LDIMT1
@@ -393,7 +430,7 @@
       include 'INPUT'           ! IFXYO,IFPO,IFVO,IFTO,IFPSO,IF3D,IFHEAT
       include 'FRAMELP'
       include 'TSTPRD'
-      include 'ARN_ARPD'
+      include 'ARNAD'
 
       ! local variables
       integer il, iunit, ierror
@@ -515,7 +552,7 @@
          else                   ! ierrarp
             write(str,*) ierrarp
             call  mntr_abort(arna_id,
-     $       'arn_esolve; error with _neupd, info = '//trim(str))
+     $       'arna_esolve; error with _neupd, info = '//trim(str))
          endif                  ! ierrarp
 
          ! finish run
@@ -526,8 +563,8 @@
       end
 !=======================================================================
 !> @brief Interface to pdnaupd
-!! @ingroup arn_arp
-      subroutine arn_naupd
+!! @ingroup arna
+      subroutine arna_naupd
       implicit none
 
       include 'SIZE'            ! NIO, NDIM, N[XYZ]1
@@ -536,7 +573,7 @@
       include 'MASS'            ! BM1
       include 'FRAMELP'
       include 'TSTPRD'
-      include 'ARN_ARPD'
+      include 'ARNAD'
 
       ! local variables
       character(20) str
@@ -559,7 +596,7 @@
       if (infarp.lt.0) then
          write(str,*) infarp
          call  mntr_abort(arna_id,
-     $       'arn_naupd; error with _naupd, info = '//trim(str))
+     $       'arna_naupd; error with _naupd, info = '//trim(str))
       endif
 
       if (idoarp.eq.2) then
@@ -601,7 +638,7 @@
             if (infarp.lt.0) then
                write(str,*) infarp
                call  mntr_abort(arna_id,
-     $  'arn_naupd; inner prod. error with _naupd, info = '//trim(str))
+     $  'arna_naupd; inner prod. error with _naupd, info = '//trim(str))
             endif
             if (idoarp.ne.2) exit
          enddo

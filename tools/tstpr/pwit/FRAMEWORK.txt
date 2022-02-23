@@ -36,6 +36,8 @@ direct and adjoint modes it is better to perform simple linear simulation with a
 -# @ref chkpoint :
    + _chkpoint:readchkpt
    + _chkpoint:chkpFnumber
+-# Nek5000 \a PARAM array and logical flags:
+   + IFHEAT
 
 @mod_param_example
 @include Toolbox/tools/tstpr/pwit/example.par

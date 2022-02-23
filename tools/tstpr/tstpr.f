@@ -4,9 +4,6 @@
 !!    iterations or solution of eigenvalue problem with Arnoldi algorithm
 !! @author Adam Peplinski
 !! @date Mar 7, 2016
-! preprocessing flag for pressure reconstruction
-!#define PRS_REC
-#undef PRS_REC
 !=======================================================================
 !> @brief Register time stepper module
 !! @ingroup tstpr
@@ -183,6 +180,9 @@
       if (NPERT.ne.1) call mntr_abort(tstpr_id,
      $   'time stepper requires NPERT=1')
 
+      if (IFHEAT.and.tstpr_ht.ne.1) call mntr_abort(tstpr_id,
+     $   'time stepper requires tstpr_ht=1 for temperature evaluation')
+
       ! initialise cycle counters
       tstpr_istep = 0
       tstpr_vstep = 0
@@ -201,7 +201,7 @@
       call stepper_init
 
       ! zero presure
-      call rzero(PRP,tstpr_np)
+      if(tstpr_pr.eq.0) call rzero(PRP,tstpr_np)
 
       ! set initial time
       TIME=0.0
@@ -310,13 +310,14 @@
             grw = sqrt(tstpr_L2ini/tstpr_L2dir)
             call cnht_opcmult (VXP,VYP,VZP,TP,grw)
 
-#ifdef PRS_REC
-            ! normalise pressure ???????????????????????????
-            call cmult(PRP,grw,tstpr_np)
-#else
-            ! zero presure
-            call rzero(PRP,tstpr_np)
-#endif
+            if (tstpr_pr.eq.0) then
+               ! zero presure
+               call rzero(PRP,tstpr_np)
+            else
+               ! normalise pressure ???????????????????????????
+               call cmult(PRP,grw,tstpr_np)
+            endif
+
             ! set cpfld for conjugated heat transfer
             if (IFHEAT) call cnht_cpfld_set
          else
@@ -338,10 +339,9 @@
                ! normalise vector after whole cycle
                grw = sqrt(tstpr_L2dir/tstpr_L2ini)! add direct growth
                call cnht_opcmult (VXP,VYP,VZP,TP,grw)
-#ifdef PRS_REC
+
                ! normalise pressure ???????????????????????????
-               call cmult(PRP,grw,tstpr_np)
-#endif
+               if (tstpr_pr.ne.0) call cmult(PRP,grw,tstpr_np)
             endif
 
             ! run vector solver (arpack, power iteration)
@@ -352,10 +352,10 @@
                ! set time and iteration number
                TIME=0.0
                ISTEP=0
-#ifndef PRS_REC
-               ! zero presure ?????????????????????????????????????
-               call rzero(PRP,tstpr_np)
-#endif
+
+               ! zero pressure
+               if (tstpr_pr.eq.0) call rzero(PRP,tstpr_np)
+
                if (tstpr_mode.eq.3) then
                   ! optimal initial condition
                   call mntr_log(tstpr_id,lp_prd,

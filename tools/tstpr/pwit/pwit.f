@@ -3,9 +3,6 @@
 !! @brief Set of subroutines to perform power iterations within time stepper
 !! @author Adam Peplinski
 !! @date Mar 7, 2016
-! preprocessing flag for pressure reconstruction
-!#define PRS_REC
-#undef PRS_REC
 !=======================================================================
 !> @brief Register power iteration module
 !! @ingroup pwit
@@ -174,11 +171,11 @@
       lnorm = sqrt(pwit_l2n/lnorm)
       call cnht_opcmult (VXP,VYP,VZP,TP,lnorm)
 
-#ifdef PRS_REC
-      ! normalise pressure ???????????????????????????
-      itmp = nx2*ny2*nz2*nelv
-      call cmult(PRP,lnorm,itmp)
-#endif
+      if (tstpr_pr.ne.0) then
+         ! normalise pressure ???????????????????????????
+         itmp = nx2*ny2*nz2*nelv
+         call cmult(PRP,lnorm,itmp)
+      endif
 
       ! make sure the velocity and temperature fields are continuous at
       ! element faces and edges
@@ -228,7 +225,6 @@
       include 'MASS'            ! BM1
       include 'SOLN'            ! V[XYZ]P, TP
       include 'FRAMELP'
-!      include 'CHKPOINTD'
       include 'TSTPRD'
       include 'PWITD'
 
@@ -252,11 +248,11 @@
       lnorm = sqrt(pwit_l2n/lnorm)
       call cnht_opcmult (VXP,VYP,VZP,TP,lnorm)
 
-#ifdef PRS_REC
-      ! normalise pressure ???????????????????????????
-      itmp = nx2*ny2*nz2*nelv
-      call cmult(PRP,lnorm,itmp)
-#endif
+      if (tstpr_pr.ne.0) then
+         ! normalise pressure ???????????????????????????
+         itmp = nx2*ny2*nz2*nelv
+         call cmult(PRP,lnorm,itmp)
+      endif
 
       ! make sure the velocity and temperature fields are continuous at
       ! element faces and edges

@@ -1,0 +1,62 @@
+#Configuration file for Nek5000 modules developped at KTH
+# Place for short description; doxygen style
+/**
+@defgroup arna Arnoldi algorithm using parpack
+@ingroup tstpr
+
+@brief Arnoldi algorithm with PARPACK
+
+@warning This module is not upgraded to stable Nek5000 relese yet
+
+@details 
+Description of the method can be found in @cite Peplinski2014 @cite Peplinski2015
+
+Two possible modes are supported:
+  + direct: A*x = lambda*x
+  + inverse: A*x = lambda*M*x, M-mass matrix defining inner product
+
+Inverse mode is preferred as it takes into account inner product
+Simulation with temperature or passive scalars has to be performed
+in inverse mode due to speciffic inner product.
+
+\a ARPACK_DIRECT preprocessing switch between direct and inverse mode.
+
+@attention This submodule has its own checkpointing routines.
+
+@todo This submodule contains binary tar file with modified (restart added) version of PARPACK.
+This binary file in git is not good idea. Repalce with separate repository for Parpack added
+by sub.module.
+
+@todo Finish description
+
+@mod_interface
+@interface_list Interface provided to tstpr:
+-# \a stepper_register; provided for @ref tstpr
+-# \a stepper_init; provided for @ref tstpr
+-# \a stepper_vsolve; provided for @ref tstpr
+
+@par
+@interface_reqr Interface required:
+-# multiple interfaces from @ref rprm and @ref mntr modules
+-# @ref io_file_freeid, @ref io_mfo_fname, @ref io_mbyte_open and @ref io_mbyte_close from @ref io module
+
+@mod_param
+@param_list Parameters provided by arna module (include file - \a ARNAD):
+|Varaible | Type | Runtime parameter | Description |
+|---------|------|-------------------|-------------|
+| arna_nkrl | integer | _arna:nkrl | Krylov space size |
+| arna_negv | integer | _arna:negv | number of eigenvalues |
+
+
+@par
+@param_reqr Parameters required by power iteration module:
+-# @ref chkpoint :
+   + _chkpoint:readchkpt
+   + _chkpoint:chkpFnumber
+-# Nek5000 \a PARAM array and logical flags:
+   + IFHEAT, NSTEPS
+
+@mod_param_example
+@include Toolbox/tools/tstpr/arna/example.par
+
+*/

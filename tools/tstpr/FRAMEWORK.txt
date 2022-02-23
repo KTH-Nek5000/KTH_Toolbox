@@ -13,6 +13,12 @@ the submodule. There are two possible submodules: power iteration and spectra ca
 using the Arnoldi algorithm implemented in \a PARPACK. The initial condition for the next stepping
 cycle is provided by the submodule. Three stepper modes are supported: direct, adjoint, direct+adjoint.
 
+There are two parameters in TSTRP include file that heve to be adjusted for the given setup. These parameters
+are \a tstpr_pr and \a tstpr_ht defining whetere pressure ro themperature are included in the simlulation vector.
+These parameters can be equal 0 or 1. The pressure is never included in the vector inner product, however for 
+\a tstpr_pr=0 it is reset to zero at the beginning of each cycle. On the other hand \a tstpr_ht should be set to 1
+for all simulations including temperature.
+
 @todo Finish temperature
 
 @mod_interface
@@ -107,7 +113,7 @@ cycle is provided by the submodule. Three stepper modes are supported: direct, a
 
 @mod_param
 @param_reqr Parameters required by time stepper module:
--# Nek5000 \a PARAM array
+-# Nek5000 \a PARAM array and logical flags:
    + PARAM(12) - time step dt
    + IFTRAN, IFPERT, IFBASE, IFHEAT, NSTEPS, NPERT
 

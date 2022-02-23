@@ -31,6 +31,14 @@
       real    tstpr_tol                   !< @var convergence threshold for stepper
       integer tstpr_tol_id
 
+!     flag marking pressure added to the vector lenght
+      integer tstpr_pr         ! 0 - no presure in the vector; 1 - pressure included in a vector
+      parameter (tstpr_pr = 0) ! CASE SPECIFIC
+!     flag marking temperature added to the vector lenght
+      integer tstpr_ht         ! 0 - no temperature in the vector; 1 - temperature included in a vector
+      parameter (tstpr_ht = 0) ! CASE SPECIFIC
+      
+
 !     vector lengths
       integer tstpr_nv   ! velocity mesh
       integer tstpr_nt   ! temperature mesh
