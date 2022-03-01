@@ -6,7 +6,8 @@
 !=======================================================================
 !> @brief Read nonconforming data from the file
 !! @ingroup pstat2d
-      subroutine pstat2d_mfi_crd2D
+!! @param[in] fidl       file number
+      subroutine pstat2d_mfi_crd2D(fidl)
       implicit none
 
       include 'SIZE'
@@ -18,6 +19,9 @@
       ! global data structures
       integer mid,mp,nekcomm,nekgroup,nekreal
       common /nekmpi/ mid,mp,nekcomm,nekgroup,nekreal
+
+      ! argument list
+      integer fidl
 
       ! local variables
       integer il, jl, kl        ! loop index
@@ -61,7 +65,7 @@
       bname = trim(adjustl(SESSION))
       call io_mfo_fname(fname,bname,prefix,ierr)
 
-      write(str,'(i5.5)') pstat_crd_fnr
+      write(str,'(i5.5)') fidl
       fname = 'DATA/'//trim(fname)//trim(str)
 
       fid0 = 0

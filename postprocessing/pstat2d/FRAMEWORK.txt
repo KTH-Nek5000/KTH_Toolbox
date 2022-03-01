@@ -26,8 +26,8 @@ statistically homogenous direction. Set the `ldimt` variable in the SIZE file fo
  the examples herein. (See also the phill_PSTAT2D example case.) Compile the case.
 - Create a folder called DATA in the case directory.
 - Copy the previously generated files with prefex `sts` and `c2D` to this folder.
-It is important that the numbering of the `sts` files is continuous and starts
-from 1.
+It is important that the numbering of the `sts` files is continuous. The number of the first
+and last files are given by runtime parameters.
 If you are not interested in point interpolation the next 2 steps can be skipped.
 - Create the file `int_pos` using the Python API in `writer_int_pos.py`.
 This file will contain the locations of the points, to which the averaged data will
@@ -129,9 +129,9 @@ It can be read using the functions in `reader_int_fld.py` Python file.
 @param_list Parameters provided by pstat2d module (include file - \a PSTAT2D):
 |Varaible | Type |Runtime parameter | Description|
 |---------|------|------------------|------------|
-| pstat_crd_fnr | integer | _pstat2d:C2D_FNUM | Should be set to 1, this parameter is redundant|
 | pstat_amr_irnr | integer | _pstat2d:IOStep  | Nr. of inital refinements (AMR only) |
-| pstat_nfile | integer | _pstat2d:STS_NFILE  | Number of collected sts files |
+| pstat_ffile | integer | _pstat2d:STS_FFILE  | First sts file number|
+| pstat_nfile | integer | _pstat2d:STS_NFILE  | Last sts file number |
 | pstat_stime | float   | _pstat2d:STS_STIME  | Statistics starting time |
 | pstat_nstep | integer | _pstat2d:STS_NSTEP  | Number of steps between averaging in collected sts files |
 

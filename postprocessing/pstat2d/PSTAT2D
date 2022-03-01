@@ -25,13 +25,13 @@
       integer pstat_sec_id
       
 !     parameter section
-      integer pstat_crd_fnr       !< c2D file number
-      integer pstat_crd_fnr_id
       integer pstat_amr_irnr      !< number of initial refinemnts
       integer pstat_amr_irnr_id
-      integer pstat_nfile         !< stat file number
+      integer pstat_ffile         !< first stat file number
+      integer pstat_ffile_id
+      integer pstat_nfile         !< last stat file number
       integer pstat_nfile_id
-      real pstat_stime         !< Statistics starting time
+      real pstat_stime            !< statistics starting time
       integer pstat_stime_id
       integer pstat_nstep         !< stat file number
       integer pstat_nstep_id
@@ -70,8 +70,8 @@
 !     common block section
       common /pstati/ pstat_id, pstat_tmr_tot_id, pstat_tmr_ini_id,
      $     pstat_tmr_avg_id, pstat_tmr_der_id, pstat_tmr_int_id, 
-     $     pstat_crd_fnr, pstat_crd_fnr_id, pstat_amr_irnr, 
-     $     pstat_amr_irnr_id, pstat_nfile, pstat_nfile_id, 
+     $     pstat_amr_irnr, pstat_amr_irnr_id, pstat_ffile, 
+     $     pstat_ffile_id, pstat_nfile, pstat_nfile_id, 
      $     pstat_stime_id, pstat_nstep, pstat_nstep_id, pstat_nelg, 
      $     pstat_nel, pstat_gnel, pstat_lev, pstat_refl, pstat_elmod, 
      $     pstat_swfield, pstat_nptot, pstat_npt, pstat_npt1, 

@@ -71,12 +71,12 @@
       call rprm_sec_set_act(.true.,pstat_sec_id)
 
       ! register parameters
-      call rprm_rp_reg(pstat_crd_fnr_id,pstat_sec_id,'C2D_FNUM',
-     $     'c2D file number',rpar_int,1,0.0,.false.,' ')
       call rprm_rp_reg(pstat_amr_irnr_id,pstat_sec_id,'AMR_NREF',
      $ 'Nr. of initial refinemnt (AMR only)',rpar_int,1,0.0,.false.,' ')
+      call rprm_rp_reg(pstat_ffile_id,pstat_sec_id,'STS_FFILE',
+     $ 'First stat file number',rpar_int,1,0.0,.false.,' ')
       call rprm_rp_reg(pstat_nfile_id,pstat_sec_id,'STS_NFILE',
-     $ 'Number of stat files',rpar_int,1,0.0,.false.,' ')
+     $ 'Last stat file number',rpar_int,1,0.0,.false.,' ')
       call rprm_rp_reg(pstat_stime_id,pstat_sec_id,'STS_STIME',
      $ 'Statistics starting time',rpar_real,1,0.0,.false.,' ')
       call rprm_rp_reg(pstat_nstep_id,pstat_sec_id,'STS_NSTEP',
@@ -123,10 +123,10 @@
       ltim = dnekclock()
 
       ! get runtime parameters
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,pstat_crd_fnr_id,rpar_int)
-      pstat_crd_fnr = abs(itmp)
       call rprm_rp_get(itmp,rtmp,ltmp,ctmp,pstat_amr_irnr_id,rpar_int)
       pstat_amr_irnr = abs(itmp)
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,pstat_ffile_id,rpar_int)
+      pstat_ffile = abs(itmp)
       call rprm_rp_get(itmp,rtmp,ltmp,ctmp,pstat_nfile_id,rpar_int)
       pstat_nfile = abs(itmp)
       call rprm_rp_get(itmp,rtmp,ltmp,ctmp,pstat_stime_id,rpar_real)
@@ -149,7 +149,15 @@
       do il = 39,44
          pstat_swfield(il) = il
       enddo
-
+#ifdef AMR
+      ! in case we are dealing with amr mesh first generate the mesh
+      ! read element centre data
+      call mntr_log(pstat_id,lp_inf,'Updating 2D mesh structure')
+      call pstat2d_mfi_crd2D(pstat_ffile)
+      ! perform element ordering to get 2D mesh corresponing to 3D projected one
+      ! in case of AMR this performs refinemnt of 2D mesh as well
+      call pstat2d_mesh_amr()
+#endif
       ! everything is initialised
       pstat_ifinit=.true.
 
@@ -192,17 +200,6 @@
       ! functions
       real dnekclock
 !-----------------------------------------------------------------------
-      ! read element centre data
-      ltim = dnekclock()
-      call mntr_log(pstat_id,lp_inf,'Updating 2D mesh structure')
-      call pstat2d_mfi_crd2D
-      ltim = dnekclock() - ltim
-      call mntr_tmr_add(pstat_tmr_ini_id,1,ltim)
-
-      ! perform element ordering to get 2D mesh corresponing to 3D projected one
-      ! in case of AMR this performs refinemnt of 2D mesh as well
-      call pstat2d_mesh_manipulate
-
       ! read and average fields
       ltim = dnekclock()
       call mntr_log(pstat_id,lp_inf,'Field averaging')
@@ -227,9 +224,62 @@
       return
       end subroutine
 !=======================================================================
-!> @brief Manipulate mesh to find proper element ordering (in case of AMR refine)
+!> @brief Manipulate mesh to get proper AMR refinement
 !! @ingroup pstat2d
-      subroutine pstat2d_mesh_manipulate
+      subroutine pstat2d_mesh_amr
+      implicit none
+#ifdef AMR
+      include 'SIZE'
+      include 'PARALLEL'
+      include 'FRAMELP'
+      include 'PSTAT2D'
+
+      ! local variables
+      integer ierr
+      integer il, inf_cnt
+
+      ! functions
+      integer iglsum
+!-----------------------------------------------------------------------
+      ! reset amr level falg
+      do il = 1, lelt
+         pstat_refl(il) = 0
+      enddo
+
+      ! initial refinement
+      do il=1,pstat_amr_irnr
+         call amr_refinement()
+      enddo
+
+      ! infinit loop
+      inf_cnt = 0
+      do
+         ! get element mapping
+         call pstat2d_mesh_map(.true.)
+
+         ! perform refinement
+         call amr_refinement()
+
+         inf_cnt = inf_cnt + 1
+         if (inf_cnt.gt.99) call mntr_abort(pstat_id,
+     $     'Infinit loop too long; possible problem with mark check.')
+
+         pstat_elmod = iglsum(pstat_elmod,1)
+         if (nelgv.eq.pstat_nelg.and.pstat_elmod.eq.0) then
+            call mntr_logi(pstat_id,lp_prd,
+     $          'Finished refinement; cycles number :', inf_cnt)
+            exit
+         endif
+
+      enddo
+#endif
+      return
+      end subroutine
+!=======================================================================
+!> @brief Find mapping of sts mesh to the existing in the run
+!! @ingroup pstat2d
+!! @param[in] ifrref       flag to return after refinement mark
+      subroutine pstat2d_mesh_map(ifrref)
       implicit none
 
       include 'SIZE'
@@ -242,6 +292,9 @@
       ! global data structures
       integer mid,mp,nekcomm,nekgroup,nekreal
       common /nekmpi/ mid,mp,nekcomm,nekgroup,nekreal
+
+      ! argument list
+      logical ifrref
 
       ! local variables
       integer ierr
@@ -264,7 +317,7 @@
       integer idim, isdim
       parameter (idim=4, isdim = 4*lelt)
       integer isort(idim,isdim), ind(isdim), iwork(idim)
-      integer ipass, iseg, nseg, gnseg
+      integer ipass, iseg, nseg
       integer ninseg(lelt)    ! elements in segment
       logical ifseg(lelt)     ! segment borders
 
@@ -283,18 +336,6 @@
       data icalld /0/
 #endif
 !-----------------------------------------------------------------------
-#ifdef AMR
-      ! reset amr level falg
-      do il = 1, lelt
-         pstat_refl(il) = 0
-      enddo
-
-      ! initial refinement
-      do il=1,pstat_amr_irnr
-         call amr_refinement()
-      enddo
-#endif
-
       ! find the mapping of the 3D projected elements on the 2D mesh and refine
       tol     = 5e-13
       nt       = lx1*ly1*lz1*lelt
@@ -304,224 +345,202 @@
       nzf     = 2*lz1
       bb_t    = 0.01
 
-      ! infinit loop
-      inf_cnt = 0
-      do
-         ! start interpolation tool on given mesh
-         call fgslib_findpts_setup(ifpts,nekcomm,mp,ldim,
-     &                            xm1,ym1,zm1,lx1,ly1,lz1,
-     &                            nelt,nxf,nyf,nzf,bb_t,nt,nt,
-     &                            npt_max,tol)
-         ! identify elements
-         call fgslib_findpts(ifpts,rcode,1,
-     &                      proc,1,
-     &                      elid,1,
-     &                      rst,ldim,
-     &                      dist,1,
-     &                      pstat_cnt(1,1),ldim,
-     &                      pstat_cnt(2,1),ldim,
-     &                      pstat_cnt(ldim,1),ldim,pstat_nel)
-         ! close interpolation tool
-         call fgslib_findpts_free(ifpts)
+      ! start interpolation tool on given mesh
+      call fgslib_findpts_setup(ifpts,nekcomm,mp,ldim,xm1,ym1,zm1,
+     &     lx1,ly1,lz1,nelt,nxf,nyf,nzf,bb_t,nt,nt,npt_max,tol)
+      ! identify elements
+      call fgslib_findpts(ifpts,rcode,1,proc,1,elid,1,rst,ldim,
+     &     dist,1,pstat_cnt(1,1),ldim,pstat_cnt(2,1),ldim,
+     &     pstat_cnt(ldim,1),ldim,pstat_nel)
+      ! close interpolation tool
+      call fgslib_findpts_free(ifpts)
 
-         ! find problems with interpolation
-         nfail = 0
-         do il = 1,pstat_nel
-            ! check return code
-            if (rcode(il).eq.1) then
-               if (sqrt(dist(il)).gt.toldist) nfail = nfail + 1
-            elseif(rcode(il).eq.2) then
-               nfail = nfail + 1
-            endif
-         enddo
-         nfail = iglsum(nfail,1)
+      ! find problems with interpolation
+      nfail = 0
+      do il = 1,pstat_nel
+         ! check return code
+         if (rcode(il).eq.1) then
+            if (sqrt(dist(il)).gt.toldist) nfail = nfail + 1
+         elseif(rcode(il).eq.2) then
+            nfail = nfail + 1
+         endif
+      enddo
+      nfail = iglsum(nfail,1)
 
 #ifdef DEBUG
-         ! for testing
-         ! to output refinement
-         icalld = icalld+1
-         call io_file_freeid(iunit, ierr)
-         write(str1,'(i3.3)') NID
-         write(str2,'(i3.3)') icalld
-         open(unit=iunit,file='CRDfpts.txt'//str1//'i'//str2)
+      ! for testing
+      ! to output refinement
+      icalld = icalld+1
+      call io_file_freeid(iunit, ierr)
+      write(str1,'(i3.3)') NID
+      write(str2,'(i3.3)') icalld
+      open(unit=iunit,file='CRDfpts.txt'//str1//'i'//str2)
 
-         write(iunit,*) pstat_nelg, pstat_nel, nfail
-         do il=1,pstat_nel
-            write(iunit,*) il, pstat_gnel(il), proc(il), elid(il)+1,
-     &       rcode(il), dist(il), (rst(jl+(il-1)*ldim),jl=1,ldim)
-         enddo
+      write(iunit,*) pstat_nelg, pstat_nel, nfail
+      do il=1,pstat_nel
+         write(iunit,*) il, pstat_gnel(il), proc(il), elid(il)+1,
+     &    rcode(il), dist(il), (rst(jl+(il-1)*ldim),jl=1,ldim)
+      enddo
 
-         close(iunit)
+      close(iunit)
 #endif
 
-         if (nfail.gt.0) call mntr_abort(pstat_id,
-     $     'Elements not identified in pstat_mesh_manipulate')
+      if (nfail.gt.0) call mntr_abort(pstat_id,
+     $   'Elements not identified in pstat_mesh_map')
 
-         ! sort data
-         ! pack it first
-         do il=1,pstat_nel
-            isort(1,il) = proc(il)
-            isort(2,il) = elid(il) + 1 ! go from c to fortran count
-            isort(3,il) = pstat_lev(il)
-            isort(4,il) = pstat_gnel(il)
-         enddo
+      ! sort data
+      ! pack it first
+      do il=1,pstat_nel
+         isort(1,il) = proc(il)
+         isort(2,il) = elid(il) + 1 ! go from c to fortran count
+         isort(3,il) = pstat_gnel(il)
+#ifdef AMR
+         isort(4,il) = pstat_lev(il) ! max amr level value
+#else
+         isort(4,il) = 0
+#endif
+      enddo
 
-         !tupple sort
-         ! mark no section boundaries
-         do il=1,pstat_nel
-            ifseg(il) = .FALSE.
-         enddo
-         ! perform local sorting to identify unique set sorting by directions
-         ! first run => whole set is one segment
-         nseg        = 1
-         ifseg(1)    = .TRUE.
-         ninseg(1)   = pstat_nel
-         ! Multiple passes eliminates false positives
-         do ipass=1,2
-            do jl=1,2          ! Sort within each segment (proc, element nr)
+      !tupple sort
+      ! mark no section boundaries
+      do il=1,pstat_nel
+         ifseg(il) = .FALSE.
+      enddo
+      ! perform local sorting to identify unique set sorting by directions
+      ! first run => whole set is one segment
+      nseg        = 1
+      ifseg(1)    = .TRUE.
+      ninseg(1)   = pstat_nel
+      ! Multiple passes eliminates false positives
+      do ipass=1,2
+         do jl=1,2          ! Sort within each segment (proc, element nr)
+            il=1
+            do iseg=1,nseg
+               call ituple_sort(isort(1,il),idim,ninseg(iseg),jl,1,
+     $           ind,iwork)     ! key = jl
+               il = il + ninseg(iseg)
+            enddo
 
-               il=1
-               do iseg=1,nseg
-                  call ituple_sort(isort(1,il),idim,ninseg(iseg),jl,1,
-     $              ind,iwork)     ! key = jl
-                  il = il + ninseg(iseg)
-               enddo
+            do il=2,pstat_nel
+               ! find segments borders
+               if (isort(jl,il).ne.isort(jl,il-1)) ifseg(il)=.TRUE.
+            enddo
 
-               do il=2,pstat_nel
-                  ! find segments borders
-                  if (isort(jl,il).ne.isort(jl,il-1)) ifseg(il)=.TRUE.
-               enddo
-
-               ! Count up number of different segments
-               nseg = 0
-               do il=1,pstat_nel
+            ! Count up number of different segments
+            nseg = 0
+            do il=1,pstat_nel
                if (ifseg(il)) then
                   nseg = nseg+1
                   ninseg(nseg) = 1
                else
                   ninseg(nseg) = ninseg(nseg) + 1
                endif
-               enddo
-            enddo                  ! jl=1,2
-         enddo                     ! ipass=1,2
-         ! sorting end
-
-         ! check global number of segments
-         gnseg = iglsum(nseg,1)
-
-         ! remove multiplicities
-         jl = 1
-         do iseg=1,nseg
-            do kl=1,idim
-               isort(kl,iseg) = isort(kl,jl)
             enddo
-            do il=jl+1,jl + ninseg(iseg)
-               if(isort(3,iseg).lt.isort(3,jl)) then
-                  do kl=1,idim
-                     isort(kl,iseg) = isort(kl,il)
-                  enddo
-               endif
-            enddo
-            jl = jl + ninseg(iseg)
+         enddo                  ! jl=1,2
+      enddo                     ! ipass=1,2
+      ! sorting end
+
+      ! remove multiplicities
+      jl = 1
+      do iseg=1,nseg
+         do kl=1,idim
+            isort(kl,iseg) = isort(kl,jl)
          enddo
-
-#ifdef DEBUG
-         ! for testing
-         ! to output refinement
-         call io_file_freeid(iunit, ierr)
-         write(str1,'(i3.3)') NID
-         write(str2,'(i3.3)') icalld
-         open(unit=iunit,file='CRDsort.txt'//str1//'i'//str2)
-
-         write(iunit,*) nseg
-
-         do il=1,nseg
-            write(iunit,*) il, ninseg(il), (isort(jl,il),jl=1,idim)
-         enddo
-
-         close(iunit)
-#endif
-
-         ! transfer and sort data
-         call fgslib_crystal_ituple_transfer
-     &      (cr_h,isort,idim,nseg,isdim,1)
-         il = 2
-         call fgslib_crystal_ituple_sort
-     &      (cr_h,isort,idim,nseg,il,1)
-
-         ! remove duplicates
-         iseg = 1
-         do il = 2, nseg
-            if (isort(2,iseg).eq.isort(2,il)) then
-               if (isort(3,iseg).lt.isort(3,il)) then
-                  do kl=1,idim
-                     isort(kl,iseg) = isort(kl,il)
-                  enddo
-               endif
-            else
-               iseg = iseg + 1
-               if (iseg.ne.il) then
-                  do kl=1,idim
-                     isort(kl,iseg) = isort(kl,il)
-                  enddo
-               endif
+#ifdef AMR
+         do il=jl+1,jl + ninseg(iseg)
+            if(isort(4,iseg).lt.isort(4,il)) then
+               isort(3,iseg) = isort(3,il)
+               isort(4,iseg) = isort(4,il)
             endif
          enddo
-         nseg = iseg
+#endif
+         jl = jl + ninseg(iseg)
+      enddo
 
 #ifdef DEBUG
-         ! for testing
-         ! to output refinement
-         call io_file_freeid(iunit, ierr)
-         write(str1,'(i3.3)') NID
-         write(str2,'(i3.3)') icalld
-         open(unit=iunit,file='CRDtrans.txt'//str1//'i'//str2)
+      ! for testing
+      ! to output refinement
+      call io_file_freeid(iunit, ierr)
+      write(str1,'(i3.3)') NID
+      write(str2,'(i3.3)') icalld
+      open(unit=iunit,file='CRDsort.txt'//str1//'i'//str2)
 
-         write(iunit,*) nseg, nelv
+      write(iunit,*) nseg
 
-         do il=1,nseg
-            write(iunit,*) il, (isort(jl,il),jl=1,idim)
-         enddo
+      do il=1,nseg
+         write(iunit,*) il, ninseg(il), (isort(jl,il),jl=1,idim)
+      enddo
 
-         close(iunit)
+      close(iunit)
 #endif
 
-         ! check consistency
-         if (nseg.ne.nelt) then
-            ierr = 1
+      ! transfer and sort data
+      call fgslib_crystal_ituple_transfer(cr_h,isort,idim,nseg,isdim,1)
+      il = 2
+      call fgslib_crystal_ituple_sort(cr_h,isort,idim,nseg,il,1)
+
+      ! remove duplicates
+      iseg = 1
+      do il = 2, nseg
+         if (isort(2,iseg).eq.isort(2,il)) then
+#ifdef AMR
+            if (isort(4,iseg).lt.isort(4,il)) then
+               isort(3,iseg) = isort(3,il)
+               isort(4,iseg) = isort(4,il)
+            endif
+#endif
          else
-            ierr = 0
+            iseg = iseg + 1
+            if (iseg.ne.il) then
+               do kl=1,idim
+                  isort(kl,iseg) = isort(kl,il)
+               enddo
+             endif
          endif
-         call mntr_check_abort(pstat_id,ierr,
-     $     'Inconsistent segment number in pstat_mesh_manipulate')
+      enddo
+      nseg = iseg
+
+#ifdef DEBUG
+      ! for testing
+      ! to output refinement
+      call io_file_freeid(iunit, ierr)
+      write(str1,'(i3.3)') NID
+      write(str2,'(i3.3)') icalld
+      open(unit=iunit,file='CRDtrans.txt'//str1//'i'//str2)
+
+      write(iunit,*) nseg, nelv
+
+      do il=1,nseg
+         write(iunit,*) il, (isort(jl,il),jl=1,idim)
+      enddo
+
+      close(iunit)
+#endif
+
+      ! check consistency
+      if (nseg.ne.nelt) then
+         ierr = 1
+      else
+         ierr = 0
+      endif
+      call mntr_check_abort(pstat_id,ierr,
+     $     'Inconsistent segment number in pstat_mesh_map')
 
 #ifdef AMR
+      if (ifrref) then
          ! transfer data for refinement mark
          do il = 1, nseg
-            pstat_refl(isort(2,il)) = isort(3,il)
+            pstat_refl(isort(2,il)) = isort(4,il)
          enddo
 
-         ! perform refinement
-         call amr_refinement()
-
-         inf_cnt = inf_cnt + 1
-         if (inf_cnt.gt.99) call mntr_abort(pstat_id,
-     $     'Infinit loop too long; possible problem with mark check.')
-
-         pstat_elmod = iglsum(pstat_elmod,1)
-         if (gnseg.eq.pstat_nelg.and.pstat_elmod.eq.0) then
-            call mntr_logi(pstat_id,lp_prd,
-     $          'Finished refinement; cycles number :', inf_cnt)
-            exit
-         endif
-#else
-         exit
+         ! for refinement return here
+         return
+      endif
 #endif
-      enddo
 
       ! set global element number for transfer
       do il = 1, nelt
-         pstat_gnel(isort(2,il)) = isort(4,il)
+         pstat_gnel(isort(2,il)) = isort(3,il)
       enddo
 
       ! notify element owners
@@ -537,11 +556,12 @@
       call fgslib_crystal_ituple_transfer(cr_h,isort,idim,iseg,isdim,1)
       ! sanity check
       ierr = 0
-      if (iseg.ne.nelt) ierr = 1
+      if (iseg.ne.nelt) ierr = 1 !!! test for good elements?
       call mntr_check_abort(pstat_id,ierr,
-     $     'Inconsistent element number in pstat_mesh_manipulate')
+     $     'Inconsistent element number in pstat_mesh_map')
       il = 2
       call fgslib_crystal_ituple_sort(cr_h,isort,idim,iseg,il,1)
+
 
 #ifdef DEBUG
       ! sanity check
@@ -550,13 +570,13 @@
          if (isort(3,il).ne.gllel(isort(4,il))) ierr = 1
       enddo
       call mntr_check_abort(pstat_id,ierr,
-     $  'Inconsistent element transfer number in pstat_mesh_manipulat')
+     $  'Inconsistent element transfer number in pstat_mesh_map')
       ierr = 0
       do il=1,iseg
          if (isort(1,il).ne.gllnid(isort(4,il))) ierr = 1
       enddo
       call mntr_check_abort(pstat_id,ierr,
-     $  'Inconsistent process transfer number in pstat_mesh_manipulat')
+     $  'Inconsistent process transfer number in pstat_mesh_map')
 #endif
 
       ! save transfer data
@@ -581,6 +601,7 @@
 #endif
 
 #undef DEBUG
+
       return
       end subroutine
 !=======================================================================
@@ -745,7 +766,14 @@
       nvec = lx1*ly1*nelt
 
       ! loop over stat files
-      do il = 1,pstat_nfile
+      do il = pstat_ffile, pstat_nfile
+
+         call mntr_logi(pstat_id,lp_inf,'Opening sts file nr=',il)
+
+         ! read cenre data to generate proper sorting
+         call pstat2d_mfi_crd2D(il)
+         ! get element mapping
+         call pstat2d_mesh_map(.false.)
 
          call io_mfo_fname(fname,bname,prefix,ierr)
          write(str,'(i5.5)') il

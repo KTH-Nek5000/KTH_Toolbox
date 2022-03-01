@@ -33,7 +33,9 @@ TOOLBOX_INC+=" -I"${IO_TOOLS_SRC}
 
 # Statistics post-processing include file has to be copied to setup directory
 export PSTAT2D_SRC=${POSTPR_SRC}"/pstat2d"
+TOOLBOX_INC+=" -I"${PSTAT2D_SRC}
 export PSTAT3D_SRC=${POSTPR_SRC}"/pstat3d"
+TOOLBOX_INC+=" -I"${PSTAT3D_SRC}
 
 export BASEFLOW_SRC=${TOOLS_SRC}"/baseflow"
 # Statistics include file has to be copied to setup directory
