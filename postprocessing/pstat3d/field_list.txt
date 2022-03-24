@@ -16,6 +16,9 @@ for exact definition
 "k" indicates the corresponding term in the kinetic energy equation, e.g.
 Pk - production of k.
 
+Please observe that <uu> stands for <u'u'> since the mean has been already subtracted.
+
+
 - a01
     <u>
     <v>
