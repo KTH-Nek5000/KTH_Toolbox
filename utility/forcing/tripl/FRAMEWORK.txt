@@ -181,8 +181,8 @@ before compilation of the code.
 |Varaible | Type | Runtime parameter | Default value | Description |
 |---------|------|-------------------|---------------|-------------|
 |tripl_nline      | integer | _tripl:nline | 0  | Number of tripping lines |
-|tripl_tiamp      | real | _tripl:tiamp   | 0.0 | Time independent amplitude |
-|tripl_tdamp      | real | _tripl:tdamp   | 0.0 | Time dependent amplitude   |
+|tripl_tiamp(il)  | real | _tripl:tiamp'il' | 0.0 | Time independent amplitude |
+|tripl_tdamp(il)  | real | _tripl:tdamp'il' | 0.0 | Time dependent amplitude   |
 |tripl_spos(1,il) | real | _tripl:sposx'il' | 0.0 | Starting point X of 'il' line |
 |tripl_spos(2,il) | real | _tripl:sposy'il' | 0.0 | Starting point Y of 'il' line |
 |tripl_spos(3,il) | real | _tripl:sposz'il' | 0.0 | Starting point Z of 'il' line |

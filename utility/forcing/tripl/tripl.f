@@ -63,14 +63,14 @@
       call rprm_rp_reg(tripl_nline_id,tripl_sec_id,'NLINE',
      $     'Number of tripping lines',rpar_int,0,0.0,.false.,' ')
 
-      call rprm_rp_reg(tripl_tiamp_id,tripl_sec_id,'TIAMP',
-     $     'Time independent amplitude',rpar_real,0,0.0,.false.,' ')
-
-      call rprm_rp_reg(tripl_tdamp_id,tripl_sec_id,'TDAMP',
-     $     'Time dependent amplitude',rpar_real,0,0.0,.false.,' ')
-
       do il=1, tripl_nline_max
          write(str,'(I2.2)') il
+
+         call rprm_rp_reg(tripl_tiamp_id(il),tripl_sec_id,'TIAMP'//str,
+     $     'Time independent amplitude',rpar_real,0,0.0,.false.,' ')
+
+         call rprm_rp_reg(tripl_tdamp_id(il),tripl_sec_id,'TDAMP'//str,
+     $     'Time dependent amplitude',rpar_real,0,0.0,.false.,' ')
 
          call rprm_rp_reg(tripl_spos_id(1,il),tripl_sec_id,'SPOSX'//str,
      $     'Starting point X',rpar_real,0,0.0,.false.,' ')
@@ -166,11 +166,15 @@
       ! get runtime parameters
       call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tripl_nline_id,rpar_int)
       tripl_nline = itmp
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tripl_tiamp_id,rpar_real)
-      tripl_tiamp = rtmp
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tripl_tdamp_id,rpar_real)
-      tripl_tdamp = rtmp
+
       do il=1,tripl_nline
+         call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tripl_tiamp_id(il),
+     $        rpar_real)
+         tripl_tiamp(il) = rtmp
+         call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tripl_tdamp_id(il),
+     $        rpar_real)
+         tripl_tdamp(il) = rtmp
+
          do jl=1,LDIM
             call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tripl_spos_id(jl,il),
      $           rpar_real)
@@ -293,6 +297,8 @@
       enddo
       
       ! generate random phases (time independent and time dependent)
+      il = tripl_nmode_max*tripl_nset_max*tripl_nline_max
+      call rzero(tripl_rphs,il)
       call tripl_rphs_get
 
       ! get forcing
@@ -571,13 +577,13 @@
 #endif
 !-----------------------------------------------------------------------
       ! time independent part
-      if (tripl_tiamp.gt.0.0.and..not.tripl_ifinit) then
-         do il = 1, tripl_nline
+      do il = 1, tripl_nline
+         if (tripl_tiamp(il).gt.0.0.and..not.tripl_ifinit) then
             do jl=1, tripl_nmode(il)
                tripl_rphs(jl,1,il) = 2.0*pi*tripl_ran2(il)
-            enddo
-         enddo
-      endif
+            end do
+         end if
+      end do
 
       ! time dependent part
       do il = 1, tripl_nline
@@ -703,12 +709,14 @@
 !-----------------------------------------------------------------------
       ! reset all
       if (ifreset) then
-         if (tripl_tiamp.gt.0.0) then
-            istart = 1
-         else
-            istart = 2
-         endif
          do il= 1, tripl_nline
+            ! do we include time independent part?
+            if (tripl_tiamp(il).gt.0.0) then
+               istart = 1
+            else
+               istart = 2
+            endif
+            ! get forcing
             do jl = istart, tripl_nset_max
                call rzero(tripl_frcs(1,jl,il),tripl_npoint(il))
                do kl= 1, tripl_npoint(il)
@@ -720,13 +728,11 @@
                   enddo
                enddo
             enddo
+            ! rescale time independent part
+            if (tripl_tiamp(il).gt.0.0) call cmult(tripl_frcs(1,1,il),
+     $            tripl_tiamp(il),tripl_npoint(il))
          enddo
-         ! rescale time independent part
-         if (tripl_tiamp.gt.0.0) then
-            do il= 1, tripl_nline
-             call cmult(tripl_frcs(1,1,il),tripl_tiamp,tripl_npoint(il))
-            enddo
-         endif
+
       else
          ! reset only time dependent part if needed
          ifntdt_dif = .FALSE.
@@ -768,15 +774,14 @@
       endif
       
       ! get tripping for current time step
-      if (tripl_tiamp.gt.0.0) then
-         do il= 1, tripl_nline
-         call copy(tripl_ftrp(1,il),tripl_frcs(1,1,il),tripl_npoint(il))
-         enddo
-      else
-         do il= 1, tripl_nline
+      do il= 1, tripl_nline
+         if (tripl_tiamp(il).gt.0.0) then
+            call copy(tripl_ftrp(1,il),tripl_frcs(1,1,il),
+     $           tripl_npoint(il))
+         else
             call rzero(tripl_ftrp(1,il),tripl_npoint(il))
-         enddo
-      endif
+         end if
+      end do
       ! interpolation in time
       do il = 1, tripl_nline
          theta0= time/tripl_tdt(il)-real(tripl_ntdt(il))
@@ -785,7 +790,7 @@
             !theta0=theta0*theta0*theta0*(10.0+(6.0*theta0-15.0)*theta0)
             do jl= 1, tripl_npoint(il)
                tripl_ftrp(jl,il) = tripl_ftrp(jl,il) +
-     $              tripl_tdamp*((1.0-theta0)*tripl_frcs(jl,3,il) +
+     $              tripl_tdamp(il)*((1.0-theta0)*tripl_frcs(jl,3,il) +
      $              theta0*tripl_frcs(jl,2,il))
             enddo
          else
@@ -794,7 +799,7 @@
             !theta0=theta0*theta0*theta0*(10.0+(6.0*theta0-15.0)*theta0)
             do jl= 1, tripl_npoint(il)
                tripl_ftrp(jl,il) = tripl_ftrp(jl,il) +
-     $              tripl_tdamp*((1.0-theta0)*tripl_frcs(jl,4,il) +
+     $              tripl_tdamp(il)*((1.0-theta0)*tripl_frcs(jl,4,il) +
      $              theta0*tripl_frcs(jl,3,il))
             enddo
          endif
