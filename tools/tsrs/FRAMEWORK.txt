@@ -8,7 +8,7 @@
 
 @details 
 This set of routines performs spectral interpolation of the velocity, pressure and vorticity fileds on a set of points and 
-writes the in a binary file. 
+writes them in a binary file. 
 @todo This have to be completed
 
 @todo Rewrite pts_redistribute.f
@@ -104,7 +104,8 @@ writes the in a binary file.
 @param_list Parameters provided by tsrs module (include file - \a TSRSD):
 |Varaible | Type |Runtime parameter | Description|
 |---------|------|------------------|------------|
-| tsrs_smpstep | integer | _tsrs:SmpStep | frequency of sampling |
+| tsrs_tstart | real | _tsrs:tStart | sampling starting time |
+| tsrs_tint | real | _tsrs:tInt | sampling time interval |
 | tsrs_skstep | integer | _tsrs:SkStep | skipped initial steps |
 
 @mod_param_example

@@ -75,11 +75,12 @@
       call rprm_sec_set_act(.true.,tsrs_sec_id)
 
       ! register parameters
-      call rprm_rp_reg(tsrs_smpstep_id,tsrs_sec_id,'SMPSTEP',
-     $     'Frequency of sampling',rpar_int,10,0.0,.false.,' ')
-
+      call rprm_rp_reg(tsrs_tstart_id,tsrs_sec_id,'TSTART',
+     $     'Sampling starting time',rpar_real,0,1.0,.false.,' ')
+      call rprm_rp_reg(tsrs_tint_id,tsrs_sec_id,'TINT',
+     $     'Sampling time interval',rpar_real,0,0.05,.false.,' ')
       call rprm_rp_reg(tsrs_skstep_id,tsrs_sec_id,'SKSTEP',
-     $     'Skipped initial steps',rpar_int,10,0.0,.false.,' ')
+     $     'Skipped initial steps',rpar_int,0,0.0,.false.,' ')
 
       ! set initialisation flag
       tsrs_ifinit=.false.
@@ -132,11 +133,22 @@
       ltim = dnekclock()
 
       ! get runtime parameters
-      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tsrs_smpstep_id,rpar_int)
-      tsrs_smpstep = itmp
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tsrs_tstart_id,rpar_real)
+      tsrs_tstart = rtmp
+
+      call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tsrs_tint_id,rpar_real)
+      tsrs_tint = rtmp
 
       call rprm_rp_get(itmp,rtmp,ltmp,ctmp,tsrs_skstep_id,rpar_int)
       tsrs_skstep = itmp
+
+      ! initialise time of the next sampling
+      if (time.gt.tsrs_tstart) then
+        itmp = floor((time - tsrs_tstart)/tsrs_tint)
+        tsrs_stime = tsrs_tstart + (itmp+1)*tsrs_tint
+      else
+        tsrs_stime = tsrs_tstart
+      end if
 
       ! initialise findpts
       ntot = lx1*ly1*lz1*lelt 
@@ -213,36 +225,67 @@
 
       include 'SIZE'
       include 'TSTEP'
+      include 'SOLN'
+      include 'FRAMELP'
       include 'TSRSD'
 
       ! argument list
       logical ifsave
 
       ! local variables
-      integer itmp
+      integer ntot
+      real alp, bet
+      logical ifapp
 
       ! simple timing
       real ltim
-
-      logical ifapp
 
       ! functions
       real dnekclock
 !-----------------------------------------------------------------------
       ! skip initial steps
       if (ISTEP.gt.tsrs_skstep) then
-        itmp = ISTEP - tsrs_skstep
-
         ! sample fields
-        if (mod(itmp,tsrs_smpstep).eq.0) then
-           call tsrs_get()
-        endif
-        ! is I/O required
-        if (ifsave) then
-           ifapp = .FALSE.
-           call tsrs_buffer_save(ifapp, ifsave)
-        endif
-      endif
+        if (time.ge.tsrs_stime) then
+          call mntr_log(tsrs_id,lp_prd,'Sampling data')
+          ! current sample for linear interpolation
+          call tsrs_get()
+          ! save it
+          ntot = tsrs_nfld*tsrs_npts
+          call copy(tsrs_sfld,tsrs_fld,ntot)
+          ! previous sample for linear interpolation
+          ntot = lx2*ly2*lz2*nelv
+          call copy(tsrs_pr,pr,ntot)
+          call copy(pr,prlag,ntot)
+          call opcopy(tsrs_vel(1,1),tsrs_vel(1,2),tsrs_vel(1,ldim),
+     $         vx,vy,vz)
+          call opcopy(vx,vy,vz,vxlag,vylag,vzlag)
+          call tsrs_get()
+          ! restore data
+          call copy(pr,tsrs_pr,ntot)
+          call opcopy(vx,vy,vz,tsrs_vel(1,1),tsrs_vel(1,2),
+     $         tsrs_vel(1,ldim))
+          ! linear interpolation
+          alp = (time-tsrs_stime)/dt
+          bet = 1.0 - alp
+          ntot = tsrs_nfld*tsrs_npts
+          call add2sxy(tsrs_fld,alp,tsrs_sfld,bet,ntot)
+          ! append the buffer
+          ifapp = .TRUE.
+          call tsrs_buffer_save(ifapp, ifsave)
+          ! update sampling time
+          tsrs_stime = tsrs_stime + tsrs_tint
+        else
+          ! is I/O required
+          if (ifsave) then
+            ifapp = .FALSE.
+            call tsrs_buffer_save(ifapp, ifsave)
+          end if
+        end if
+      else if (ISTEP.eq.tsrs_skstep) then
+        ! correct sampling time; necessary because speciffic way of nek restart
+        if (time.ge.tsrs_stime) tsrs_stime = tsrs_stime + tsrs_tint
+      end if
       
       return
       end subroutine
@@ -251,6 +294,7 @@
 !! @ingroup tsrs
 !! @details This routine performs interpolation on set of points, buffering
 !!     and file writing.
+!! @remark This routine uses global scratch space \a SCRMG, \a SCRUZ, \a SCRNS, \a SCRSF
       subroutine tsrs_get()
       implicit none
 
@@ -272,7 +316,6 @@
 
       ! local variables
       real ltim
-      logical ifapp, ifsave
 
       ! functions
       real dnekclock
@@ -291,10 +334,6 @@
       call tsrs_interpolate(tmpvel,slvel,tmppr)
       ltim = dnekclock() - ltim
       call mntr_tmr_add(tsrs_tmr_int_id,1,ltim)
-
-      ifapp = .TRUE.
-      ifsave = .FALSE.
-      call tsrs_buffer_save(ifapp, ifsave)
 
       return
       end subroutine
@@ -568,7 +607,6 @@
       implicit none
 
       include 'SIZE'
-      include 'TSTEP'
       include 'TSRSD'
 
       ! global memory space
@@ -594,7 +632,7 @@
          tsrs_ntsnap = tsrs_ntsnap + 1
          ntot = tsrs_nfld*tsrs_npts
          call copy(tsrs_buff(1,1,tsrs_ntsnap),tsrs_fld,ntot)
-         tsrs_tmlist(tsrs_ntsnap) = time
+         tsrs_tmlist(tsrs_ntsnap) = tsrs_stime
          ltim = dnekclock() - ltim
          call mntr_tmr_add(tsrs_tmr_bfr_id,1,ltim)
       endif
