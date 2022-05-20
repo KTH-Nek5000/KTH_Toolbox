@@ -36,9 +36,11 @@
       integer nelBl             ! store global nelB
 
       integer*8 offs0, offs     ! offset      
-      integer*8 stride,strideB  ! stride
+      integer*8 stride,stridebt,stridebf  ! stride
 
       integer ioflds            ! fields count
+
+      integer wdsizet, wdsizef  ! precission of writing coordinates/time and fields
 
 !     byte sum
       real dnbyte
@@ -58,9 +60,11 @@
       nelBl = NELB
       NELB = nptsB
 
-      ! force double precission
+      ! force double precission for coordinates and time, but single for fileds
       wdsizol = WDSIZO
-      WDSIZO = WDSIZE
+      wdsizet = WDSIZE
+      wdsizef = 4
+      WDSIZO = wdsizet
 
       ! open files on i/o nodes
       prefix='pts'
@@ -70,21 +74,22 @@
      $     'Error openning file')
 
       ! write header
-      call tsrs_mfo_write_hdr()
+      call tsrs_mfo_write_hdr(wdsizet,wdsizef)
 
       ! initial offset: header, test pattern, tiem list, global ordering
       offs0 = iheadersize + 4 + wdsizo*tsrs_ntsnap + isize*tsrs_nptot
       offs = offs0
       ! stride
-      strideb = nelb * wdsizo
-      stride  = tsrs_nptot * wdsizo
+      stridebt = nelb * wdsizet
+      stridebf = nelb * wdsizef
+      stride  = tsrs_nptot * wdsizet
 
       ! count fields
       ioflds = 0
 
       ! write coordinates in a single call
       ! offset
-      offs = offs0 + stride*ioflds + strideb*ndim
+      offs = offs0 + stride*ioflds + stridebt*ndim
       call byte_set_view(offs,ifh_mbyte)
       itmp = tsrs_npts*ndim
       call tsrs_mfo_outs(tsrs_pts,itmp,ierr)
@@ -93,8 +98,9 @@
       ioflds = ioflds + ndim
 
       ! write fields in a single call
+      WDSIZO = wdsizef
       ! offset
-      offs = offs0 + stride*ioflds + strideB*tsrs_nfld*tsrs_ntsnap
+      offs = offs0 + stride*ioflds + stridebf*tsrs_nfld*tsrs_ntsnap
       call byte_set_view(offs,ifh_mbyte)
       itmp = tsrs_npts*tsrs_nfld*tsrs_ntsnap
       call tsrs_mfo_outs(bff,itmp,ierr)
@@ -117,6 +123,7 @@
       tio = dnekclock_sync()-tiostart
       if (tio.le.0) tio=1.
 
+      ! this is not exact right now as there are different real precisons
       dnbyte = glsum(dnbyte,1)
       dnbyte = dnbyte + iHeaderSize + 4. + wdsizo * tsrs_ntsnap +
      $     isize*tsrs_nptot
@@ -139,7 +146,9 @@
 !> @brief Write file header 
 !! @ingroup tsrs
 !! @details This routine is based on mfo_write_hdr adopted for point data
-      subroutine tsrs_mfo_write_hdr()
+!! @param[in]   wdsizet   writing precision for position and time
+!! @param[in]   wdsizef   writing precision for fileds
+      subroutine tsrs_mfo_write_hdr(wdsizet, wdsizef)
       implicit none
 
       include 'SIZE'
@@ -148,6 +157,9 @@
       include 'PARALLEL'
       include 'TSTEP'
       include 'TSRSD'
+
+      ! argument list
+      integer wdsizet, wdsizef
 
       ! local variables
       integer ierr              ! error flag
@@ -195,10 +207,10 @@
       if(nid.eq.pid0) then
          call blank(hdr,132)    
  
-         write(hdr,1) wdsizo,ldim,nelo,tsrs_nptot,tsrs_ntsnap,
+         write(hdr,1) wdsizet,wdsizef,ldim,nelo,tsrs_nptot,tsrs_ntsnap,
      $        tsrs_nfld,time,fid0,nfileoo
- 1       format('#std',1x,i1,1x,i1,1x,i10,1x,i10,1x,i10,1x,i4,1x,e20.13,
-     $        1x,i6,1x,i6)
+ 1       format('#std',1x,i1,1x,i1,1x,i1,1x,i10,1x,i10,1x,i10,1x,i4,1x,
+     $        e20.13,1x,i6,1x,i6)
 
          ! write test pattern for byte swap
          test_pattern = 6.54321
