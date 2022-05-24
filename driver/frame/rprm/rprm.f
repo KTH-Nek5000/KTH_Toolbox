@@ -521,6 +521,7 @@
          ! check if parameter name is already registered
          do il=1,rprm_par_mpos
             if (rprm_par_id(rprm_par_mark,il).gt.0.and.
+     $          rprm_par_id(rprm_par_mark,il).eq.mid.and.
      $          rprm_par_name(il).eq.lname) then
                ipos = -il
                exit
