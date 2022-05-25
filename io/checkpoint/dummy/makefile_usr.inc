@@ -1,1 +1,1 @@
-$(OBJDIR)/chkptd.o          :$(CHKPTDMM_SRC)/chkptd.f;               $(F77) -c $(FL2) $< -o $@
+$(OBJDIR)/chkptd.o          :$(CHKPTDMM_SRC)/chkptd.f;               $(FC) -c $(FL2) $< -o $@

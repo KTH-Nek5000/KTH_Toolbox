@@ -1,1 +1,1 @@
-$(OBJDIR)/sfd.o             :$(SFD_SRC)/sfd.f;                       $(F77) -c $(FL2) $< -o $@
+$(OBJDIR)/sfd.o             :$(SFD_SRC)/sfd.f;                       $(FC) -c $(FL2) $< -o $@

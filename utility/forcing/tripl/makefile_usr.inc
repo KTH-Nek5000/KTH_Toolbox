@@ -1,1 +1,1 @@
-$(OBJDIR)/tripl.o           :$(TRIPL_SRC)/tripl.f ./TRIPLD;      $(F77) -c $(FL2) $< -o $@
+$(OBJDIR)/tripl.o           :$(TRIPL_SRC)/tripl.f ./TRIPLD;      $(FC) -c $(FL2) $< -o $@
