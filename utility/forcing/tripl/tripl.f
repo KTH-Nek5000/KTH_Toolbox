@@ -153,6 +153,8 @@
       ! functions
       real dnekclock
 !-----------------------------------------------------------------------
+      call mntr_log(tripl_id,lp_inf,'Initialisation started')
+
       ! check if the module was already initialised
       if (tripl_ifinit) then
          call mntr_warn(tripl_id,
@@ -285,9 +287,11 @@
             endif
          enddo
       enddo
+      call mntr_log(tripl_id,lp_inf,'Local base calculated')
 
       ! get 1D projection and array mapping
       call tripl_1dprj
+      call mntr_log(tripl_id,lp_inf,'1D projection finalised')
 
       ! initialise random generator seed and number of time intervals
       do il=1,tripl_nline
@@ -300,12 +304,17 @@
       il = tripl_nmode_max*tripl_nset_max*tripl_nline_max
       call rzero(tripl_rphs,il)
       call tripl_rphs_get
+      call mntr_log(tripl_id,lp_inf,'Random phases calculated')
 
       ! get forcing
       call tripl_frcs_get(.true.)
+      call mntr_log(tripl_id,lp_inf,'Forcing calculated')
+
       
       ! everything is initialised
       tripl_ifinit=.true.
+
+      call mntr_log(tripl_id,lp_inf,'Initialisation finalised')
 
       ! timing
       ltim = dnekclock() - ltim

@@ -117,11 +117,13 @@
       integer npt_max, nxf, nyf, nzf
       real ltim
       real tol, bb_t            ! interpolation tolerance and relative size to expand bounding boxes by
-      parameter (tol = 5.0E-13, bb_t = 0.1)
+      parameter (tol = 5.0E-13, bb_t = 0.01)
 
       ! functions
       real dnekclock
 !-----------------------------------------------------------------------
+      call mntr_log(tsrs_id,lp_inf,'Initialisation started')
+
       ! check if the module was already initialised
       if (tsrs_ifinit) then
          call mntr_warn(tsrs_id,
@@ -149,9 +151,10 @@
       else
         tsrs_stime = tsrs_tstart
       end if
+      call mntr_log(tsrs_id,lp_inf,'Sampling time initialised')
 
       ! initialise findpts
-      ntot = lx1*ly1*lz1*lelt 
+      ntot = lx1*ly1*lz1*lelt
       npt_max = 256
       nxf = 2*lx1 ! fine mesh for bb-test
       nyf = 2*ly1
@@ -160,9 +163,11 @@
       call fgslib_findpts_setup(tsrs_handle,nekcomm,npp,ldim,
      $     xm1,ym1,zm1,nx1,ny1,nz1,nelt,nxf,nyf,nzf,bb_t,ntot,ntot,
      $     npt_max,tol)
+      call mntr_log(tsrs_id,lp_inf,'Interpolation tool started')
 
       ! read and redistribute points among processors
       call tsrs_read_redistribute()
+      call mntr_log(tsrs_id,lp_inf,'Points redistributed')
 
       ! clean the buffer
       tsrs_ntsnap = 0
@@ -172,6 +177,8 @@
 
       ! everything is initialised
       tsrs_ifinit=.true.
+
+      call mntr_log(tsrs_id,lp_inf,'Initialisation finalised')
 
       ! timing
       ltim = dnekclock() - ltim
@@ -392,9 +399,13 @@
       do il = 1,tsrs_npts
          ! check return code
          if (tsrs_rcode(il).eq.1) then
-            if (sqrt(tsrs_dist(il)).gt.toldist) nfail = nfail + 1
+            if (sqrt(tsrs_dist(il)).gt.toldist) then
+              nfail = nfail + 1
+              !write(*,*) 'TSTR int', nid, tsrs_pts(:,il),tsrs_rcode(il)
+            end if
          elseif(tsrs_rcode(il).eq.2) then
             nfail = nfail + 1
+            !write(*,*) 'TSTR int', nid, tsrs_pts(:,il),tsrs_rcode(il)
          endif
       enddo
       nfail = iglsum(nfail,1)

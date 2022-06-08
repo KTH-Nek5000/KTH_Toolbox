@@ -125,6 +125,8 @@
       ! functions
       real dnekclock
 !-----------------------------------------------------------------------
+      call mntr_log(stat_id,lp_inf,'Initialisation started')
+
       ! check if the module was already initialised
       if (stat_ifinit) then
          call mntr_warn(stat_id,
@@ -136,6 +138,7 @@
       if (stat_rdim.eq.1) then
          if (.not.map2d_ifinit) call map2d_init()
       endif
+      call mntr_log(stat_id,lp_inf,'Map 2D finalised')
 
       ! timing
       ltim = dnekclock()
@@ -158,6 +161,7 @@
          call mntr_log(stat_id,lp_vrb,'Getting loacal int. coeff.')
          call stat_init_int1D
       endif
+      call mntr_log(stat_id,lp_inf,'1D local finalised')
 
       ! reset statistics variables
       itmp = lx1**(LDIM-stat_rdim)*lelt*stat_lvar
@@ -165,6 +169,8 @@
       
       ! everything is initialised
       stat_ifinit=.true.
+
+      call mntr_log(stat_id,lp_inf,'Initialisation finalised')
 
       ! timing
       ltim = dnekclock() - ltim
