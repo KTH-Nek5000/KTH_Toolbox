@@ -811,8 +811,9 @@
 
          ! accumulate fileds
          do jl = 1,pstat_svar
-            call add2s2(pstat_ruavg(1,1,pstat_swfield(jl)),
-     $           t(1,1,1,1,jl+1),dtime,nvec)
+!            call add2s2(pstat_ruavg(1,1,pstat_swfield(jl)),
+!     $           t(1,1,1,1,jl+1),dtime,nvec)
+            call add2s2(pstat_ruavg(1,1,jl),t(1,1,1,1,jl+1),dtime,nvec)
          enddo
 
       enddo
@@ -844,6 +845,11 @@
          call copy(t(1,1,1,1,il+1),pstat_ruavg(1,1,il),nvec)
       enddo
       call outpost2(vx,vy,vz,pr,t,pstat_svar+1,'st1')
+      ! sort variables according to pstat_swfield
+      do il = 1,pstat_svar
+        call copy(pstat_ruavg(1,1,pstat_swfield(il)),t(1,1,1,1,il+1),
+     $       nvec)
+      end do
 
       return
       end subroutine
