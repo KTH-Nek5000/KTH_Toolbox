@@ -284,15 +284,15 @@
 
                   do jl=1,ntot
                      rtmp = lcoord(jl)
-                     if(rtmp.le.xxmin_c) then ! constant; xmin
+                     if(rtmp.lt.xxmin_c) then ! constant; xmin
                         rtmp=spnb_str
                      elseif(rtmp.lt.xxmin) then ! fall; xmin
-                        arg = (xxmin-rtmp)/(spnb_wl(il)-spnb_dl(il))
+                        arg = (xxmin-rtmp)/spnb_dl(il)
                         rtmp = spnb_str*math_stepf(arg)
                      elseif (rtmp.le.xxmax) then ! zero
                         rtmp = 0.0
                      elseif (rtmp.lt.xxmax_c) then ! rise
-                        arg = (rtmp-xxmax)/(spnb_wr(il)-spnb_dr(il))
+                        arg = (rtmp-xxmax)/spnb_dr(il)
                         rtmp = spnb_str*math_stepf(arg)
                      else    ! constant
                         rtmp = spnb_str
