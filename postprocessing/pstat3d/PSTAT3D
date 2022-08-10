@@ -45,6 +45,7 @@
       real pstat_ruavg(lx1**(ldim),lelt,pstat_svar) ! averaged fields
       real pstat_runew(lx1**(ldim),lelt,pstat_dvar) ! new fields
       real pstat_rutmp(lx1**(ldim),lelt,pstat_tvar) ! tmp fields
+      real pstat_pgrad(lx1**(ldim),lelt,ldim)       ! temporary storage for averaged pressure gradient
       integer pstat_swfield(4,pstat_finset)         ! mark fields swapping
 
 !     interpolation section
@@ -55,6 +56,7 @@
       real pstat_int_avg (lhis,pstat_svar) ! interpolated averaged fields
       real pstat_int_new (lhis,pstat_dvar) ! interpolated new fields
       real pstat_int_tmp (lhis,pstat_tvar) ! interpolated tmp fields
+      real pstat_int_pgr (lhis,ldim)       ! interpolated pressure gradient
       
 !     additional variables for file header
       real pstat_etime           ! statistics ened time
@@ -70,9 +72,10 @@
      
       common/pstatr/ pstat_stime, pstat_etime
       
-      common/pstatrv/ pstat_ruavg, pstat_runew, pstat_rutmp
+      common/pstatrv/ pstat_ruavg, pstat_runew, pstat_rutmp, 
+     $     pstat_pgrad
       
       common/pstatrint/ pstat_int_pts, pstat_int_avg, pstat_int_new,
-     $     pstat_int_tmp
+     $     pstat_int_tmp, pstat_int_pgr
       
       common /pstatl/ pstat_ifinit 

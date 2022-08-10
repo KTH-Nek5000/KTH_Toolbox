@@ -12,8 +12,6 @@
       include 'SIZE'
       include 'INPUT'
       include 'SOLN'
-!      include 'RESTART'
-!      include 'PARALLEL'
       include 'FRAMELP'
       include 'PSTAT3D'
 
@@ -73,6 +71,8 @@
      $     pstat_runew(1,1,5),pr,pstat_runew(1,1,6),'a21')
       call outpost(pstat_runew(1,1,7),pstat_runew(1,1,8), ! dWdx,dWdy,dWdz,Tk
      $     pstat_runew(1,1,9),pr,pstat_rutmp(1,1,15),'a22')
+      call outpost(pstat_pgrad(1,1,1),pstat_pgrad(1,1,2), ! dPdx,dPdy,dPdz,Tk
+     $     pstat_pgrad(1,1,3),pr,pstat_rutmp(1,1,15),'a23')
 
       return
       end subroutine
@@ -324,8 +324,8 @@
       iavfr = pstat_nstep
       ! stat averagign time
       rtmp = pstat_etime-pstat_stime
-      ! currently I interpolate and save 87 variables
-      int_nvar = 87
+      ! currently I interpolate and save 90 variables
+      int_nvar = 90
       ! this is far from optimal, but for post-processing I do not care
       ! master opens files and writes header
       ierr = 0
@@ -561,6 +561,12 @@
       call mntr_check_abort(pstat_id,ierr,'Error writing dWdy interp.')
       call pstat3d_field_out(pstat_int_new(1,9),1,ierr) ! dWdz
       call mntr_check_abort(pstat_id,ierr,'Error writing dWdz interp.')
+      call pstat3d_field_out(pstat_int_pgr(1,1),1,ierr) ! dPdx
+      call mntr_check_abort(pstat_id,ierr,'Error writing dPdx interp.')
+      call pstat3d_field_out(pstat_int_pgr(1,2),1,ierr) ! dPdy
+      call mntr_check_abort(pstat_id,ierr,'Error writing dPdx interp.')
+      call pstat3d_field_out(pstat_int_pgr(1,3),1,ierr) ! dPdz
+      call mntr_check_abort(pstat_id,ierr,'Error writing dPdx interp.')
 
       ! master closes the file
       if (nid.eq.pid00) then

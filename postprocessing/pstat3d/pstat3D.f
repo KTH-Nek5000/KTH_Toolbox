@@ -258,74 +258,92 @@
       do il=1, npscal
           ifgtps(il)=.false.
       enddo
-
-      ! initial time and step count
-      ltime = pstat_stime
-      istepr = 0
+      ! mark variables for saving
+      ifxyo = .true.
+      ifvo = .true.
+      ifpo = .false.
+      ifto = .true.
+      do il=1, npscal
+          ifpsco(il)= .false.
+      enddo
 
       ! initilise vectors
       call rzero(pstat_ruavg,lx1**ldim*lelt*pstat_svar)
       nvec = lx1*ly1*lz1*nelt
 
       ! loop over stat files
-      do il = 1,pstat_nfile
+      ! to be able to save averaged fields in the order of s** files
+      ! I average each s** file separately
+      do jl=1, pstat_finset
+        ! initial time and step count
+        ltime = pstat_stime
+        istepr = 0
 
-         do jl=1, pstat_finset
+        ! get prefix for reading
+        write(fins,'(i2.2)') jl
+        prefix = 's'//trim(fins)
 
-            ! get prefix
-            write(fins,'(i2.2)') jl
-            prefix = 's'//trim(fins)
+        ! loop over time samples
+        do il = 1,pstat_nfile
 
-            ! get file name
-            call io_mfo_fname(fname,bname,prefix,ierr)
-            write(str,'(i5.5)') il
-            fname = trim(fname)//trim(str)
+          ! get file name
+          call io_mfo_fname(fname,bname,prefix,ierr)
+          write(str,'(i5.5)') il
+          fname = trim(fname)//trim(str)
 
-            fid0 = 0
-            call addfid(fname,fid0)
+          fid0 = 0
+          call addfid(fname,fid0)
 
-            ! add directory name
-            fname = 'DATA/'//trim(fname)
+          ! add directory name
+          fname = 'DATA/'//trim(fname)
 
-            !call load_fld(fname)
-            call mfi(fname,il)
+          !call load_fld(fname)
+          call mfi(fname,il)
 
-            ! calculate interval and update time
-            dtime = timer - ltime
+          ! calculate interval and update time
+          dtime = timer - ltime
 
-            ! accumulate fileds
-            call add2s2(pstat_ruavg(1,1,pstat_swfield(1,jl)),
-     $           vx,dtime,nvec)
-            call add2s2(pstat_ruavg(1,1,pstat_swfield(2,jl)),
-     $           vy,dtime,nvec)
-            call add2s2(pstat_ruavg(1,1,pstat_swfield(3,jl)),
-     $           vz,dtime,nvec)
-            call add2s2(pstat_ruavg(1,1,pstat_swfield(4,jl)),
-     $           t,dtime,nvec)
-         enddo
+          ! accumulate fileds
+          call add2s2(pstat_ruavg(1,1,pstat_swfield(1,jl)),
+     $         vx,dtime,nvec)
+          call add2s2(pstat_ruavg(1,1,pstat_swfield(2,jl)),
+     $         vy,dtime,nvec)
+          call add2s2(pstat_ruavg(1,1,pstat_swfield(3,jl)),
+     $         vz,dtime,nvec)
+          call add2s2(pstat_ruavg(1,1,pstat_swfield(4,jl)),
+     $         t,dtime,nvec)
+!         enddo
 
-         ! sum number of time steps
-         istepr = istepr + istpr
+          ! sum number of time steps
+          istepr = istepr + istpr
 
-         ! update time
-         ltime = timer
+          ! update time
+          ltime = timer
 
+        end do
+
+        ! divide by time span
+        if (ltime.ne.pstat_stime) then
+          rtmp = 1.0/(ltime-pstat_stime)
+        else
+          rtmp = 1.0
+        endif
+        do il = 1,4
+          call cmult(pstat_ruavg(1,1,pstat_swfield(il,jl)),rtmp,nvec)
+        enddo
+        ! save the averaged filed
+        ! get prefix for writing
+        write(fins,'(i2.2)') jl
+        prefix = 't'//trim(fins)
+        call outpost(pstat_ruavg(1,1,pstat_swfield(1,jl)),
+     $      pstat_ruavg(1,1,pstat_swfield(2,jl)),
+     $      pstat_ruavg(1,1,pstat_swfield(3,jl)),pr,
+     $      pstat_ruavg(1,1,pstat_swfield(4,jl)),prefix)
       enddo
 
       ! save data for file header
       pstat_etime = ltime
       pstat_istepr = istepr
-
-      ! divide by time span
-      if (ltime.ne.pstat_stime) then
-         rtmp = 1.0/(ltime-pstat_stime)
-      else
-         rtmp = 1.0
-      endif
-
-      do il = 1,pstat_svar
-         call cmult(pstat_ruavg(1,1,il),rtmp,nvec)
-      enddo
 
       return
       end subroutine
@@ -641,6 +659,10 @@
       ! Derivatives of the mean pressure field
       call gradm1(pstat_rutmp(1,1,10),pstat_rutmp(1,1,11), ! dPdx (tmp 10), dPdy (tmp 11), dPdz (tmp 12)
      $     pstat_rutmp(1,1,12),pstat_ruavg(1,1,4))
+      ! save pressure gradient for output
+      do il = 1, 3
+        call copy(pstat_pgrad(1,1,il),pstat_rutmp(1,1,9+il),nvec)
+      end do
 
       ! Pressure transport tensor
       ! update dp[uvw]d[xyz]
@@ -930,7 +952,13 @@
 
       close(iunit)
 #endif
-         
+
+      ! Interpolate pressure gradient
+      do il=1,ldim
+         call fgslib_findpts_eval(ifpts,pstat_int_pgr (1,il),1,
+     &        rcode,1,proc,1,elid,1,rst,ndim,pstat_npt,
+     &        pstat_pgrad(1,1,il))
+      enddo
 
       ! finalise interpolation tool
       call fgslib_findpts_free(ifpts)
