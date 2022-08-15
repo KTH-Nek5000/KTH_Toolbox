@@ -457,7 +457,7 @@
       common /CTMP1/ lmap, lmap_el
 
       ! local variables
-      integer nptot, itmp
+      integer nptot, itmp, itmp2
       integer il, jl, kl, ll, ml, nl
       real rota, rtmp, epsl
       parameter (epsl = 1.0e-10)
@@ -542,8 +542,9 @@
             tripl_npoint(il) = 1
             tripl_prj(tripl_npoint(il),il) = lcoord(1)
             ! generate mapping
-            tripl_map(lmap_el(4,1),lmap_el(3,1),
-     $          lmap_el(2,1),lmap_el(1,1),il) = tripl_npoint(il)
+            itmp2 = lmap(1)
+            tripl_map(lmap_el(4,itmp2),lmap_el(3,itmp2),
+     $          lmap_el(2,itmp2),lmap_el(1,itmp2),il) = tripl_npoint(il)
             do jl = 2, itmp
                ! compare positions along the line
                if((lcoord(jl)-tripl_prj(tripl_npoint(il),il)).gt.
@@ -552,8 +553,9 @@
                   tripl_prj(tripl_npoint(il),il) = lcoord(jl)
                endif
                ! generate mapping
-               tripl_map(lmap_el(4,jl),lmap_el(3,jl),
-     $          lmap_el(2,jl),lmap_el(1,jl),il) = tripl_npoint(il)
+               itmp2 = lmap(jl)
+               tripl_map(lmap_el(4,itmp2),lmap_el(3,itmp2),
+     $          lmap_el(2,itmp2),lmap_el(1,itmp2),il) = tripl_npoint(il)
             end do
          end if
       enddo
