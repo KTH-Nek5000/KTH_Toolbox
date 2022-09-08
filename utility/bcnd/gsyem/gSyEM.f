@@ -132,25 +132,9 @@
       ! to get checkpoint runtime parameters
       integer ierr, lmid, lsid, lrpid
       
-      integer il, jl, iel, iface, nface
-      integer itmp2
-      character*3 cbcl
-
-      ! face to face mapping
-      integer iffmap(4,6)
-      save iffmap
-      data iffmap / 2,4,5,6, 1,3,5,6, 2,4,5,6, 1,3,5,6,
-     $              1,2,3,4, 1,2,3,4 /
-
-      ! face to edge mapping
-      integer ifemap(4,6)
-      save ifemap
-      data ifemap / 10,9,1,3, 10,12,6,8, 12,11,2,4, 9,11,5,7,
-     $              1,6,2,5, 3,8,4,7 /
+      integer il, jl
 
       ! functions
-      integer iglsum
-      integer frame_get_master
       real dnekclock
 !-----------------------------------------------------------------------
       ! check if the module was already initialised
@@ -258,60 +242,17 @@
          gsyem_eoff(il+1) = gsyem_eoff(il) + gsyem_neddy(il)
       enddo
 
-      ! generate faces/edges mapping and check if all families
-      ! correspond to Dirichlet bc
-      ierr = 0
-      nface = 2*ndim
-      call izero(gsyem_lfnum,gsyem_nfam_max)
-      call izero(gsyem_gfnum,gsyem_nfam_max)
-      call izero(gsyem_lenum,gsyem_nfam_max)
-      call izero(gsyem_genum,gsyem_nfam_max)
-      itmp = 2*lelt*gsyem_nfam_max
-      call izero(gsyem_lfmap,itmp)
-      call izero(gsyem_lemap,itmp)
-      do il=1,gsyem_nfam
-         itmp=0                 ! count family faces
-         itmp2=0                ! count family edges
-         do iel=1,nelv
-            do iface = 1, nface
-               if(boundaryID(iface,iel).eq.gsyem_fambc(il)) then
-                  itmp = itmp +1
-                  if(cbc(iface,iel,1).eq.'v  ') then
-                     gsyem_lfmap(1,itmp,il) = iel
-                     gsyem_lfmap(2,itmp,il) = iface
-                     ! get edges
-                     do jl=1,(ndim-1)*2
-                        cbcl = cbc(iffmap(jl,iface),iel,1)
-                        if(cbcl(1:1).eq.'W'.or.cbcl(1:1).eq.'m') then
-                           itmp2 = itmp2 +1
-                           gsyem_lemap(1,itmp2,il) = iel
-                           gsyem_lemap(2,itmp2,il) = ifemap(jl,iface)
-                        endif
-                     enddo
-                  else
-                     ierr = 1
-                  endif
-               endif
-            enddo
-         enddo
-         gsyem_lfnum(il) = itmp
-         gsyem_gfnum(il) = iglsum(gsyem_lfnum(il),1)
-         if (gsyem_gfnum(il).eq.0)  call mntr_abort(gsyem_id,
-     $        'Empty family BC')
-         gsyem_lenum(il) = itmp2
-         gsyem_genum(il) = iglsum(gsyem_lenum(il),1)
-      enddo
-      call mntr_check_abort(gsyem_id,ierr,'Non Dirichlet family BC')
+      ! initialise random number genrator with clock time
+      itmp = 0
+      call math_zbqlini(itmp)
 
-      ! calculate face offset
-      gsyem_foff(1) = 1
-      do il=1,gsyem_nfam
-         gsyem_foff(il+1) = gsyem_foff(il) + gsyem_lfnum(il)
-      enddo
+      ! read profile data
+      call gsyem_prof_read(gsyem_pnpoint,gsyem_ppoff,gsyem_prpos,
+     $     gsyem_pumean,gsyem_ptke,gsyem_pdss)
 
-      ! generate family information
-      call gsyem_fam_setup()
-      
+      ! create mesh dependent information
+      call gsyem_mesh_setup()
+
       ! initialise eddy position and orientation; possible rfestart
       if (gsyem_chifrst) then
          ! read checkpoint
@@ -372,9 +313,10 @@
       if ((gsyem_chifrst.and.(istep.lt.(gsyem_nsnap-1))).or.
      $     istep.eq.0) return
 
+#ifnde AMR
       ! to be consistent with saved velocity field first write checkpoint
       call gsyem_rst_write
-
+#endif
       ! update vertices position
       ! timing
       ltim = dnekclock()
@@ -398,7 +340,9 @@
       include 'TSTEP'
       include 'FRAMELP'
       include 'GSYEMD'
-
+#ifdef AMR
+      include 'AMR'
+#endif
       ! local variables
       integer step_cnt, set_out
       integer ierr
@@ -422,13 +366,17 @@
       ! functions
       real dnekclock
 !-----------------------------------------------------------------------
+#ifdef AMR
+      set_out = mod(AMR_IORSET,AMR_IOSET_MAX)
+      step_cnt = 1
+#else
       ! avoid writing during possible restart reading
       call mntr_get_step_delay(step_cnt)
       if (istep.le.step_cnt) return
 
       ! get step count and file set number
       call chkpt_get_fset(step_cnt, set_out)
-
+#endif
       ! we write everything in single step
       if (step_cnt.eq.1) then
          ltim = dnekclock()
@@ -641,11 +589,102 @@
       return
       end subroutine
 !=======================================================================
+!> @brief Generate mesh dependent information
+!! @ingroup gsyem
+!! @note This routine should be called in userchk after refinement is 
+!!     preformed.
+      subroutine gsyem_mesh_setup()
+      implicit none
+      include 'SIZE'
+      include 'INPUT'
+      include 'GEOM'
+      include 'TSTEP'
+      include 'FRAMELP'
+      include 'GSYEMD'
+
+      ! local variables
+      integer ierr, itmp, itmp2, il, iel, iface, jl
+      integer nface
+      character*3 cbcl
+
+      ! face to face mapping
+      integer iffmap(4,6)
+      save iffmap
+      data iffmap / 2,4,5,6, 1,3,5,6, 2,4,5,6, 1,3,5,6,
+     $              1,2,3,4, 1,2,3,4 /
+
+      ! face to edge mapping
+      integer ifemap(4,6)
+      save ifemap
+      data ifemap / 10,9,1,3, 10,12,6,8, 12,11,2,4, 9,11,5,7,
+     $              1,6,2,5, 3,8,4,7 /
+      
+      ! functions
+      integer iglsum
+!-----------------------------------------------------------------------
+      ! generate faces/edges mapping and check if all families
+      ! correspond to Dirichlet bc
+      ierr = 0
+      nface = 2*ndim
+      call izero(gsyem_lfnum,gsyem_nfam_max)
+      call izero(gsyem_gfnum,gsyem_nfam_max)
+      call izero(gsyem_lenum,gsyem_nfam_max)
+      call izero(gsyem_genum,gsyem_nfam_max)
+      itmp = 2*lelt*gsyem_nfam_max
+      call izero(gsyem_lfmap,itmp)
+      call izero(gsyem_lemap,itmp)
+      do il=1,gsyem_nfam
+         itmp=0                 ! count family faces
+         itmp2=0                ! count family edges
+         do iel=1,nelv
+            do iface = 1, nface
+               if(boundaryID(iface,iel).eq.gsyem_fambc(il)) then
+                  itmp = itmp +1
+                  if(cbc(iface,iel,1).eq.'v  ') then
+                     gsyem_lfmap(1,itmp,il) = iel
+                     gsyem_lfmap(2,itmp,il) = iface
+                     ! get edges
+                     do jl=1,(ndim-1)*2
+                        cbcl = cbc(iffmap(jl,iface),iel,1)
+                        if(cbcl(1:1).eq.'W'.or.cbcl(1:1).eq.'m') then
+                           itmp2 = itmp2 +1
+                           gsyem_lemap(1,itmp2,il) = iel
+                           gsyem_lemap(2,itmp2,il) = ifemap(jl,iface)
+                        endif
+                     enddo
+                  else
+                     ierr = 1
+                  endif
+               endif
+            enddo
+         enddo
+         gsyem_lfnum(il) = itmp
+         gsyem_gfnum(il) = iglsum(gsyem_lfnum(il),1)
+         if (gsyem_gfnum(il).eq.0)  call mntr_abort(gsyem_id,
+     $        'Empty family BC')
+         gsyem_lenum(il) = itmp2
+         gsyem_genum(il) = iglsum(gsyem_lenum(il),1)
+      enddo
+      call mntr_check_abort(gsyem_id,ierr,'Non Dirichlet family BC')
+
+      ! calculate face offset
+      gsyem_foff(1) = 1
+      do il=1,gsyem_nfam
+         gsyem_foff(il+1) = gsyem_foff(il) + gsyem_lfnum(il)
+      enddo
+
+      ! generate family information
+      call gsyem_fam_setup(gsyem_pnpoint,gsyem_ppoff,gsyem_prpos,
+     $     gsyem_pumean,gsyem_ptke,gsyem_pdss)
+
+      return
+      end subroutine
+!=======================================================================
 !> @brief Generate family information
 !! @ingroup gsyem
 !! @details This routine generates family information
 !!    including bounding box size, average coordinates, normal vector
-      subroutine gsyem_fam_setup()
+      subroutine gsyem_fam_setup(npoint,poff,rpos,umean,tke,dss)
       implicit none
       include 'SIZE'
       include 'INPUT'
@@ -654,12 +693,7 @@
       include 'FRAMELP'
       include 'GSYEMD'
 
-      ! local variables
-      integer il, jl, kl, ll, ml, nl
-      integer iel, ifc, ied, ifn, itmp
-      real rtmp, epsl
-      parameter (epsl=1.0E-06)
-
+      ! argument list
       ! profiles for given family
       ! number of points in profile per family
       integer npoint(gsyem_nfam_max)
@@ -673,6 +707,13 @@
       real tke(gsyem_npoint_max*gsyem_nfam_max)
       ! dissipation rate
       real dss(gsyem_npoint_max*gsyem_nfam_max)
+      
+
+      ! local variables
+      integer il, jl, kl, ll, ml, nl
+      integer iel, ifc, ied, ifn, itmp
+      real rtmp, epsl
+      parameter (epsl=1.0E-06)
 
       ! work arrays
       real xyz_ewall(ldim,lx1,gsyem_edge_max,gsyem_nfam_max)
@@ -684,13 +725,6 @@
       real vlmin, vlmax, vlsum
 !-----------------------------------------------------------------------
       call mntr_log(gsyem_id,lp_inf,'Generate family information')
-
-      ! initialise random number genrator with clock time
-      itmp = 0
-      call math_zbqlini(itmp)
-
-      ! read profile data
-      call gsyem_prof_read(npoint,poff,rpos,umean,tke,dss)
 
       ! extract edge position;
       ! This is necessary to get distance of the point from the edge
