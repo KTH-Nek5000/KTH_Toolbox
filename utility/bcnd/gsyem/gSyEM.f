@@ -313,7 +313,7 @@
       if ((gsyem_chifrst.and.(istep.lt.(gsyem_nsnap-1))).or.
      $     istep.eq.0) return
 
-#ifnde AMR
+#ifndef AMR
       ! to be consistent with saved velocity field first write checkpoint
       call gsyem_rst_write
 #endif
