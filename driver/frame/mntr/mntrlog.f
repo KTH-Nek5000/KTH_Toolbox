@@ -21,6 +21,7 @@
       ! local variables
       character*2 str
       character*200 lstring
+      integer il
 
       ! functions
       integer frame_get_master
@@ -28,6 +29,28 @@
 !-----------------------------------------------------------------------
       ! simple timing
       mntr_frame_tmini = dnekclock()
+
+      ! amd seems to have big problem with block data for arrays
+      mntr_ifinit = .false.
+      mntr_stdl = 1
+      mntr_ifconv = .false.
+      mntr_pid0 = 0
+      mntr_mod_num = 0
+      mntr_mod_mpos = 0
+      do il = 1, mntr_id_max
+         mntr_mod_id(il) = -1
+         mntr_mod_name(il) = mntr_blname
+      end do
+      mntr_tmr_num = 0
+      mntr_tmr_mpos = 0
+      do il = 1, mntr_tmr_id_size
+         mntr_tmr_id(il,1) = -1
+         mntr_tmrv_timer(il,1) = 0.0
+      end do
+      do il = 1, mntr_tmr_id_max
+         mntr_tmr_sum(il) =  .false.
+         mntr_tmr_name(il) = mntr_blname
+      end do
 
       ! set master node
       mntr_pid0 = frame_get_master()

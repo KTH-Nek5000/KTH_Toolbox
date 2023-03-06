@@ -15,11 +15,35 @@
 
       ! local variables
       integer itmp
+      integer il
 
       ! functions
       integer frame_get_master
 !-----------------------------------------------------------------------
       rprm_pid0 = frame_get_master()
+
+      ! amd seems to have big problem with block data for arrays
+      rprm_ifinit = .false.
+      rprm_pid0 = 0
+      rprm_sec_num = 0
+      rprm_sec_mpos = 0
+      do il = 1, rprm_sec_id_max
+         rprm_sec_id(il) = -1
+         rprm_sec_act(il) = .false.
+         rprm_sec_name(il) = rprm_blname
+      end do
+      rprm_par_num = 0
+      rprm_par_mpos = 0
+      do il = 1, rprm_par_id_size
+         rprm_par_id(il,1) =  -1
+      end do
+      do il = 1, rprm_par_id_max
+         rprm_par_name(il) = rprm_blname
+         rprm_parv_int(il) = 0
+         rprm_parv_real(il) = 0.0
+         rprm_parv_log(il) = .false.
+         rprm_parv_str(il) = rprm_blname
+      end do
 
       ! check if the current module was already registered
       call mntr_mod_is_name_reg(itmp,rprm_name)
