@@ -240,7 +240,7 @@
       logical ifsave
 
       ! local variables
-      integer ntot
+      integer ntot, itmp
       real alp, bet
       logical ifapp
 
@@ -292,6 +292,11 @@
       else if (ISTEP.eq.tsrs_skstep) then
         ! correct sampling time; necessary because speciffic way of nek restart
         if (time.ge.tsrs_stime) tsrs_stime = tsrs_stime + tsrs_tint
+      else ! in case the restart field was not loaded yet; requires tsrs_skstep>0
+        if (time.ge.tsrs_tstart) then
+          itmp = floor((time - tsrs_tstart)/tsrs_tint)
+          tsrs_stime = tsrs_tstart + (itmp+1)*tsrs_tint
+        end if
       end if
       
       return
