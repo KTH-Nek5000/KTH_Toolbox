@@ -50,9 +50,9 @@ by sub.module.
 
 @par
 @param_reqr Parameters required by power iteration module:
--# @ref chkpoint :
-   + _chkpoint:readchkpt
-   + _chkpoint:chkpFnumber
+-# @ref chkpt :
+   + _chkpt:readchkpt
+   + _chkpt:chkpFnumber
 -# Nek5000 \a PARAM array and logical flags:
    + IFHEAT, NSTEPS
 

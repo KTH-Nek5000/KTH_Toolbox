@@ -1,5 +1,5 @@
-!> @file CHKPTMSTPD
-!! @ingroup chkpoint_mstep
+!> @file CHKPTMSD
+!! @ingroup chkptms
 !! @brief Include file for multistep checkpointing
 !! @author Adam Peplinski
 !! @date Feb 6, 2017
@@ -7,7 +7,7 @@
 !     module id and name
       integer chpm_id
       character*(*) chpm_name
-      parameter(chpm_name='MSTEP')
+      parameter(chpm_name='CHKPTMS')
 
 !     timer id
       integer chpm_tread_id, chpm_twrite_id

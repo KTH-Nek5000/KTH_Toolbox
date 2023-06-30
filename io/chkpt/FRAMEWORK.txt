@@ -1,7 +1,7 @@
 #Configuration file for Nek5000 modules developped at KTH
 # Place for short description; doxygen style
 /**
-@defgroup chkpoint  Checkpointing routines
+@defgroup chkpt  Checkpointing routines
 @ingroup io
 
 @brief Checkpointing routines for toolbox
@@ -19,10 +19,10 @@
 @par
 @interface_reqr Interface required:
 -# multiple interfaces from @ref frame, @ref rprm and @ref mntr modules
--# (\a chkpts_register); provided by submodule
--# (\a chkpts_init); provided by submodule
--# (\a chkpts_read); provided by submodule
--# (\a chkpts_write); provided by submodule
+-# @a chkpts_register; provided by submodule
+-# @a chkpts_init; provided by submodule
+-# @a chkpts_read; provided by submodule
+-# @a chkpts_write; provided by submodule
 
 @mod_interface_example
 @code{.f}
@@ -83,26 +83,20 @@
       include 'FRAMELP'
 !-----------------------------------------------------------------------
 
-      
       return
       end subroutine
 !======================================================================
 @endcode
 
 @mod_param
-@param_list Parameters provided by checkpoint module (include file - \a CHKPOINTD):
+@param_list Parameters provided by checkpoint module (include file - @a CHKPTD):
 |Varaible | Type | Runtime parameter | Description |
 |---------|------|-------------------|-------------|
-| chpt_ifrst | logical | _chkpoint:readchkpt | start simulation form checkpoint |
-| chpt_fnum | integer | _chkpoint:chkpFnumber | restart file number |
-| chpt_step | integer | _chkpoint:chkpInterval | checkpiont dump frequency (number of time steps) |
+| chpt_ifrst | logical | _chkpt:readchkpt | start simulation form checkpoint |
+| chpt_fnum | integer | _chkpt:chkpFnumber | restart file number |
+| chpt_step | integer | _chkpt:chkpInterval | checkpiont dump frequency (number of time steps) |
 
 @mod_param_example
-@code{.txt}
-[_CHKPOINT]
-chkpInterval = 10
-readchkpt = no
-chkpFnumber = 1
-@endcode
+@include Toolbox/io/chkpt/example.par
 
 */

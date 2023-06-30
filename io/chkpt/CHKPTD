@@ -1,5 +1,5 @@
-!> @file CHKPOINTD
-!! @ingroup chkpoint
+!> @file CHKPTD
+!! @ingroup chkpt
 !! @brief Include file for checkpoint module
 !! @author Adam Peplinski
 !! @date Mar 7, 2016
@@ -7,7 +7,7 @@
 !     module id and name
       integer chpt_id
       character*(*) chpt_name
-      parameter(chpt_name='CHKPOINT')
+      parameter(chpt_name='CHKPT')
 
 !     timer id
       integer chpt_ttot_id, chpt_tini_id

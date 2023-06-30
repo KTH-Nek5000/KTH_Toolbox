@@ -14,15 +14,15 @@ direct and adjoint modes it is better to perform simple linear simulation with a
 
 @mod_interface
 @interface_list Interface provided to tstpr:
--# \a stepper_register; provided for @ref tstpr
--# \a stepper_init; provided for @ref tstpr
--# \a stepper_vsolve; provided for @ref tstpr
+-# @a stepper_register; provided for @ref tstpr
+-# @a stepper_init; provided for @ref tstpr
+-# @a stepper_vsolve; provided for @ref tstpr
 
 @par
 @interface_reqr Interface required:
 -# multiple interfaces from @ref rprm and @ref mntr modules
--# @ref chkpt_get_fset from @ref chkpoint module
--# @ref chkpt_set_name, @ref chkpt_restart_read and @ref chkpt_restart_write from @ref chkpoint_mstep module
+-# @ref chkpt_get_fset from @ref chkpt module
+-# @ref chkptms_set_name, @ref chkptms_restart_read and @ref chkptms_restart_write from @ref chkptms module
 -# @ref cnht_opcmult, @ref cnht_opcopy, @ref cnht_opsub3 and @ref cnht_glsc2_wt from @ref cnht module
 
 @mod_param
@@ -33,10 +33,10 @@ direct and adjoint modes it is better to perform simple linear simulation with a
 
 @par
 @param_reqr Parameters required by power iteration module:
--# @ref chkpoint :
-   + _chkpoint:readchkpt
-   + _chkpoint:chkpFnumber
--# Nek5000 \a PARAM array and logical flags:
+-# @ref chkpt :
+   + _chkpt:readchkpt
+   + _chkpt:chkpFnumber
+-# Nek5000 @a PARAM array and logical flags:
    + IFHEAT
 
 @mod_param_example

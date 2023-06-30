@@ -1,4 +1,4 @@
-[_CHKPOINT]
+[_CHKPT]
 readchkpt = yes
 chkpFnumber = 1
 chkpInterval = 500

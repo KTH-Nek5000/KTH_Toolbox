@@ -1,11 +1,11 @@
-!> @file chkptd.f
-!! @ingroup chkptdummy
+!> @file chkptdm.f
+!! @ingroup chkptdm
 !! @brief Dummy routines for checkpointing.
 !! @author Adam Peplinski
 !! @date Mar 7, 2016
 !=======================================================================
 !> @brief Dummy replacement for checkpoint registration.
-!! @ingroup chkptdummy
+!! @ingroup chkptdm
       subroutine chkpts_register
       implicit none
 !-----------------------------------------------------------------------
@@ -13,7 +13,7 @@
       end subroutine
 !=======================================================================
 !> @brief Dummy replacement for checkpoint initialisation.
-!! @ingroup chkptdummy
+!! @ingroup chkptdm
       subroutine chkpts_init
       implicit none
 !-----------------------------------------------------------------------
@@ -21,7 +21,7 @@
       end subroutine
 !=======================================================================
 !> @brief Dummy replacement for check of module initialisation
-!! @ingroup chkptdummy
+!! @ingroup chkptdm
 !! @return chkpts_is_initialised
       logical function chkpts_is_initialised()
       implicit none
@@ -32,7 +32,7 @@
       end function
 !=======================================================================
 !> @brief Dummy replacement for checkpoint reader.
-!! @ingroup chkptdummy
+!! @ingroup chkptdm
       subroutine chkpts_read
       implicit none
 !-----------------------------------------------------------------------
@@ -40,7 +40,7 @@
       end subroutine
 !=======================================================================
 !> @brief Dummy replacement for checkpoint writer.
-!! @ingroup chkptdummy
+!! @ingroup chkptdm
       subroutine chkpts_write
       implicit none
 !-----------------------------------------------------------------------

@@ -1,17 +1,17 @@
-!> @file chkpt_mstp.f
-!! @ingroup chkpoint_mstep
+!> @file chkptms.f
+!! @ingroup chkptms
 !! @brief Set of multi-file checkpoint routines for DNS, MHD and
 !!    perturbation simulations
 !=======================================================================
 !> @brief Register multi step checkpointing module
-!! @ingroup chkpoint_mstep
+!! @ingroup chkptms
       subroutine chkpts_register()
       implicit none
 
       include 'SIZE'
       include 'FRAMELP'
-      include 'CHKPOINTD'
-      include 'CHKPTMSTPD'
+      include 'CHKPTD'
+      include 'CHKPTMSD'
 
       ! local variables
       integer lpmid
@@ -51,7 +51,7 @@
       end subroutine
 !=======================================================================
 !> @brief Initialise multi-file checkpoint routines
-!! @ingroup chkpoint_mstep
+!! @ingroup chkptms
 !! @note This interface is defined in @ref chkpt_main
       subroutine chkpts_init
       implicit none
@@ -60,8 +60,8 @@
       include 'TSTEP'           ! ISTEP, NSTEPS
       include 'INPUT'           ! IFPERT, PARAM
       include 'FRAMELP'
-      include 'CHKPOINTD'
-      include 'CHKPTMSTPD'
+      include 'CHKPTD'
+      include 'CHKPTMSD'
 !-----------------------------------------------------------------------
       ! check if the module was already initialised
       if (chpm_ifinit) then
@@ -89,13 +89,13 @@
       end subroutine
 !=======================================================================
 !> @brief Check if module was initialised
-!! @ingroup chkpoint_mstep
+!! @ingroup chkptms
 !! @return chkpts_is_initialised
       logical function chkpts_is_initialised()
       implicit none
 
       include 'SIZE'
-      include 'CHKPTMSTPD'
+      include 'CHKPTMSD'
 !-----------------------------------------------------------------------
       chkpts_is_initialised = chpm_ifinit
 
@@ -103,7 +103,7 @@
       end function
 !=======================================================================
 !> @brief Write full file restart set
-!! @ingroup chkpoint_mstep
+!! @ingroup chkptms
 !! @note This interface is defined in @ref chkpt_main.
 !! @note This is version of @ref full_restart_save routine.
       subroutine chkpts_write()
@@ -113,8 +113,8 @@
       include 'TSTEP'           ! ISTEP, NSTEPS
       include 'INPUT'           ! IFMVBD, IFREGUO
       include 'FRAMELP'
-      include 'CHKPOINTD'
-      include 'CHKPTMSTPD'
+      include 'CHKPTD'
+      include 'CHKPTMSD'
 
       ! local variables
       integer il, ifile, fnum
@@ -152,7 +152,7 @@
          call io_init
 
          ! get set of file names in the snapshot
-         call chkpt_set_name(fname, fnum, chpt_set_o, ifile)
+         call chkptms_set_name(fname, fnum, chpt_set_o, ifile)
 
          ! do we wtrite coordinates; we save coordinates in DNS files only
          if (IFMVBD) then  ! moving boundaries save in every file
@@ -181,7 +181,7 @@
          endif
 
          ! write down files
-         call chkpt_restart_write(fname, fnum, ifcoord)
+         call chkptms_restart_write(fname, fnum, ifcoord)
 
          ! update output set number
          ! we do it after the last file in the set was sucsesfully written
@@ -203,7 +203,7 @@
       end subroutine
 !=======================================================================
 !> @brief Read full file restart set.
-!! @ingroup chkpoint_mstep
+!! @ingroup chkptms
 !! @note This interface is defined in @ref chkpt_main
 !! @note This is version of @ref full_restart routine.
       subroutine chkpts_read()
@@ -213,8 +213,8 @@
       include 'TSTEP'           ! ISTEP, IF_FULL_PRES
       include 'INPUT'           ! IFREGUO, INITC
       include 'FRAMELP'
-      include 'CHKPOINTD'
-      include 'CHKPTMSTPD'
+      include 'CHKPTD'
+      include 'CHKPTMSD'
 
       ! local variables
       integer ifile, fnum, fnuml, il
@@ -237,7 +237,7 @@
       ! this is multi step restart so check for timestep consistency is necessary
       ! this routine gets the information of pressure mesh as well
       if (chpt_ifrst.and.icalld.eq.0) then
-         call chkpt_dt_get
+         call chkptms_dt_get
          icalld = 1
       endif
 
@@ -252,13 +252,13 @@
          call io_init
 
          ! get set of file names in the snapshot
-         call chkpt_set_name(fname, fnum, chpt_set_i, ifile)
+         call chkptms_set_name(fname, fnum, chpt_set_i, ifile)
 
          ! perturbation mode with constant base flow - only 1 rsX written
          if (ifpert.and.(.not.ifbase)) then
             if (ifile.eq.1) then
                il = 0
-               call chkpt_set_name(fnamel, fnuml, il, ifile)
+               call chkptms_set_name(fnamel, fnuml, il, ifile)
                call chcopy (fname(1),fnamel(1),132)
                fnum = 2
             else
@@ -267,7 +267,7 @@
             endif
          endif
 
-         call chkpt_restart_read(fname, fnum)
+         call chkptms_restart_read(fname, fnum)
 
          ! check time step consistency
          if(ifile.gt.1.and.chpm_dtstep(ifile).gt.0.0) then
@@ -293,10 +293,10 @@
       end subroutine
 !=======================================================================
 !> @brief Get old simulation time steps and pressure mesh marker.
-!! @ingroup chkpoint_mstep
+!! @ingroup chkptms
 !! @todo Different files could have different chpm_if_pmesh, so it is
 !!    not the best place to read it
-      subroutine chkpt_dt_get
+      subroutine chkptms_dt_get
       implicit none
 
       include 'SIZE'
@@ -304,8 +304,8 @@
       include 'RESTART'
       include 'TSTEP'
       include 'FRAMELP'
-      include 'CHKPOINTD'
-      include 'CHKPTMSTPD'
+      include 'CHKPTD'
+      include 'CHKPTMSD'
 
       ! local variables
       integer ifile, ierr
@@ -373,18 +373,18 @@
       end subroutine
 !=======================================================================
 !> @brief Generate set of restart file names in snapshot
-!! @ingroup chkpoint_mstep
+!! @ingroup chkptms
 !! @param[out] fname  restart file names
 !! @param[out] fnum   number of files in snapshot
 !! @param[in]  nset   set number
 !! @param[in]  ifile  snupshot numer
-      subroutine chkpt_set_name(fname, fnum, nset, ifile)
+      subroutine chkptms_set_name(fname, fnum, nset, ifile)
       implicit none
 
       include 'SIZE'            ! NIO
       include 'INPUT'           ! IFMHD, IFPERT, IFBASE
       include 'FRAMELP'
-      include 'CHKPTMSTPD'
+      include 'CHKPTMSD'
 
       ! argument list
       character*132 fname(CHKPTNFMAX)
@@ -405,13 +405,13 @@
          prefix(1:2)='rs'
          call chkpt_fname(fname(1), prefix, nset, ifile, ierr)
          call mntr_check_abort(chpm_id,ierr,
-     $        'chkpt_set_name; DNS file name error')
+     $        'chkptms_set_name; DNS file name error')
 
          ! prefix and name for magnetic field (MHD)
          prefix(1:2)='rb'
          call chkpt_fname(fname(2), prefix, nset, ifile, ierr)
          call mntr_check_abort(chpm_id,ierr,
-     $        'chkpt_set_name; MHD file name error')
+     $        'chkptms_set_name; MHD file name error')
 
       elseif (IFPERT) then
          ! file number
@@ -427,13 +427,13 @@
          endif
          call chkpt_fname(fname(1), prefix, nset, ifilel, ierr)
          call mntr_check_abort(chpm_id,ierr,
-     $        'chkpt_set_name; base flow file name error')
+     $        'chkptms_set_name; base flow file name error')
 
          ! prefix and name for perturbation
          prefix(1:2)='rp'
          call chkpt_fname(fname(2), prefix, nset, ifile, ierr)
          call mntr_check_abort(chpm_id,ierr,
-     $        'chkpt_set_name; perturbation file name error')
+     $        'chkptms_set_name; perturbation file name error')
 
       else                ! DNS
          fnum = 1
@@ -442,7 +442,7 @@
          prefix(1:2)='rs'
          call chkpt_fname(fname(1), prefix, nset, ifile, ierr)
          call mntr_check_abort(chpm_id,ierr,
-     $        'chkpt_set_name; DNS file name error')
+     $        'chkptms_set_name; DNS file name error')
 
       endif
 
@@ -450,7 +450,7 @@
       end subroutine
 !=======================================================================
 !> @brief Generate single restart file name
-!! @ingroup chkpoint_mstep
+!! @ingroup chkptms
 !! @param[out] fname  restart file name
 !! @param[in]  prefix prefix
 !! @param[in]  nset   set number
@@ -461,8 +461,8 @@
 
       include 'SIZE'            ! NIO
       include 'INPUT'           ! SESSION
-      include 'CHKPOINTD'
-      include 'CHKPTMSTPD'
+      include 'CHKPTD'
+      include 'CHKPTMSD'
 
       ! argument list
       character*132 fname
@@ -502,18 +502,18 @@
       end subroutine
 !=======================================================================
 !> @brief Write checkpoint snapshot.
-!! @ingroup chkpoint_mstep
+!! @ingroup chkptms
 !! @param[out] fname   restart file name
 !! @param[in]  fnum    number of files in snapshot
 !! @param[in]  ifcoord do we save coordinates
-      subroutine chkpt_restart_write(fname, fnum, ifcoord)
+      subroutine chkptms_restart_write(fname, fnum, ifcoord)
       implicit none
 
       include 'SIZE'
       include 'RESTART'
       include 'TSTEP'
       include 'INPUT'
-      include 'CHKPTMSTPD'
+      include 'CHKPTMSD'
 
       ! argument list
       character*132 fname(CHKPTNFMAX)
@@ -550,34 +550,34 @@
          ! DNS first
          IFXYO = ifcoord
          chktype = 1
-         call chkpt_mfo(fname(1),chktype,ipert)
+         call chkptms_mfo(fname(1),chktype,ipert)
 
          ! MHD
          IFXYO = .FALSE.
          chktype = 2
-         call chkpt_mfo(fname(2),chktype,ipert)
+         call chkptms_mfo(fname(2),chktype,ipert)
 
       elseif (IFPERT) then
          ! DNS first
          if (fnum.eq.2) then
             IFXYO = ifcoord
             chktype = 1
-            call chkpt_mfo(fname(1),chktype,ipert)
+            call chkptms_mfo(fname(1),chktype,ipert)
          endif
 
          ! perturbation
          IFXYO = .FALSE.
          chktype = 3
          ipert = 1
-         call chkpt_mfo(fname(fnum),chktype,ipert)
+         call chkptms_mfo(fname(fnum),chktype,ipert)
       else ! DNS
          ! write only one set of files
          if (fnum.ne.1) call mntr_abort(chpm_id,
-     $        'chkpt_restart_save; too meny files for DNS')
+     $        'chkptms_restart_write; too meny files for DNS')
 
          IFXYO = ifcoord
          chktype = 1
-         call chkpt_mfo(fname(1),chktype,ipert)
+         call chkptms_mfo(fname(1),chktype,ipert)
       endif
 
       ! restore I/O parameters
@@ -595,17 +595,17 @@
       end subroutine
 !=======================================================================
 !> @brief Read checkpoint snapshot.
-!! @ingroup chkpoint_mstep
+!! @ingroup chkptms
 !! @param[out] fname   restart file name
 !! @param[in]  fnum    number of files in snapshot
-      subroutine chkpt_restart_read(fname, fnum)
+      subroutine chkptms_restart_read(fname, fnum)
       implicit none
 
       include 'SIZE'
       include 'RESTART'
       include 'TSTEP'
       include 'INPUT'
-      include 'CHKPTMSTPD'
+      include 'CHKPTMSD'
 
       ! argument list
       character*132 fname(CHKPTNFMAX)
@@ -621,34 +621,34 @@
          ! DNS first
          chktype = 1
          call sioflag(ndumps,fnamel,fname(1))
-         call chkpt_mfi(fnamel,chktype,ipert)
+         call chkptms_mfi(fnamel,chktype,ipert)
 
          ! MHD
          chktype = 2
          call sioflag(ndumps,fnamel,fname(2))
-         call chkpt_mfi(fnamel,chktype,ipert)
+         call chkptms_mfi(fnamel,chktype,ipert)
 
       elseif (IFPERT) then
          ! DNS first
          if (fnum.eq.2) then
             chktype = 1
             call sioflag(ndumps,fnamel,fname(1))
-            call chkpt_mfi(fnamel,chktype,ipert)
+            call chkptms_mfi(fnamel,chktype,ipert)
          endif
 
          ! perturbation
          chktype = 3
          ipert = 1
          call sioflag(ndumps,fnamel,fname(fnum))
-         call chkpt_mfi(fnamel,chktype,ipert)
+         call chkptms_mfi(fnamel,chktype,ipert)
       else ! DNS
          ! read only one set of files
          if (fnum.ne.1) call mntr_abort(chpm_id,
-     $        'chkpt_restart_read; too meny files for DNS')
+     $        'chkptms_restart_read; too meny files for DNS')
 
          chktype = 1
          call sioflag(ndumps,fnamel,fname(1))
-         call chkpt_mfi(fnamel,chktype,ipert)
+         call chkptms_mfi(fnamel,chktype,ipert)
       endif
 
       return
@@ -657,14 +657,14 @@
 !> @brief Write field to the file
 !! @details This routine is based on @ref mfo_outfld but does not assume
 !!    any file numbering. It is optimised for chekpoint writing.
-!! @ingroup chkpoint_mstep
+!! @ingroup chkptms
 !! @param[in]   fname      file name
 !! @param[in]   chktype    data type to write (DNS, MHD, perturbation)
 !! @param[in]   ipert      index of perturbation field
 !! @note Only one set of data (DNS, MHD or perturbation) can be saved in
 !!    single file
 !! @remark This routine uses global scratch space \a SCRCG.
-      subroutine chkpt_mfo(fname,chktype,ipert)
+      subroutine chkptms_mfo(fname,chktype,ipert)
       implicit none
 
       include 'SIZE'
@@ -675,7 +675,7 @@
       include 'GEOM'
       include 'SOLN'
       include 'FRAMELP'
-      include 'CHKPTMSTPD'
+      include 'CHKPTMSD'
 
       ! argumnt list
       character*132 fname
@@ -703,7 +703,7 @@
 
       ! open file
       call io_mbyte_open(fname,ierr)
-      call mntr_check_abort(chpm_id,ierr,'chkpt_mfo; file not opened.')
+      call mntr_check_abort(chpm_id,ierr,'chkptms_mfo; file not opened')
 
       ! write a header and create element mapping
       call mfo_write_hdr
@@ -800,7 +800,7 @@
 
       ! close file
       call io_mbyte_close(ierr)
-      call mntr_check_abort(chpm_id,ierr,'chkpt_mfo; file not closed.')
+      call mntr_check_abort(chpm_id,ierr,'chkptms_mfo; file not closed')
 
       ! stamp the log
       tio = dnekclock_sync()-tiostart
@@ -822,12 +822,12 @@
 !> @brief Read field to the file
 !! @details This routine is based on @ref mfi but supports perturbation
 !!    as well. It is optimised for chekpoint reading.
-!! @ingroup chkpoint_mstep
+!! @ingroup chkptms
 !! @param[in]   fname      file name
 !! @param[in]   chktype    data type to read (DNS, MHD, preturbation)
 !! @param[in]   ipert      index of perturbation field
 !! @remark This routine uses global scratch space \a SCRUZ.
-      subroutine chkpt_mfi(fname,chktype,ipert)
+      subroutine chkptms_mfi(fname,chktype,ipert)
       implicit none
 
       include 'SIZE'
@@ -838,7 +838,7 @@
       include 'GEOM'
       include 'SOLN'
       include 'FRAMELP'
-      include 'CHKPTMSTPD'
+      include 'CHKPTMSD'
 
       ! argumnt list
       character*132 fname
@@ -910,17 +910,17 @@
             ! interpolate
             if (ifgetu) then
                if (chktype.eq.1) then
-                  call chkpt_map_gll(vx,wkv1,nxr,nzr,nelv)
-                  call chkpt_map_gll(vy,wkv2,nxr,nzr,nelv)
-                  if (if3d) call chkpt_map_gll(vz,wkv3,nxr,nzr,nelv)
+                  call chkptms_map_gll(vx,wkv1,nxr,nzr,nelv)
+                  call chkptms_map_gll(vy,wkv2,nxr,nzr,nelv)
+                  if (if3d) call chkptms_map_gll(vz,wkv3,nxr,nzr,nelv)
                elseif(chktype.eq.2) then
-                  call chkpt_map_gll(bx,wkv1,nxr,nzr,nelv)
-                  call chkpt_map_gll(by,wkv2,nxr,nzr,nelv)
-                  if (if3d) call chkpt_map_gll(bz,wkv3,nxr,nzr,nelv)
+                  call chkptms_map_gll(bx,wkv1,nxr,nzr,nelv)
+                  call chkptms_map_gll(by,wkv2,nxr,nzr,nelv)
+                  if (if3d) call chkptms_map_gll(bz,wkv3,nxr,nzr,nelv)
                elseif(chktype.eq.3) then
-                  call chkpt_map_gll(vxp(1,ipert),wkv1,nxr,nzr,nelv)
-                  call chkpt_map_gll(vyp(1,ipert),wkv2,nxr,nzr,nelv)
-                  if (if3d) call chkpt_map_gll(vzp(1,ipert),wkv3,
+                  call chkptms_map_gll(vxp(1,ipert),wkv1,nxr,nzr,nelv)
+                  call chkptms_map_gll(vyp(1,ipert),wkv2,nxr,nzr,nelv)
+                  if (if3d) call chkptms_map_gll(vzp(1,ipert),wkv3,
      $                        nxr,nzr,nelv)
                endif
             endif
@@ -991,7 +991,7 @@
                   if (ifsplit) then
                      if (chktype.eq.1) then
                         ! interpolate on GL mesh
-                        call chkpt_map_gl(wkv1,wkv2,nxr-2,itmp3,nelv)
+                        call chkptms_map_gl(wkv1,wkv2,nxr-2,itmp3,nelv)
 
                         !interpolate GL to GLL
                         itmp2 = nx2*ny2*nz2
@@ -1004,11 +1004,11 @@
                   else
                      ! interpolate on GL mesh
                      if (chktype.eq.1) then
-                        call chkpt_map_gl(pr,wkv2,nxr-2,itmp3,nelv)
+                        call chkptms_map_gl(pr,wkv2,nxr-2,itmp3,nelv)
                      elseif(chktype.eq.2) then
-                        call chkpt_map_gl(pm,wkv2,nxr-2,itmp3,nelv)
+                        call chkptms_map_gl(pm,wkv2,nxr-2,itmp3,nelv)
                      elseif(chktype.eq.3) then
-                        call chkpt_map_gl(prp(1,ipert),wkv2,nxr-2,
+                        call chkptms_map_gl(prp(1,ipert),wkv2,nxr-2,
      $                       itmp3,nelv)
                      endif
                   endif
@@ -1062,10 +1062,10 @@
                if (ifgetp) then
                   if (ifsplit) then
                      ! interpolate on GLL
-                     call chkpt_map_gll(pr,wkv1,nxr,nzr,nelv)
+                     call chkptms_map_gll(pr,wkv1,nxr,nzr,nelv)
                   else
                      ! interpolate on GLL
-                     call chkpt_map_gll(wkv2,wkv1,nxr,nzr,nelv)
+                     call chkptms_map_gll(wkv2,wkv1,nxr,nzr,nelv)
 
                      ! interpolate GLL to GL
                      itmp2 = nx1*ny1*nz1
@@ -1117,9 +1117,10 @@
                ! interpolate
                if (ifgett) then
                   if (chktype.eq.1) then
-                     call chkpt_map_gll(t,wkv1,nxr,nzr,nelt)
+                     call chkptms_map_gll(t,wkv1,nxr,nzr,nelt)
                   elseif(chktype.eq.3) then
-                     call chkpt_map_gll(tp(1,1,ipert),wkv1,nxr,nzr,nelt)
+                     call chkptms_map_gll(tp(1,1,ipert),wkv1,nxr,nzr,
+     $               nelt)
                   endif
                endif
             endif
@@ -1147,10 +1148,10 @@
                   ! interpolate
                   if (ifgtps(il)) then
                      if (chktype.eq.1) then
-                        call chkpt_map_gll(t(1,1,1,1,il+1),wkv1,
+                        call chkptms_map_gll(t(1,1,1,1,il+1),wkv1,
      $                                    nxr,nzr,nelt)
                      elseif(chktype.eq.3) then
-                        call chkpt_map_gll(tp(1,il+1,ipert),wkv1,
+                        call chkptms_map_gll(tp(1,il+1,ipert),wkv1,
      $                                    nxr,nzr,nelt)
                      endif
                   endif
@@ -1164,7 +1165,7 @@
 
       ! close file
       call io_mbyte_close(ierr)
-      call mntr_check_abort(chpm_id,ierr,'chkpt_mfi; file not closed.')
+      call mntr_check_abort(chpm_id,ierr,'chkptms_mfi; file not closed')
 
       ! stamp the log
       tio = dnekclock_sync()-tiostart
@@ -1185,7 +1186,7 @@
      $     dnbyte/tio)
       call mntr_logi(chpm_id,lp_vrb,'io-nodes = ',nfileo)
 
-      if (ifaxis) call chkpt_axis_interp_ic()
+      if (ifaxis) call chkptms_axis_interp_ic()
 
       return
       end subroutine
@@ -1194,13 +1195,13 @@
 !! @details This is version of @ref mapab with corrected array sizes.
 !!    It iterpolates fields defined on GLL points. Like
 !!    the orginal routine I assume NXR=NYR=NZR, or NXR=NYR, NZR=1
-!! @ingroup chkpoint_mstep
+!! @ingroup chkptms
 !! @param[out]   xf           output field on velocity mesh
 !! @param[in]    yf           input field on velocity mesh
 !! @param[in]    nxr, nzr     array sizes
 !! @param[in]    nel          element number
 !! @remarks This routine uses global scratch space CTMP0, CTMPABM1
-      subroutine chkpt_map_gll(xf,yf,nxr,nzr,nel)
+      subroutine chkptms_map_gll(xf,yf,nxr,nzr,nel)
       implicit none
 
       include 'SIZE'
@@ -1263,13 +1264,13 @@
 !! @details This is version of @ref mapab modified to work with pressure
 !!    mesh. It iterpolates fields defined on GL points. Like
 !!    the orginal routine I assume NXR=NYR=NZR, or NXR=NYR, NZR=1
-!! @ingroup chkpoint_mstep
+!! @ingroup chkptms
 !! @param[out]   xf           output field on pressure mesh
 !! @param[in]    yf           input field on pressure mesh
 !! @param[in]    nxr, nzr     array sizes
 !! @param[in]    nel          element number
 !! @remarks This routine uses global scratch space CTMP0, CTMPABM2
-      subroutine chkpt_map_gl(xf,yf,nxr,nzr,nel)
+      subroutine chkptms_map_gl(xf,yf,nxr,nzr,nel)
       implicit none
 
       include 'SIZE'
@@ -1329,11 +1330,11 @@
       end subroutine
 !=======================================================================
 !> @brief Map loaded variables from velocity to axisymmetric mesh
-!! @ingroup chkpoint_mstep
+!! @ingroup chkptms
 !! @note This is version of @ref axis_interp_ic taking into account fact
 !! pressure does not have to be written on velocity mesh.
 !! @remark This routine uses global scratch space \a CTMP0.
-      subroutine chkpt_axis_interp_ic()
+      subroutine chkptms_axis_interp_ic()
       implicit none
 
       include 'SIZE'

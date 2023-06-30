@@ -10,7 +10,7 @@
 Set of I/O speciffic routines for toolbox.
 
 This module is automatically registered by @ref frame and should not be registered 
-inside (\a frame_usr_register).
+inside @a frame_usr_register.
 
 @mod_interface
 @interface_list Interface provided:

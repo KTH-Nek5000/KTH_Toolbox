@@ -1,18 +1,18 @@
-!> @file chkpoint.f
-!! @ingroup chkpoint
+!> @file chkpt.f
+!! @ingroup chkpt
 !! @brief Set of checkpoint routines
 !! @details This is a main interface reading/writing runtime parameters
 !! and calling proper submodule.
 !=======================================================================
 !> @brief Register checkpointing module
-!! @ingroup chkpoint
+!! @ingroup chkpt
 !! @note This routine should be called in frame_usr_register
       subroutine chkpt_register()
       implicit none
 
       include 'SIZE'
       include 'FRAMELP'
-      include 'CHKPOINTD'
+      include 'CHKPTD'
 
       ! local variables
       integer lpmid
@@ -81,7 +81,7 @@
       end subroutine
 !=======================================================================
 !> @brief Initilise checkpointing module
-!! @ingroup chkpoint
+!! @ingroup chkpt
 !! @note This routine should be called in frame_usr_init
       subroutine chkpt_init()
       implicit none
@@ -89,7 +89,7 @@
       include 'SIZE'
       include 'TSTEP'
       include 'FRAMELP'
-      include 'CHKPOINTD'
+      include 'CHKPTD'
 
       ! local variables
       integer itmp, lstdl
@@ -180,13 +180,13 @@
       end subroutine
 !=======================================================================
 !> @brief Check if module was initialised
-!! @ingroup chkpoint
+!! @ingroup chkpt
 !! @return chkpt_is_initialised
       logical function chkpt_is_initialised()
       implicit none
 
       include 'SIZE'
-      include 'CHKPOINTD'
+      include 'CHKPTD'
 !-----------------------------------------------------------------------
       chkpt_is_initialised = chpt_ifinit
 
@@ -194,7 +194,7 @@
       end function
 !=======================================================================
 !> @brief Main checkpoint interface
-!! @ingroup chkpoint
+!! @ingroup chkpt
 !! @note This routine should be called in userchk as a first framework call
 !     after frame_monitor
       subroutine chkpt_main
@@ -202,7 +202,7 @@
 
       include 'SIZE'
       include 'TSTEP'
-      include 'CHKPOINTD'
+      include 'CHKPTD'
 
       ! local variables
       integer itmp, lstdl
@@ -249,14 +249,14 @@
       end subroutine
 !=======================================================================
 !> @brief Get step count to the checkpoint and a set number
-!! @ingroup chkpoint
+!! @ingroup chkpt
 !! @param[out] step_cnt   decreasing step count in checkpoint writinh phase (otherwise -1)
 !! @param[out] set_out    set number
       subroutine chkpt_get_fset(step_cnt, set_out)
       implicit none
 
       include 'SIZE'
-      include 'CHKPOINTD'
+      include 'CHKPTD'
 
       ! argument list
       integer step_cnt, set_out

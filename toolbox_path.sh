@@ -22,10 +22,10 @@ TOOLBOX_INC+=" -I"${MNTR_SRC}
 export RPRM_SRC=${FRAME_SRC}"/rprm"
 TOOLBOX_INC+=" -I"${RPRM_SRC}
 
-export CHKPT_SRC=${IO_SRC}"/checkpoint"
+export CHKPT_SRC=${IO_SRC}"/chkpt"
 TOOLBOX_INC+=" -I"${CHKPT_SRC}
-export CHKPTDMM_SRC=${CHKPT_SRC}"/dummy"
-export CHKPTMS_SRC=${CHKPT_SRC}"/mstep"
+export CHKPTDMM_SRC=${CHKPT_SRC}"/chkptdm"
+export CHKPTMS_SRC=${CHKPT_SRC}"/chkptms"
 TOOLBOX_INC+=" -I"${CHKPTMS_SRC}
 
 export IO_TOOLS_SRC=${IO_SRC}"/io_tools"

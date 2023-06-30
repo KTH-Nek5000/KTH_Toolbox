@@ -160,9 +160,9 @@
 
       ! check if checkpointing module was registered and take parameters
       ierr = 0
-      call mntr_mod_is_name_reg(lmid,'CHKPOINT')
+      call mntr_mod_is_name_reg(lmid,'CHKPT')
       if (lmid.gt.0) then
-         call rprm_sec_is_name_reg(lsid,lmid,'_CHKPOINT')
+         call rprm_sec_is_name_reg(lsid,lmid,'_CHKPT')
          if (lsid.gt.0) then
             ! restart flag
             call rprm_rp_is_name_reg(lrpid,lsid,'READCHKPT',rpar_log)
@@ -848,9 +848,9 @@
          call io_mfiv(offs,wkv1,wkv2,wkv3,nxr,nyr,nzr,lelt,ifskip)
 
          ! interpolate
-         call chkpt_map_gll(sfd_vx,wkv1,nxr,nzr,nelv)
-         call chkpt_map_gll(sfd_vy,wkv2,nxr,nzr,nelv)
-         if (if3d) call chkpt_map_gll(sfd_vz,wkv3,nxr,nzr,nelv)
+         call chkptms_map_gll(sfd_vx,wkv1,nxr,nzr,nelv)
+         call chkptms_map_gll(sfd_vy,wkv2,nxr,nzr,nelv)
+         if (if3d) call chkptms_map_gll(sfd_vz,wkv3,nxr,nzr,nelv)
       endif
       ioflds = ioflds + ndim
 
@@ -868,9 +868,11 @@
             call io_mfiv(offs,wkv1,wkv2,wkv3,nxr,nyr,nzr,lelt,ifskip)
 
             ! interpolate
-            call chkpt_map_gll(sfd_vxlag(1,1,1,1,il),wkv1,nxr,nzr,nelv)
-            call chkpt_map_gll(sfd_vylag(1,1,1,1,il),wkv2,nxr,nzr,nelv)
-            if (if3d) call chkpt_map_gll(sfd_vzlag(1,1,1,1,il),wkv3,
+            call chkptms_map_gll(sfd_vxlag(1,1,1,1,il),wkv1,nxr,nzr,
+     $      nelv)
+            call chkptms_map_gll(sfd_vylag(1,1,1,1,il),wkv2,nxr,nzr,
+     $      nelv)
+            if (if3d) call chkptms_map_gll(sfd_vzlag(1,1,1,1,il),wkv3,
      $                     nxr,nzr,nelv)
          endif
          ioflds = ioflds + ndim

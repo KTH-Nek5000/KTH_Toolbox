@@ -117,9 +117,9 @@
       ! check the restart flag
       ! check if checkpointing module was registered and take parameters
       ierr = 0
-      call mntr_mod_is_name_reg(lmid,'CHKPOINT')
+      call mntr_mod_is_name_reg(lmid,'CHKPT')
       if (lmid.gt.0) then
-         call rprm_sec_is_name_reg(lsid,lmid,'_CHKPOINT')
+         call rprm_sec_is_name_reg(lsid,lmid,'_CHKPT')
          if (lsid.gt.0) then
             ! restart flag
             call rprm_rp_is_name_reg(lrpid,lsid,'READCHKPT',rpar_log)
@@ -325,8 +325,8 @@
       include 'TSTEP'           ! TIME, LASTEP, NSTEPS
       include 'INPUT'           ! IFMVBD, IFREGUO
       include 'FRAMELP'
-      include 'CHKPOINTD'
-      include 'CHKPTMSTPD'
+      include 'CHKPTD'
+      include 'CHKPTMSD'
       include 'PWITD'
 
       ! argument list
@@ -348,10 +348,10 @@
 
       ! get set of file names in the snapshot
       ifile = 1
-      call chkpt_set_name(fname, fnum, set_in, ifile)
+      call chkptms_set_name(fname, fnum, set_in, ifile)
 
       ! read files
-      call chkpt_restart_read(fname, fnum)
+      call chkptms_restart_read(fname, fnum)
 
       ! put parameters back
       IFREGUO = ifreguol
@@ -368,8 +368,8 @@
       include 'TSTEP'           ! TIME, LASTEP, NSTEPS
       include 'INPUT'           ! IFMVBD, IFREGUO
       include 'FRAMELP'
-      include 'CHKPOINTD'
-      include 'CHKPTMSTPD'
+      include 'CHKPTD'
+      include 'CHKPTMSD'
       include 'PWITD'
 
       ! local variables
@@ -390,11 +390,11 @@
       ! get set of file names in the snapshot
       ifile = 1
       call chkpt_get_fset(step_cnt, set_out)
-      call chkpt_set_name(fname, fnum, set_out, ifile)
+      call chkptms_set_name(fname, fnum, set_out, ifile)
 
       ifcoord = .true.
       ! write down files
-      call chkpt_restart_write(fname, fnum, ifcoord)
+      call chkptms_restart_write(fname, fnum, ifcoord)
 
       ! put parameters back
       IFREGUO = ifreguol

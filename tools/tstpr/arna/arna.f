@@ -139,9 +139,9 @@
       ! check the restart flag
       ! check if checkpointing module was registered and take parameters
       ierr = 0
-      call mntr_mod_is_name_reg(lmid,'CHKPOINT')
+      call mntr_mod_is_name_reg(lmid,'CHKPT')
       if (lmid.gt.0) then
-         call rprm_sec_is_name_reg(lsid,lmid,'_CHKPOINT')
+         call rprm_sec_is_name_reg(lsid,lmid,'_CHKPT')
          if (lsid.gt.0) then
             ! restart flag
             call rprm_rp_is_name_reg(lrpid,lsid,'READCHKPT',rpar_log)

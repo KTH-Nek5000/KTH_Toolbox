@@ -30,8 +30,8 @@ Description of the implementation and performed tests can be found in @cite Pepl
 @interface_reqr Interface required:
 -# multiple interfaces from @ref rprm and @ref mntr modules
 -# @ref io_file_freeid, @ref io_mfo_fname, @ref io_mbyte_open, @ref io_mfov, @ref io_mbyte_close and @ref io_mfiv from @ref io module
--# @ref chkpt_get_fset from @ref chkpoint module
--# @ref chkpt_map_gll from @ref chkpoint_mstep module
+-# @ref chkpt_get_fset from @ref chkpt module
+-# @ref chkptms_map_gll from @ref chkptms module
 
 @mod_interface_example
 @code{.f}
@@ -134,10 +134,10 @@ the number of the restart file set \a chkpt_main must be called before \a sfd_ma
 
 @par
 @param_reqr Parameters required by sfd module:
--# @ref chkpoint :
-   + _chkpoint:readchkpt - start simulation form checkpoint
-   + _chkpoint:chkpFnumber - restart file number
-   + _chkpoint:chkpInterval - checkpiont dump frequency (number of time steps)
+-# @ref chkpt :
+   + _chkpt:readchkpt - start simulation form checkpoint
+   + _chkpt:chkpFnumber - restart file number
+   + _chkpt:chkpInterval - checkpiont dump frequency (number of time steps)
 -# Nek5000
    + PARAM(27)
    + IFTRAN

@@ -32,9 +32,9 @@ for all simulations including temperature.
 @interface_reqr Interface required:
 -# multiple interfaces from @ref rprm and @ref mntr modules
 -# @ref cnht_register, @ref cnht_init, @ref cnht_is_initialised, @ref cnht_glsc2_wt, @ref cnht_cpfld_set and @ref cnht_opcmult from @ref cnht module (automatically registered)
--# \a stepper_register; provided by a submodule
--# \a stepper_init; provided by a submodule
--# \a stepper_vsolve; provided by a submodule
+-# @a stepper_register; provided by a submodule
+-# @a stepper_init; provided by a submodule
+-# @a stepper_vsolve; provided by a submodule
 
 @mod_interface_example
 @code{.f}

@@ -447,6 +447,7 @@
 !> @brief Read vector filed from the file
 !! @details This is version of @ref mfi_getv that does not perform
 !!    interpolation and allows to specify element size.
+!! @ingroup io_tools
 !! @param[inout] offs         offset of global vector beginning
 !! @param[out]   uf, vf, wf   vector field compinents
 !! @param[in]    lnx,lny,lnz  element size
