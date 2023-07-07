@@ -120,10 +120,10 @@ Description of the implementation and performed tests can be found in @cite Pepl
 @endcode
 
 @warning This module's restart prosedure depends on multistep checkpointing. As multisetep checpointeing sets
-the number of the restart file set \a chkpt_main must be called before \a sfd_main.
+the number of the restart file set @a chkpt_main must be called before @a sfd_main.
 
 @mod_param
-@param_list Parameters provided by sfd module (include file - \a SFDD):
+@param_list Parameters provided by sfd module (include file - @a SFDD):
 |Varaible | Type |Runtime parameter | Description|
 |---------|------|------------------|------------|
 | sfd_dlt | real | _sfd:FilterWdth | filter width |

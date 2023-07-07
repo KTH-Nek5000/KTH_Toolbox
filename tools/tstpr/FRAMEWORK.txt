@@ -10,16 +10,16 @@
 This module implements time stepper method for linear solver in Nek5000 using the userchk interface. 
 It allows to perform a number of constant length cycles providing the result vector to 
 the submodule. There are two possible submodules: power iteration and spectra calculation
-using the Arnoldi algorithm implemented in \a PARPACK. The initial condition for the next stepping
+using the Arnoldi algorithm implemented in @a PARPACK. The initial condition for the next stepping
 cycle is provided by the submodule. Three stepper modes are supported: direct, adjoint, direct+adjoint.
 
 There are two parameters in TSTRP include file that heve to be adjusted for the given setup. These parameters
-are \a tstpr_pr and \a tstpr_ht defining whetere pressure ro themperature are included in the simlulation vector.
+are @a tstpr_pr and @a tstpr_ht defining whetere pressure ro themperature are included in the simlulation vector.
 These parameters can be equal 0 or 1. The pressure is never included in the vector inner product, however for 
-\a tstpr_pr=0 it is reset to zero at the beginning of each cycle. On the other hand \a tstpr_ht should be set to 1
+@a tstpr_pr=0 it is reset to zero at the beginning of each cycle. On the other hand @a tstpr_ht should be set to 1
 for all simulations including temperature.
 
-@todo Finish temperature
+@todo Finish temperature. Check pressure treatment
 
 @mod_interface
 @interface_list Interface provided:
@@ -103,7 +103,7 @@ for all simulations including temperature.
 @endcode
 
 @mod_param
-@param_list Parameters provided by time stepper module (include file - \a TSTPRD):
+@param_list Parameters provided by time stepper module (include file - @a TSTPRD):
 |Varaible | Type | Runtime parameter | Description |
 |---------|------|-------------------|-------------|
 | tstpr_mode | integer | _tstpr:mode | simulation mode (1-direct, 2-adjoint, 3-direct+adjoint) |
@@ -113,7 +113,7 @@ for all simulations including temperature.
 
 @mod_param
 @param_reqr Parameters required by time stepper module:
--# Nek5000 \a PARAM array and logical flags:
+-# Nek5000 @a PARAM array and logical flags:
    + PARAM(12) - time step dt
    + IFTRAN, IFPERT, IFBASE, IFHEAT, NSTEPS, NPERT
 

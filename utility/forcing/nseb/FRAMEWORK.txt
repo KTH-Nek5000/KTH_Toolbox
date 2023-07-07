@@ -81,11 +81,10 @@ a random number ganarator. At the end velocity field is smoothed at the element 
       return
       end subroutine
 !======================================================================
-
 @endcode
 
 @mod_param
-@param_list Parameters provided by nseb module (include file - \a NSEBD):
+@param_list Parameters provided by nseb module (include file - @a NSEBD):
 |Varaible | Type | Runtime parameter | Default value | Description |
 |---------|------|-------------------|---------------|-------------|
 |nseb_tim | real | _nseb:time | 0.0 | time to add noise |

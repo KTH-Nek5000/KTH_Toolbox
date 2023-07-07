@@ -26,7 +26,7 @@ direct and adjoint modes it is better to perform simple linear simulation with a
 -# @ref cnht_opcmult, @ref cnht_opcopy, @ref cnht_opsub3 and @ref cnht_glsc2_wt from @ref cnht module
 
 @mod_param
-@param_list Parameters provided by pwit module (include file - \a PWITD):
+@param_list Parameters provided by pwit module (include file - @a PWITD):
 |Varaible | Type | Runtime parameter | Description |
 |---------|------|-------------------|-------------|
 | pwit_l2n | real | _pwit:l2n | initial L2 norm of the evolved vector for every cycle |

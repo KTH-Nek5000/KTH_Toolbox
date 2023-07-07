@@ -6,8 +6,8 @@
 !=======================================================================
 !> @brief Start framework
 !! @ingroup frame
-!! @note This routine requires \a frame_usr_register and
-!!    \a frame_usr_init to be defined in \a setup.usr
+!! @note This routine requires @a frame_usr_register and
+!!    @a frame_usr_init to be defined in @a setup.usr
       subroutine frame_start
       implicit none
 
@@ -94,8 +94,6 @@
 !> @brief Specify master node id
 !! @ingroup frame
 !! @return frame_get_master
-!! @note This routine requires \a frame_usr_end to be defined in
-!!    \a setup.usr
       integer function frame_get_master()
       implicit none
 !-----------------------------------------------------------------------

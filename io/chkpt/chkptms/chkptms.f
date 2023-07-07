@@ -17,10 +17,10 @@
       integer lpmid
 !-----------------------------------------------------------------------
       ! check if the current module was already registered
-      call mntr_mod_is_name_reg(lpmid,chpm_name)
+      call mntr_mod_is_name_reg(lpmid,chkptms_name)
       if (lpmid.gt.0) then
          call mntr_warn(lpmid,
-     $        'module ['//trim(chpm_name)//'] already registered')
+     $        'module ['//trim(chkptms_name)//'] already registered')
          return
       endif
 
@@ -33,19 +33,19 @@
       endif
 
       ! register module
-      call mntr_mod_reg(chpm_id,lpmid,chpm_name,
+      call mntr_mod_reg(chkptms_id,lpmid,chkptms_name,
      $         'Multi-file checkpointing')
 
       ! register timers
       call mntr_tmr_is_name_reg(lpmid,'CHP_TOT')
-      call mntr_tmr_reg(chpm_tread_id,lpmid,chpm_id,
+      call mntr_tmr_reg(chkptms_tread_id,lpmid,chkptms_id,
      $      'CHP_READ','Checkpointing reading time',.true.)
 
-      call mntr_tmr_reg(chpm_twrite_id,lpmid,chpm_id,
+      call mntr_tmr_reg(chkptms_twrite_id,lpmid,chkptms_id,
      $      'CHP_WRITE','Checkpointing writing time',.true.)
 
       ! adjust step delay
-      call mntr_set_step_delay(chpm_snmax)
+      call mntr_set_step_delay(chkptms_snmax)
 
       return
       end subroutine
@@ -64,26 +64,26 @@
       include 'CHKPTMSD'
 !-----------------------------------------------------------------------
       ! check if the module was already initialised
-      if (chpm_ifinit) then
-         call mntr_warn(chpm_id,
-     $        'module ['//trim(chpm_name)//'] already initiaised.')
+      if (chkptms_ifinit) then
+         call mntr_warn(chkptms_id,
+     $        'module ['//trim(chkptms_name)//'] already initiaised.')
          return
       endif
 
       ! get number of snapshots in a set
       if (PARAM(27).lt.0) then
-         chpm_nsnap = NBDINP
+         chkptms_nsnap = NBDINP
       else
-         chpm_nsnap = chpm_snmax
+         chkptms_nsnap = chkptms_snmax
       endif
 
       ! we support only one perturbation
       if (IFPERT) then
-         if (NPERT.gt.1) call mntr_abort(chpm_id,
+         if (NPERT.gt.1) call mntr_abort(chkptms_id,
      $         'only single perturbation supported')
       endif
 
-      chpm_ifinit = .true.
+      chkptms_ifinit = .true.
 
       return
       end subroutine
@@ -97,7 +97,7 @@
       include 'SIZE'
       include 'CHKPTMSD'
 !-----------------------------------------------------------------------
-      chkpts_is_initialised = chpm_ifinit
+      chkpts_is_initialised = chkptms_ifinit
 
       return
       end function
@@ -119,7 +119,7 @@
       ! local variables
       integer il, ifile, fnum
       real ltim
-      character*132 fname(CHKPTNFMAX)
+      character*132 fname(chkptms_fmax)
       logical ifcoord
       logical ifreguol
 
@@ -139,13 +139,13 @@
 
       ! do we write a snapshot
       ifile = 0
-      if (chpt_stepc.gt.0.and.chpt_stepc.le.chpm_nsnap) then
+      if (chpt_stepc.gt.0.and.chpt_stepc.le.chkptms_nsnap) then
       ! timing
          ltim = dnekclock()
 
          ! file number
-         ifile = chpm_nsnap - chpt_stepc +1
-         if (ifile.eq.1) call mntr_log(chpm_id,lp_inf,
+         ifile = chkptms_nsnap - chpt_stepc +1
+         if (ifile.eq.1) call mntr_log(chkptms_id,lp_inf,
      $                             'Writing checkpoint snapshot')
 
          ! initialise I/O data
@@ -185,15 +185,15 @@
 
          ! update output set number
          ! we do it after the last file in the set was sucsesfully written
-         if (ifile.eq.chpm_nsnap) then
+         if (ifile.eq.chkptms_nsnap) then
             write(str,'(I2)') chpt_set_o+1
             lstring = 'Written checkpoint snapshot number: '//trim(str)
-            call mntr_log(chpm_id,lp_prd,lstring)
+            call mntr_log(chkptms_id,lp_prd,lstring)
          endif
 
          ! timing
          ltim = dnekclock() - ltim
-         call mntr_tmr_add(chpm_twrite_id,1,ltim)
+         call mntr_tmr_add(chkptms_twrite_id,1,ltim)
       endif
 
       ! put parameters back
@@ -221,7 +221,7 @@
       real dtratio, epsl, ltim
       parameter (epsl = 0.0001)
       logical ifreguol
-      character*132 fname(CHKPTNFMAX),fnamel(CHKPTNFMAX)
+      character*132 fname(chkptms_fmax),fnamel(chkptms_fmax)
       character*200 lstring
       integer icalld
       save icalld
@@ -241,7 +241,7 @@
          icalld = 1
       endif
 
-      if (chpt_ifrst.and.(ISTEP.lt.chpm_nsnap)) then
+      if (chpt_ifrst.and.(ISTEP.lt.chkptms_nsnap)) then
 
          ! timing
          ltim = dnekclock()
@@ -270,19 +270,20 @@
          call chkptms_restart_read(fname, fnum)
 
          ! check time step consistency
-         if(ifile.gt.1.and.chpm_dtstep(ifile).gt.0.0) then
-            dtratio = abs(DT-chpm_dtstep(ifile))/chpm_dtstep(ifile)
+         if(ifile.gt.1.and.chkptms_dtstep(ifile).gt.0.0) then
+            dtratio = abs(DT-chkptms_dtstep(ifile))
+     $              /chkptms_dtstep(ifile)
             if (dtratio.gt.epsl) then
                 write(lstring,*) 'Time step inconsistent, new=',
-     $            DT,', old=',chpm_dtstep(ifile)
-               call mntr_warn(chpm_id,lstring)
+     $            DT,', old=',chkptms_dtstep(ifile)
+               call mntr_warn(chkptms_id,lstring)
               ! possible place to exit if this should be trerated as error
             endif
          endif
 
          ! timing
          ltim = dnekclock() - ltim
-         call mntr_tmr_add(chpm_tread_id,1,ltim)
+         call mntr_tmr_add(chkptms_tread_id,1,ltim)
       endif
 
       ! put parameters back
@@ -294,7 +295,7 @@
 !=======================================================================
 !> @brief Get old simulation time steps and pressure mesh marker.
 !! @ingroup chkptms
-!! @todo Different files could have different chpm_if_pmesh, so it is
+!! @todo Different files could have different chkptms_if_pmesh, so it is
 !!    not the best place to read it
       subroutine chkptms_dt_get
       implicit none
@@ -309,7 +310,7 @@
 
       ! local variables
       integer ifile, ierr
-      real timerl(chpm_snmax), p0thr
+      real timerl(chkptms_snmax), p0thr
       character*132 fname, header
       character*3 prefix
       character*4 dummy
@@ -325,9 +326,10 @@
       call io_init
 
       ! collect simulation time from file headers
-      do ifile=1,chpm_nsnap
+      do ifile=1,chkptms_nsnap
          call chkpt_fname(fname, prefix, chpt_set_i, ifile, ierr)
-         call mntr_check_abort(chpm_id,ierr,'dt get; file name error')
+         call mntr_check_abort(chkptms_id,ierr,
+     $    'dt get; file name error')
 
          ierr = 0
          if (NID.eq.pid00) then
@@ -344,7 +346,7 @@
             ! close the file
             if (ierr.eq.0) call byte_close(ierr)
          endif
-         call mntr_check_abort(chpm_id,ierr,
+         call mntr_check_abort(chkptms_id,ierr,
      $       'dt get; error reading header')
 
          call bcast(header,iHeaderSize)
@@ -354,19 +356,19 @@
      $         ,  wdsizr,nxr,nyr,nzr,nelr,nelgr,timer,istpr
      $         ,  ifiler,nfiler
      $         ,  rdcode      ! 74+20=94
-     $         ,  p0thr, chpm_if_pmesh
+     $         ,  p0thr, chkptms_if_pmesh
          else
             ierr = 1
          endif
-         call mntr_check_abort(chpm_id,ierr,
+         call mntr_check_abort(chkptms_id,ierr,
      $       'dt get; error extracting timer')
 
          timerl(ifile) = timer
       enddo
 
       ! get dt
-      do ifile=2,chpm_nsnap
-         chpm_dtstep(ifile) = timerl(ifile) - timerl(ifile-1)
+      do ifile=2,chkptms_nsnap
+         chkptms_dtstep(ifile) = timerl(ifile) - timerl(ifile-1)
       enddo
 
       return
@@ -387,7 +389,7 @@
       include 'CHKPTMSD'
 
       ! argument list
-      character*132 fname(CHKPTNFMAX)
+      character*132 fname(chkptms_fmax)
       integer fnum, nset, ifile
 
       ! local variables
@@ -404,13 +406,13 @@
          ! prefix and name for fluid (DNS)
          prefix(1:2)='rs'
          call chkpt_fname(fname(1), prefix, nset, ifile, ierr)
-         call mntr_check_abort(chpm_id,ierr,
+         call mntr_check_abort(chkptms_id,ierr,
      $        'chkptms_set_name; DNS file name error')
 
          ! prefix and name for magnetic field (MHD)
          prefix(1:2)='rb'
          call chkpt_fname(fname(2), prefix, nset, ifile, ierr)
-         call mntr_check_abort(chpm_id,ierr,
+         call mntr_check_abort(chkptms_id,ierr,
      $        'chkptms_set_name; MHD file name error')
 
       elseif (IFPERT) then
@@ -426,13 +428,13 @@
             ifilel =1
          endif
          call chkpt_fname(fname(1), prefix, nset, ifilel, ierr)
-         call mntr_check_abort(chpm_id,ierr,
+         call mntr_check_abort(chkptms_id,ierr,
      $        'chkptms_set_name; base flow file name error')
 
          ! prefix and name for perturbation
          prefix(1:2)='rp'
          call chkpt_fname(fname(2), prefix, nset, ifile, ierr)
-         call mntr_check_abort(chpm_id,ierr,
+         call mntr_check_abort(chkptms_id,ierr,
      $        'chkptms_set_name; perturbation file name error')
 
       else                ! DNS
@@ -441,7 +443,7 @@
          ! create prefix and name for DNS
          prefix(1:2)='rs'
          call chkpt_fname(fname(1), prefix, nset, ifile, ierr)
-         call mntr_check_abort(chpm_id,ierr,
+         call mntr_check_abort(chkptms_id,ierr,
      $        'chkptms_set_name; DNS file name error')
 
       endif
@@ -483,7 +485,7 @@
       ! create prefix and name for DNS
       ierr = 0
       prefixl(1:2) = prefix(1:2)
-      itmp=min(17,chpt_nset*chpm_nsnap) + 1
+      itmp=min(17,chpt_nset*chkptms_nsnap) + 1
       prefixl(3:3)=kst(itmp:itmp)
 
       ! get base name (SESSION)
@@ -491,11 +493,11 @@
 
       call io_mfo_fname(fnamel,bname,prefixl,ierr)
       if (ierr.ne.0) then
-         call mntr_error(chpm_id,'chkpt_fname; file name error')
+         call mntr_error(chkptms_id,'chkpt_fname; file name error')
          return
       endif
 
-      write(str,'(i5.5)') chpm_nsnap*nset+ifile
+      write(str,'(i5.5)') chkptms_nsnap*nset+ifile
       fname = trim(fnamel)//trim(str)
 
       return
@@ -516,7 +518,7 @@
       include 'CHKPTMSD'
 
       ! argument list
-      character*132 fname(CHKPTNFMAX)
+      character*132 fname(chkptms_fmax)
       integer fnum
       logical ifcoord
 
@@ -572,7 +574,7 @@
          call chkptms_mfo(fname(fnum),chktype,ipert)
       else ! DNS
          ! write only one set of files
-         if (fnum.ne.1) call mntr_abort(chpm_id,
+         if (fnum.ne.1) call mntr_abort(chkptms_id,
      $        'chkptms_restart_write; too meny files for DNS')
 
          IFXYO = ifcoord
@@ -608,7 +610,7 @@
       include 'CHKPTMSD'
 
       ! argument list
-      character*132 fname(CHKPTNFMAX)
+      character*132 fname(chkptms_fmax)
       integer fnum
 
       ! local variables
@@ -643,7 +645,7 @@
          call chkptms_mfi(fnamel,chktype,ipert)
       else ! DNS
          ! read only one set of files
-         if (fnum.ne.1) call mntr_abort(chpm_id,
+         if (fnum.ne.1) call mntr_abort(chkptms_id,
      $        'chkptms_restart_read; too meny files for DNS')
 
          chktype = 1
@@ -703,7 +705,8 @@
 
       ! open file
       call io_mbyte_open(fname,ierr)
-      call mntr_check_abort(chpm_id,ierr,'chkptms_mfo; file not opened')
+      call mntr_check_abort(chkptms_id,ierr,
+     $   'chkptms_mfo; file not opened')
 
       ! write a header and create element mapping
       call mfo_write_hdr
@@ -800,7 +803,8 @@
 
       ! close file
       call io_mbyte_close(ierr)
-      call mntr_check_abort(chpm_id,ierr,'chkptms_mfo; file not closed')
+      call mntr_check_abort(chkptms_id,ierr,
+     $    'chkptms_mfo; file not closed')
 
       ! stamp the log
       tio = dnekclock_sync()-tiostart
@@ -810,11 +814,11 @@
       dnbyte = dnbyte + iHeaderSize + 4. + isize*nelgt
       dnbyte = dnbyte/1024/1024
 
-      call mntr_log(chpm_id,lp_prd,'Checkpoint written:')
-      call mntr_logr(chpm_id,lp_vrb,'file size (MB) = ',dnbyte)
-      call mntr_logr(chpm_id,lp_vrb,'avg data-throughput (MB/s) = ',
+      call mntr_log(chkptms_id,lp_prd,'Checkpoint written:')
+      call mntr_logr(chkptms_id,lp_vrb,'file size (MB) = ',dnbyte)
+      call mntr_logr(chkptms_id,lp_vrb,'avg data-throughput (MB/s) = ',
      $     dnbyte/tio)
-      call mntr_logi(chpm_id,lp_vrb,'io-nodes = ',nfileo)
+      call mntr_logi(chkptms_id,lp_vrb,'io-nodes = ',nfileo)
 
       return
       end subroutine
@@ -932,7 +936,7 @@
       if (ifgetpr) then
          ifskip = .not.ifgetp
 
-         if (chpm_if_pmesh) then
+         if (chkptms_if_pmesh) then
             ! file contains pressure on nxr-2 (GL) mesh
             ! read field to tmp array
             call io_mfis(offs,wkv1,nxr,nyr,nzr,lelt,ifskip)
@@ -1165,7 +1169,8 @@
 
       ! close file
       call io_mbyte_close(ierr)
-      call mntr_check_abort(chpm_id,ierr,'chkptms_mfi; file not closed')
+      call mntr_check_abort(chkptms_id,ierr,
+     $     'chkptms_mfi; file not closed')
 
       ! stamp the log
       tio = dnekclock_sync()-tiostart
@@ -1181,10 +1186,10 @@
       dnbyte = dnbyte + iHeaderSize + 4. + isize*nelgt
       dnbyte = dnbyte/1024/1024
 
-      call mntr_log(chpm_id,lp_prd,'Checkpoint read:')
-      call mntr_logr(chpm_id,lp_vrb,'avg data-throughput (MB/s) = ',
+      call mntr_log(chkptms_id,lp_prd,'Checkpoint read:')
+      call mntr_logr(chkptms_id,lp_vrb,'avg data-throughput (MB/s) = ',
      $     dnbyte/tio)
-      call mntr_logi(chpm_id,lp_vrb,'io-nodes = ',nfileo)
+      call mntr_logi(chkptms_id,lp_vrb,'io-nodes = ',nfileo)
 
       if (ifaxis) call chkptms_axis_interp_ic()
 

@@ -26,6 +26,8 @@ where:
 In our implementation each dimension is treated separately and the final 3-dimensional function takes a 
 maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta_{wr} \f$ can be set to zero.
 
+@todo Add a figure to make parameter section clearer.
+
 @mod_interface
 @interface_list Interface provided:
 -# @ref spnb_register
@@ -117,7 +119,7 @@ maximum value of its 1-dimensional components. \f$ \Delta_{wl}\f$ and \f$ \Delta
 @endcode
 
 @mod_param
-@param_list Parameters provided by sponge box module (include file - \a SPNBD):
+@param_list Parameters provided by sponge box module (include file - @a SPNBD):
 |Varaible | Type | Runtime parameter | Default value | Description |
 |---------|------|-------------------|---------------|-------------|
 |spnb_str | real | _spnb:strenght | 0.0 | sponge strength |

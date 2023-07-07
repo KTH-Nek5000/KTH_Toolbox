@@ -70,14 +70,14 @@ Post-processing of the produced fields can also be performed with the
 @interface_reqr Interface required:
 -# multiple interfaces from @ref rprm and @ref mntr modules
 -# @ref map2d_register , @ref map2d_init and @ref map2d_get from @ref map2d module (automatically registered)
--# \a user_stat_trnsv; user defined
+-# @a user_stat_trnsv; user defined
 
-@warning This module depends on @ref map2d module and (\a user_map2d_get) has to be provided irrespective of the spanwise
-average being performed or not. In case only the time average is performed (stat_rdim=0 in STATD) \a user_map2d_get should 
+@warning This module depends on @ref map2d module and (@a user_map2d_get) has to be provided irrespective of the spanwise
+average being performed or not. In case only the time average is performed (stat_rdim=0 in STATD) @a user_map2d_get should 
 be empty, but stil present. However, @ref map2d is automatically registered by statistics tool, so there is no need to add it 
-to \a frame_usr_register and \a frame_usr_init. 
+to @a frame_usr_register and @a frame_usr_init. 
 
-@note \a user_stat_trnsv is a user provided interface for both statistics and @ref tsrs modules.
+@note @a user_stat_trnsv is a user provided interface for both statistics and @ref tsrs modules.
 
 @mod_interface_example
 @code{.f}
@@ -147,7 +147,7 @@ to \a frame_usr_register and \a frame_usr_init.
 @include Toolbox/tools/stat/example.usr
 
 @mod_param
-@param_list Parameters provided by stat module (include file - \a STATD):
+@param_list Parameters provided by stat module (include file - @a STATD):
 |Varaible | Type |Runtime parameter | Description|
 |---------|------|------------------|------------|
 | stat_avstep | integer | _stat:AvStep | frequency of averaging |

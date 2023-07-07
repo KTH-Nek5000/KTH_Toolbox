@@ -26,9 +26,9 @@ writes them in a binary file.
 -# multiple interfaces from @ref rprm and @ref mntr modules
 -# @ref io_file_freeid from @ref io module (debugging only)
 -# @ref comm_ivglrsum and @ref comm_ibcastn from @ref comm module
--# \a user_stat_trnsv; user defined
+-# @a user_stat_trnsv; user defined
 
-@note \a user_stat_trnsv is a user provided interface for both tsrs and @ref stat modules.
+@note @a user_stat_trnsv is a user provided interface for both tsrs and @ref stat modules.
 
 @mod_interface_example
 @code{.f}
@@ -101,7 +101,7 @@ writes them in a binary file.
 @include Toolbox/tools/tsrs/example.usr
 
 @mod_param
-@param_list Parameters provided by tsrs module (include file - \a TSRSD):
+@param_list Parameters provided by tsrs module (include file - @a TSRSD):
 |Varaible | Type |Runtime parameter | Description|
 |---------|------|------------------|------------|
 | tsrs_tstart | real | _tsrs:tStart | sampling starting time |

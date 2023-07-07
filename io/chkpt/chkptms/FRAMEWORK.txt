@@ -50,7 +50,7 @@ the fiel set number, so it can be equal 1 or 2 only.
    + chpt_step - checkpiont dump frequency (number of time steps)
    + chpt_ifrst - if restart
    + chpt_fnum - restart set number
--# Nek5000 \a PARAM array
-   + PARAM(27) - if negative number of files is equal NBDINP otherwise chpm_snmax
+-# Nek5000 @a PARAM array
+   + PARAM(27) - if negative number of files is equal NBDINP otherwise chkptms_snmax
 
 */

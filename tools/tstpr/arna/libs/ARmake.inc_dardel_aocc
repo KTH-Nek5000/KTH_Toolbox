@@ -27,11 +27,11 @@
 #  The complete path to the top level of ARPACK directory, usually
 #  $(HOME)/ARPACK
 #
-home          = $(HOME)/ARPACK
+home          = /cfs/klemming/projects/snic/kthmech/adampep/Run/Arash/new/KTH_Framework/Examples/ext_cyl_ARN/libs/ARPACK
 #
 #  The platform identifier to suffix to the end of library names
 #
-PLAT          = gcc_rst
+PLAT          = aocc_rst
 #
 #  The communication library ( need for parallel library only )
 #  Current availible platforms are: BLACS or MPI
@@ -101,12 +101,12 @@ PLIBS = $(PARPACKLIB) $(ALIBS) $(MPILIBS)
 #  Various compilation programs and flags.
 #  You need to make sure these are correct for your system.
 #
-FC		= mpif90
-FFLAGS	= -std=legacy -O2
+FC	= ftn
+FFLAGS	= -O2
 
 # Set the parallel fortran compiler
-PFC     = mpif90
-PFFLAGS = -std=legacy -O2
+PFC     = ftn
+PFFLAGS = -O2
 
 LDFLAGS = 
 CD		= cd

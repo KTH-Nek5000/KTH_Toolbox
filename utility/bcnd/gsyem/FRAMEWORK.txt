@@ -21,6 +21,7 @@ on at the inflow position only. Next a vortex position is rotated to match a rea
 The final step is definition of the vortex orinetation with an integer array.
 @todo This description has to be extended.
 
+@todo Add reference to bitex file; Finalise documentation.
 
 @mod_interface
 @interface_list Interface provided:
@@ -34,7 +35,7 @@ The final step is definition of the vortex orinetation with an integer array.
 -# @ref io_file_freeid from @ref io module (debugging only)
 -# @ref chkpt_get_fset from @ref chkpt module
 -# @ref math_ran_rng, @ref math_zbqlini, @ref math_etovec and @ref math_rot3da from @ref math module
--# \a usr_gen_eddy; user defined
+-# @a usr_gen_eddy; user defined
 
 @mod_interface_example
 @code{.f}
@@ -105,10 +106,11 @@ The final step is definition of the vortex orinetation with an integer array.
 @endcode
 @include Toolbox/utility/bcnd/gsyem/example.usr
 
-@warning This module's restart procedure depends on @ref chkpt module. 
+@warning This module's restart procedure depends on @ref chkpt module. As multisetep checpointeing sets
+the number of the restart file set @a chkpt_main must be called before @a gsyem_main.
 
 @mod_param
-@param_list Parameters provided by gsyem module (include file - \a GSYEMD):
+@param_list Parameters provided by gsyem module (include file - @a GSYEMD):
 |Varaible | Type | Runtime parameter | Default value | Description |
 |---------|------|-------------------|---------------|-------------|
 |gsyem_mode | integer | _gsyem:mode | 1 | gSyEM mode |

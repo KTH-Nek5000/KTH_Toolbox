@@ -334,7 +334,7 @@
 
       ! local variables
       integer ifile, step_cnt, fnum
-      character*132 fname(CHKPTNFMAX)
+      character*132 fname(chkptms_fmax)
       logical ifreguol
 !-----------------------------------------------------------------------
       ! no regular mesh
@@ -374,7 +374,7 @@
 
       ! local variables
       integer ifile, step_cnt, set_out, fnum
-      character*132 fname(CHKPTNFMAX)
+      character*132 fname(chkptms_fmax)
       logical ifcoord
       logical ifreguol
 !-----------------------------------------------------------------------

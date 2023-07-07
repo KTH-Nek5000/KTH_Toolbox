@@ -12,16 +12,16 @@ The frame module provides backbone of the whole framework consisting of dynamica
 parameters and timers. This is supposed to simplify interactions between different 
 modules, logging and operations on runtime parameters. It provides interfaces
 for intialisation, monitoring and finalisation of the framework. It requires as well
-three subroutines defined in \a setup.usr and providing modules registration 
-(\a frame_usr_register), initialisation (\a frame_usr_init) and finalisation 
-(\a frame_usr_end). There are three modules automatically started by framework:
+three subroutines defined in @a setup.usr and providing modules registration 
+(@a frame_usr_register), initialisation (@a frame_usr_init) and finalisation 
+(@a frame_usr_end). There are three modules automatically started by framework:
 [monitor] (@ref mntr), [runtime parameters] (@ref rprm) and [I/O tools] (@ref io_tools).
-These modules should not be registered inside (\a frame_usr_register).
+These modules should not be registered inside (@a frame_usr_register).
 
 This module also provides an include file FRAMELP defining log priorities and runtime parameter 
 types. Using logging routines from the [monitor] (@ref mntr) submodule, one can easily specify 
 the verbosity of the code. The logging level can be set in two ways: by LOGLEVEL runtime parameter 
-in [_MNTR] section of \a setup.par file (doeas not cover framework initialisation) 
+in [_MNTR] section of @a setup.par file (doeas not cover framework initialisation) 
 or by setting the enviromental variable FRAMELOGL. The second way covers all stages of the simulation.
 For the bash shell this variable can be set by:
 @code{.sh}
@@ -40,9 +40,9 @@ export FRAMELOGL
 @interface_reqr Interface required:
 -# multiple interfaces from @ref rprm and @ref mntr modules (automatically registered)
 -# @ref io_file_close from @ref io_tools module (automatically registered)
--# \a frame_usr_register; user defined
--# \a frame_usr_init; user defined
--# \a frame_usr_end; user defined
+-# @a frame_usr_register; user defined
+-# @a frame_usr_init; user defined
+-# @a frame_usr_end; user defined
 
 @mod_interface_example
 @code{.f}

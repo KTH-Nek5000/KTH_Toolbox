@@ -38,7 +38,7 @@ This module is automatically registered by @ref tstpr module.
 
 
 @mod_param
-@param_list Parameters provided by time snht module (include file - \a CNHTD):
+@param_list Parameters provided by time snht module (include file - @a CNHTD):
 |Varaible | Type | Runtime parameter | Description |
 |---------|------|-------------------|-------------|
 | cnht_sc | real | _cnht:scln | norm scaling factor |

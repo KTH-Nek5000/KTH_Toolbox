@@ -18,13 +18,13 @@ normal to the wall. In case of a finite length line the smoothing in the third d
 at the line ending points as well. The forcing is always normal to the line and its direction is not changin along 
 the line. It is just forcing magnitude that fluctuates. As a line direction is specified by its starting and ending 
 points, to determine the forcing direction we define line's local coordinate system build of three versors VX, VY 
-and VZ, where VZ is by definition parallel to the line. To determine versors normal to the line we use va ector cross 
+and VZ, where VZ is by definition parallel to the line. To determine versors normal to the line we use vector cross 
 product:
 \f[ VY = VZ \times VL,\f]
 where VL is a vrsor parallel to the physical y axis for VZ parallel to the physical x axis, and it is parallel to 
 the physical x axis otherwise. Finally 
 \f[ VX = VZ \times VY.\f]
-The last operation is rotetion of the local vresors VX and VY by ROTA angle along VZ versor. The forcing is always 
+The last operation is a rotation of the local vresors VX and VY by ROTA angle along VZ versor. The forcing is always 
 directed along VY versor.
 
 The smoothing function is defined in the following way:
@@ -70,8 +70,8 @@ restart flag). It is based on a similar implementation in the SIMSON code @cite 
 and is described in detail in @cite Schlatter2012.
 
 This tool can simulate number of lines with different set of parameters for each line. The maximal
-number of lines is given by tripl_nline_max in TRIPLD include file. In the same way maximal number of 
-Fouries modes per line is given by tripl_nmode_max parameter. User has to adjust values of these variables
+number of lines is given by  @a tripl_nline_max in @a TRIPLD include file. In the same way maximal number of 
+Fouries modes per line is given by @a tripl_nmode_max parameter. User has to adjust values of these variables
 before compilation of the code.
 
 @mod_interface
@@ -177,7 +177,7 @@ before compilation of the code.
 @endcode
 
 @mod_param
-@param_list Parameters provided by tripl module (include file - \a TRIPLD):
+@param_list Parameters provided by tripl module (include file - @a TRIPLD):
 |Varaible | Type | Runtime parameter | Default value | Description |
 |---------|------|-------------------|---------------|-------------|
 |tripl_nline      | integer | _tripl:nline | 0  | Number of tripping lines |
