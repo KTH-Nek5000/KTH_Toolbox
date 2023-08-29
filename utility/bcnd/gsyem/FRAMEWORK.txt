@@ -8,8 +8,7 @@
 
 @details
 This set of routines generating set of vortices at the computational domain inlet.
-Poletto, Ruggero: Divergence free development of the synthetic eddy method in order to improve synthetic turbulence 
-for embedded les simulations, PhD Thesis, The University of Manchester, 2015
+The method is based on @cite Poletto2015.
 
 This module requires runtime parameters defined by @ref chkpt module to properly perform restart operations. 
 User defined routine (@a usr_gen_eddy) provides the rules for generating a single vortex. It allows the user to 
@@ -19,9 +18,17 @@ the face is normal to Z axis. Two different options are considered depending on 
 to a simulation initialisation where the vortices fill the whole testing volume. In the second one the vortives are placed
 on at the inflow position only. Next a vortex position is rotated to match a real face position in the computational domain. 
 The final step is definition of the vortex orinetation with an integer array.
-@todo This description has to be extended.
+In addition the user has to provide a radial distribution of a mean velocity (U_mean), a turbulence kinetic energy (k) and a dissipation rate (eps).
+U_mean, k and eps have to be given in a text file "gsyem_prof_###.txt" containing three header lines:
 
-@todo Add reference to bitex file; Finalise documentation.
+# point number in a profile
+187
+#r  U_mean  k  eps
+
+followed by the data set for each point in the profile. The scend line in the header gives the number of radial positions in the profile, and the data 
+set consists of four real numbers: radial position (r), U_mean, k and eps.
+
+@todo This description has to be extended.
 
 @mod_interface
 @interface_list Interface provided:
