@@ -21,9 +21,9 @@ The final step is definition of the vortex orinetation with an integer array.
 In addition the user has to provide a radial distribution of a mean velocity (U_mean), a turbulence kinetic energy (k) and a dissipation rate (eps).
 U_mean, k and eps have to be given in a text file "gsyem_prof_###.txt" containing three header lines:
 
-# point number in a profile
+\# point number in a profile
 187
-#r  U_mean  k  eps
+\# r  U_mean  k  eps
 
 followed by the data set for each point in the profile. The scend line in the header gives the number of radial positions in the profile, and the data 
 set consists of four real numbers: radial position (r), U_mean, k and eps.
