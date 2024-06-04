@@ -146,7 +146,7 @@
       do il = 35,38
          pstat_swfield(il) = il-1
       enddo
-      do il = 39,44
+      do il = 39,pstat_svar
          pstat_swfield(il) = il
       enddo
 #ifdef AMR
